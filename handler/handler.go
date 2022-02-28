@@ -16,6 +16,7 @@ type Handler interface {
 	UpdateEmail(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateProfile(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
+	UpdateSecurity(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	Get(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	GetAll(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	Search(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
@@ -87,6 +88,16 @@ func (h *defaultHandler) UpdateProfile(ctx context.Context, req *block_user.User
 
 func (h *defaultHandler) UpdateNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
 	updatedUser, err := h.repository.UserRepository.UpdateNamespace(ctx, req.Update)
+	if err != nil {
+		return nil, err
+	}
+	return &block_user.UserResponse{
+		User: updatedUser,
+	}, nil
+}
+
+func (h *defaultHandler) UpdateSecurity(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+	updatedUser, err := h.repository.UserRepository.UpdateSecurity(ctx, req.Update)
 	if err != nil {
 		return nil, err
 	}

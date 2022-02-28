@@ -20,7 +20,6 @@ func TestMain(m *testing.M) {
 	}
 	containerName := "mongodb-user-repo-test"
 	repository, pool, container, err := repository_mock.NewRepositoryMock(context.Background(), zapLog, containerName)
-	// ensure container is cleaned up.
 	if err != nil {
 		zapLog.Fatal(err.Error())
 	}
@@ -28,10 +27,10 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	// after test
 	if err := pool.Purge(container); err != nil {
-		zapLog.Fatal(fmt.Sprintf("failed to purge pool with err: %s", err))
+		zapLog.Error(fmt.Sprintf("failed to purge pool with err: %s", err))
 	}
 	if err := pool.RemoveContainerByName(containerName); err != nil {
-		zapLog.Fatal(fmt.Sprintf("failed to remove Docker container with err: %s", err))
+		zapLog.Error(fmt.Sprintf("failed to remove Docker container with err: %s", err))
 	}
 	os.Exit(code)
 }

@@ -17,6 +17,7 @@ const (
 	UpdateEmail         = "UpdateEmail"
 	UpdateProfile       = "UpdateProfile"
 	UpdateNamespace     = "UpdateNamespace"
+	UpdateSecurity      = "UpdateSecurity"
 	Get                 = "Get"
 	GetAll              = "GetAll"
 	Search              = "Search"
@@ -44,10 +45,10 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		translatedReq = &block_user.UserRequest{}
 	}
 	method := strings.Split(info.FullMethod, ProjectName)
-	if len(method) != 1 {
+	if len(method) != 2 {
 		return nil, errors.New(fmt.Sprintf("invalid method call: %s", info.FullMethod))
 	}
-	switch method[0] {
+	switch method[1] {
 	case Heartbeat:
 		break
 	case Create, Get:
@@ -56,7 +57,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		} else if translatedReq.User == nil {
 			return &block_user.UserResponse{}, UpdateIsNil
 		}
-	case UpdatePassword, UpdateEmail, UpdateProfile, UpdateNamespace:
+	case UpdatePassword, UpdateSecurity, UpdateEmail, UpdateProfile, UpdateNamespace:
 		if translatedReq == nil {
 			return nil, ErrorReqIsNil
 		} else if translatedReq.Update == nil {

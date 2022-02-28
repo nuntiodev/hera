@@ -18,6 +18,7 @@ type Handler interface {
 	UpdateNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	Get(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	GetAll(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
+	Search(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	ValidateCredentials(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	Delete(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	DeleteNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
@@ -116,7 +117,17 @@ func (h *defaultHandler) Get(ctx context.Context, req *block_user.UserRequest) (
 }
 
 func (h *defaultHandler) GetAll(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	getUsers, err := h.repository.UserRepository.GetAll(ctx, req.Filter)
+	getUsers, err := h.repository.UserRepository.GetAll(ctx, req.Filter, req.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	return &block_user.UserResponse{
+		Users: getUsers,
+	}, nil
+}
+
+func (h *defaultHandler) Search(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+	getUsers, err := h.repository.UserRepository.Search(ctx, req.Search, req.Namespace)
 	if err != nil {
 		return nil, err
 	}

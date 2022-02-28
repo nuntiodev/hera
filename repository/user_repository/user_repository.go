@@ -47,8 +47,8 @@ type UserRepository interface {
 	UpdateSecurity(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	GetById(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	GetByEmail(ctx context.Context, user *block_user.User) (*block_user.User, error)
-	GetAll(ctx context.Context, userFilter *block_user.UserFilter) ([]*block_user.User, error)
-	Search(ctx context.Context, search string, userFilter *block_user.UserFilter) ([]*block_user.User, error)
+	GetAll(ctx context.Context, userFilter *block_user.UserFilter, namespace string) ([]*block_user.User, error)
+	Search(ctx context.Context, search string, namespace string) ([]*block_user.User, error)
 	Delete(ctx context.Context, user *block_user.User) error
 	DeleteNamespace(ctx context.Context, namespace string) error
 }
@@ -347,12 +347,12 @@ func (umr *UserMongoRepository) GetByEmail(ctx context.Context, user *block_user
 	return &resp, nil
 }
 
-func (umr *UserMongoRepository) GetAll(ctx context.Context, userFilter *block_user.UserFilter) ([]*block_user.User, error) {
+func (umr *UserMongoRepository) GetAll(ctx context.Context, userFilter *block_user.UserFilter, namespace string) ([]*block_user.User, error) {
 	var resp []*block_user.User
 	sortOptions := options.FindOptions{}
 	limitOptions := options.Find()
 	limitOptions.SetLimit(maximumLimit)
-	filter := bson.M{"namespace": ""}
+	filter := bson.M{"namespace": namespace}
 	if userFilter != nil {
 		order := -1
 		if userFilter.Order == block_user.UserFilter_INC {
@@ -377,9 +377,6 @@ func (umr *UserMongoRepository) GetAll(ctx context.Context, userFilter *block_us
 			limitOptions.SetLimit(int64(userFilter.To - userFilter.From))
 			limitOptions.SetSkip(int64(userFilter.From))
 		}
-		if userFilter.Namespace != "" {
-			filter = bson.M{"namespace": userFilter.Namespace}
-		}
 	}
 	cursor, err := umr.collection.Find(ctx, filter, &sortOptions, limitOptions)
 	if err != nil {
@@ -396,17 +393,13 @@ func (umr *UserMongoRepository) GetAll(ctx context.Context, userFilter *block_us
 	return resp, nil
 }
 
-func (umr *UserMongoRepository) Search(ctx context.Context, search string, userFilter *block_user.UserFilter) ([]*block_user.User, error) {
+func (umr *UserMongoRepository) Search(ctx context.Context, search string, namespace string) ([]*block_user.User, error) {
 	if search == "" {
 		return nil, errors.New("empty search string")
 	}
 	var resp []*block_user.User
-	namespace := ""
 	limitOptions := options.Find()
 	limitOptions.SetLimit(50)
-	if userFilter != nil {
-		namespace = userFilter.Namespace
-	}
 	filter := bson.D{
 		{"namespace", namespace},
 		{"$or", bson.A{

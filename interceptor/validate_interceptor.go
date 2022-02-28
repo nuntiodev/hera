@@ -19,6 +19,7 @@ const (
 	UpdateNamespace     = "UpdateNamespace"
 	Get                 = "Get"
 	GetAll              = "GetAll"
+	Search              = "Search"
 	ValidateCredentials = "ValidateCredentials"
 	Delete              = "Delete"
 	DeleteNamespace     = "DeleteNamespace"
@@ -61,7 +62,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		} else if translatedReq.Update == nil {
 			return &block_user.UserResponse{}, UpdateIsNil
 		}
-	case GetAll:
+	case GetAll, Search:
 		if translatedReq == nil {
 			return nil, ErrorReqIsNil
 		}

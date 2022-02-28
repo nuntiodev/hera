@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-admin-user
+  namespace: {{ .Release.Namespace | default "default" }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.adminClusterIp.port }}
+      targetPort: {{ .Values.adminClusterIp.targetPort }}
+      protocol: TCP
+  selector:
+    app: {{ .Release.Name }}-user

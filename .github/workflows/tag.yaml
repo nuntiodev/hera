@@ -1,0 +1,73 @@
+name: Tag image and push to Dockerhub. Also package and update Helm.
+
+on:
+  push:
+    tags:
+      - "*"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Checkout main branch
+        run: git checkout main
+
+      # Build and push docker image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: softcorpdev/softcorp-user-service
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # Install Helm
+      - uses: azure/setup-helm@v1
+        with:
+          version: 'v3.6.1'
+        id: install
+
+      # Build Helm files
+      - name: Get tag
+        id: tag
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+
+      - name: Helm package
+        run: make helm-package tag=${{ steps.tag.outputs.VERSION }}
+
+      # Commit and push to git
+      - name: Add all new files
+        run: git add --all
+
+      - name: Check status
+        run: git status
+
+      - name: Set github name and email
+        run: git config --global user.email "dev@softcorp.io" && git config --global user.name "Softcorp Automation"
+
+      - name: Add git credentials
+        run: git remote set-url --push origin https://softcorp-admin:$GITHUB_TOKEN@github.com/softcorp-io/block-user-service
+
+      - name: Git commit
+        run: git commit -am "add helm package"
+
+      - name: Git push
+        run: git  push -u origin

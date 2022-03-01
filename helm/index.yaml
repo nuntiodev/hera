@@ -3,7 +3,7 @@ entries:
   softcorp-user-service:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2021-12-08T10:09:07.64176811Z"
+    created: "2022-03-01T10:30:29.433448133Z"
     description: A Helm chart for the softcorp-user-service
     digest: 8eb659420f02a1a2118abedb220070df3747aea65116a1c6f7cde51d98c2f5bc
     name: softcorp-user-service
@@ -13,7 +13,7 @@ entries:
     version: 0.0.10
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2021-12-08T10:09:07.643638504Z"
+    created: "2022-03-01T10:30:29.434475566Z"
     description: A Helm chart for the softcorp-user-service
     digest: d2b43d512cf2205c33711f5aa242fadc4f8716601e5322f00bdae6d7af200ca2
     name: softcorp-user-service
@@ -23,7 +23,7 @@ entries:
     version: 0.0.9
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2021-12-08T10:09:07.642350208Z"
+    created: "2022-03-01T10:30:29.433895547Z"
     description: A Helm chart for the softcorp-user-service
     digest: 1accd188a70f6f8439eb3b8fec6ea551d688c7ae1ee2d3679e07701e6b9796f7
     name: softcorp-user-service
@@ -31,15 +31,25 @@ entries:
     urls:
     - packages/softcorp-user-service-0.0.8.tgz
     version: 0.0.8
-  block_user_service:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2021-12-08T10:09:07.644079502Z"
+    created: "2022-03-01T10:30:29.432696309Z"
     description: A Helm chart for the softcorp-user-service
-    digest: 9c2867a544a2d680e0b02d3209905884022b9f2fe29b98de6c4417d5fc9cbfbf
-    name: block_user_service
+    digest: 88d0a9483e93b1c2a05f119785e842e99d712c6550b863c8e932b917eae18eef
+    name: softcorp-user-service
     type: application
     urls:
-    - packages/block_user_service-0.0.7.tgz
+    - packages/softcorp-user-service-0.0.1.tgz
+    version: 0.0.1
+  softcorp_user_service:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2022-03-01T10:30:29.434855378Z"
+    description: A Helm chart for the softcorp-user-service
+    digest: 9c2867a544a2d680e0b02d3209905884022b9f2fe29b98de6c4417d5fc9cbfbf
+    name: softcorp_user_service
+    type: application
+    urls:
+    - packages/softcorp_user_service-0.0.7.tgz
     version: 0.0.7
-generated: "2021-12-08T10:09:07.640508114Z"
+generated: "2022-03-01T10:30:29.431307764Z"

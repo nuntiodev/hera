@@ -47,8 +47,8 @@ func TestUpdateProfile(t *testing.T) {
 	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
 	// validate in database
 	getUser, err := testRepo.GetById(ctx, createdUser)
-	assert.Nil(t, err)
-	assert.Nil(t, user_mock.CompareUsers(getUser, updatedUser))
+	assert.NoError(t, err)
+	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
 }
 
 func TestUpdateProfileInvalidNamespace(t *testing.T) {

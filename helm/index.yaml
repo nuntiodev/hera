@@ -11,15 +11,4 @@ entries:
     urls:
     - packages/block-user-service-0.0.2.tgz
     version: 0.0.2
-  softcorp-user-service:
-  - apiVersion: v2
-    appVersion: 0.0.1
-    created: "2022-03-02T09:10:52.745221895Z"
-    description: A Helm chart for the softcorp-user-service
-    digest: 88d0a9483e93b1c2a05f119785e842e99d712c6550b863c8e932b917eae18eef
-    name: softcorp-user-service
-    type: application
-    urls:
-    - packages/softcorp-user-service-0.0.1.tgz
-    version: 0.0.1
-generated: "2022-03-02T09:10:52.742879689Z"
+generated: "2022-03-02T09:10:52.743980239Z"

@@ -15,6 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"strings"
+	"time"
 )
 
 const (
@@ -26,6 +27,7 @@ const (
 	actionUpdateSecurity
 	actionGetByID
 	actionGetByEmail
+	actionGetByOptionalId
 	actionGetAll
 	actionDelete
 )
@@ -38,6 +40,23 @@ var (
 	NoUsersDeletedErr = errors.New("no users deleted")
 )
 
+type User struct {
+	Id         string            `bson:"id" json:"id"`
+	OptionalId string            `bson:"optional_id" json:"optional_id"`
+	Namespace  string            `bson:"namespace" json:"namespace"`
+	Role       string            `bson:"role" json:"role"`
+	Name       string            `bson:"name" json:"name"`
+	Email      string            `bson:"email" json:"email"`
+	Password   string            `bson:"password" json:"password"`
+	Gender     block_user.Gender `bson:"gender" json:"gender"`
+	Country    string            `bson:"country" json:"country"`
+	Image      string            `bson:"image" json:"image"`
+	Blocked    bool              `bson:"blocked" json:"blocked"`
+	Birthdate  time.Time         `bson:"birthdate" json:"birthdate"`
+	CreatedAt  time.Time         `bson:"created_at" json:"created_at"`
+	UpdatedAt  time.Time         `bson:"updated_at" json:"updated_at"`
+}
+
 type UserRepository interface {
 	Create(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	UpdatePassword(ctx context.Context, user *block_user.User) (*block_user.User, error)
@@ -47,6 +66,7 @@ type UserRepository interface {
 	UpdateSecurity(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	GetById(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	GetByEmail(ctx context.Context, user *block_user.User) (*block_user.User, error)
+	GetByOptionalId(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	GetAll(ctx context.Context, userFilter *block_user.UserFilter, namespace string) ([]*block_user.User, error)
 	Search(ctx context.Context, search string, namespace string) ([]*block_user.User, error)
 	Delete(ctx context.Context, user *block_user.User) error
@@ -80,6 +100,26 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, zapLog
 	if _, err := collection.Indexes().CreateOne(ctx, emailNamespaceIndexModel); err != nil {
 		return nil, err
 	}
+	optionalIdIndexModel := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "optional_id", Value: 1},
+			{Key: "namespace", Value: 1},
+		},
+		Options: options.Index().SetUnique(true).SetPartialFilterExpression(
+			bson.D{
+				{
+					"optional_id", bson.D{
+						{
+							"$gt", "",
+						},
+					},
+				},
+			},
+		),
+	}
+	if _, err := collection.Indexes().CreateOne(ctx, optionalIdIndexModel); err != nil {
+		return nil, err
+	}
 	return &UserMongoRepository{
 		collection: collection,
 		zapLog:     zapLog,
@@ -107,6 +147,7 @@ func prepare(action int, user *block_user.User) {
 	user.Name = strings.TrimSpace(user.Name)
 	user.Country = strings.TrimSpace(user.Country)
 	user.Image = strings.TrimSpace(user.Image)
+	user.OptionalId = strings.TrimSpace(user.OptionalId)
 }
 
 func validate(action int, user *block_user.User) error {
@@ -150,6 +191,10 @@ func validate(action int, user *block_user.User) error {
 		if err := checkmail.ValidateFormat(user.Email); err != nil {
 			return err
 		}
+	case actionGetByOptionalId:
+		if user.OptionalId == "" {
+			return errors.New("missing required optional id")
+		}
 	case actionGetAll:
 		return nil
 	case actionUpdateNamespace:
@@ -175,7 +220,7 @@ func (umr *UserMongoRepository) Create(ctx context.Context, user *block_user.Use
 	if err != nil {
 		return nil, err
 	}
-	if _, err := umr.collection.InsertOne(ctx, user); err != nil {
+	if _, err := umr.collection.InsertOne(ctx, protoUserToUser(user)); err != nil {
 		return nil, err
 	}
 	return user, nil
@@ -191,17 +236,18 @@ func (umr *UserMongoRepository) UpdatePassword(ctx context.Context, user *block_
 		return nil, err
 	}
 	user.Password = string(hashedPassword)
-	updateUser := bson.M{
+	updateUser := protoUserToUser(user)
+	update := bson.M{
 		"$set": bson.M{
-			"password":  user.Password,
-			"updatedAt": user.UpdatedAt,
+			"password":   updateUser.Password,
+			"updated_at": updateUser.UpdatedAt,
 		},
 	}
 	filter := bson.M{"id": user.Id, "namespace": user.Namespace}
 	updateResult, err := umr.collection.UpdateOne(
 		ctx,
 		filter,
-		updateUser,
+		update,
 	)
 	if err != nil {
 		return nil, err
@@ -217,17 +263,18 @@ func (umr *UserMongoRepository) UpdateEmail(ctx context.Context, user *block_use
 	if err := validate(actionUpdateEmail, user); err != nil {
 		return nil, err
 	}
-	updateUser := bson.M{
+	updateUser := protoUserToUser(user)
+	update := bson.M{
 		"$set": bson.M{
-			"email":     user.Email,
-			"updatedAt": user.UpdatedAt,
+			"email":      updateUser.Email,
+			"updated_at": updateUser.UpdatedAt,
 		},
 	}
 	filter := bson.M{"id": user.Id, "namespace": user.Namespace}
 	updateResult, err := umr.collection.UpdateOne(
 		ctx,
 		filter,
-		updateUser,
+		update,
 	)
 	if err != nil {
 		return nil, err
@@ -243,21 +290,22 @@ func (umr *UserMongoRepository) UpdateProfile(ctx context.Context, user *block_u
 	if err := validate(actionUpdateProfile, user); err != nil {
 		return nil, err
 	}
-	updateUser := bson.M{
+	updateUser := protoUserToUser(user)
+	update := bson.M{
 		"$set": bson.M{
-			"name":      user.Name,
-			"gender":    user.Gender,
-			"image":     user.Image,
-			"country":   user.Country,
-			"birthdate": user.Birthdate,
-			"updatedAt": user.UpdatedAt,
+			"name":       updateUser.Name,
+			"gender":     updateUser.Gender,
+			"image":      updateUser.Image,
+			"country":    updateUser.Country,
+			"birthdate":  updateUser.Birthdate,
+			"updated_at": updateUser.UpdatedAt,
 		},
 	}
 	filter := bson.M{"id": user.Id, "namespace": user.Namespace}
 	updateResult, err := umr.collection.UpdateOne(
 		ctx,
 		filter,
-		updateUser,
+		update,
 	)
 	if err != nil {
 		return nil, err
@@ -273,17 +321,18 @@ func (umr *UserMongoRepository) UpdateNamespace(ctx context.Context, user *block
 	if err := validate(actionUpdateNamespace, user); err != nil {
 		return nil, err
 	}
-	updateUser := bson.M{
+	updateUser := protoUserToUser(user)
+	update := bson.M{
 		"$set": bson.M{
-			"namespace": user.Namespace,
-			"updatedAt": user.UpdatedAt,
+			"namespace":  updateUser.Namespace,
+			"updated_at": updateUser.UpdatedAt,
 		},
 	}
 	filter := bson.M{"id": user.Id}
 	updateResult, err := umr.collection.UpdateOne(
 		ctx,
 		filter,
-		updateUser,
+		update,
 	)
 	if err != nil {
 		return nil, err
@@ -299,18 +348,19 @@ func (umr *UserMongoRepository) UpdateSecurity(ctx context.Context, user *block_
 	if err := validate(actionUpdateSecurity, user); err != nil {
 		return nil, err
 	}
-	updateUser := bson.M{
+	updateUser := protoUserToUser(user)
+	update := bson.M{
 		"$set": bson.M{
-			"role":      user.Role,
-			"blocked":   user.Blocked,
-			"updatedAt": user.UpdatedAt,
+			"role":       updateUser.Role,
+			"blocked":    updateUser.Blocked,
+			"updated_at": updateUser.UpdatedAt,
 		},
 	}
 	filter := bson.M{"id": user.Id}
 	updateResult, err := umr.collection.UpdateOne(
 		ctx,
 		filter,
-		updateUser,
+		update,
 	)
 	if err != nil {
 		return nil, err
@@ -327,11 +377,11 @@ func (umr *UserMongoRepository) GetById(ctx context.Context, user *block_user.Us
 		return nil, err
 	}
 	filter := bson.M{"id": user.Id, "namespace": user.Namespace}
-	resp := block_user.User{}
+	resp := User{}
 	if err := umr.collection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	return userToProtoUser(&resp), nil
 }
 
 func (umr *UserMongoRepository) GetByEmail(ctx context.Context, user *block_user.User) (*block_user.User, error) {
@@ -340,11 +390,24 @@ func (umr *UserMongoRepository) GetByEmail(ctx context.Context, user *block_user
 		return nil, err
 	}
 	filter := bson.M{"id": user.Id, "namespace": user.Namespace}
-	resp := block_user.User{}
+	resp := User{}
 	if err := umr.collection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	return userToProtoUser(&resp), nil
+}
+
+func (umr *UserMongoRepository) GetByOptionalId(ctx context.Context, user *block_user.User) (*block_user.User, error) {
+	prepare(actionGetByOptionalId, user)
+	if err := validate(actionGetByOptionalId, user); err != nil {
+		return nil, err
+	}
+	filter := bson.M{"optional_id": user.OptionalId, "namespace": user.Namespace}
+	resp := User{}
+	if err := umr.collection.FindOne(ctx, filter).Decode(&resp); err != nil {
+		return nil, err
+	}
+	return userToProtoUser(&resp), nil
 }
 
 func (umr *UserMongoRepository) GetAll(ctx context.Context, userFilter *block_user.UserFilter, namespace string) ([]*block_user.User, error) {
@@ -360,9 +423,9 @@ func (umr *UserMongoRepository) GetAll(ctx context.Context, userFilter *block_us
 		}
 		switch userFilter.Sort {
 		case block_user.UserFilter_CREATED_AT:
-			sortOptions.SetSort(bson.D{{"createdAt", order}, {"_id", order}})
+			sortOptions.SetSort(bson.D{{"created_at", order}, {"_id", order}})
 		case block_user.UserFilter_UPDATE_AT:
-			sortOptions.SetSort(bson.D{{"updatedAt", order}, {"_id", order}})
+			sortOptions.SetSort(bson.D{{"updated_at", order}, {"_id", order}})
 		case block_user.UserFilter_BIRTHDATE:
 			sortOptions.SetSort(bson.D{{"birthdate", order}, {"_id", order}})
 		case block_user.UserFilter_NAME:
@@ -383,11 +446,11 @@ func (umr *UserMongoRepository) GetAll(ctx context.Context, userFilter *block_us
 		return nil, err
 	}
 	for cursor.Next(ctx) {
-		var user block_user.User
+		var user User
 		if err := cursor.Decode(&user); err != nil {
 			return nil, err
 		}
-		resp = append(resp, &user)
+		resp = append(resp, userToProtoUser(&user))
 	}
 
 	return resp, nil
@@ -404,6 +467,7 @@ func (umr *UserMongoRepository) Search(ctx context.Context, search string, names
 		{"namespace", namespace},
 		{"$or", bson.A{
 			bson.D{{"id", primitive.Regex{Pattern: search, Options: ""}}},
+			bson.D{{"optional_id", primitive.Regex{Pattern: search, Options: ""}}},
 			bson.D{{"email", primitive.Regex{Pattern: search, Options: ""}}},
 			bson.D{{"name", primitive.Regex{Pattern: search, Options: ""}}},
 			bson.D{{"country", primitive.Regex{Pattern: search, Options: ""}}},
@@ -417,11 +481,11 @@ func (umr *UserMongoRepository) Search(ctx context.Context, search string, names
 		return nil, err
 	}
 	for cursor.Next(ctx) {
-		var user block_user.User
+		var user User
 		if err := cursor.Decode(&user); err != nil {
 			return nil, err
 		}
-		resp = append(resp, &user)
+		resp = append(resp, userToProtoUser(&user))
 	}
 
 	return resp, nil

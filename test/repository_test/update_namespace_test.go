@@ -27,6 +27,6 @@ func TestUpdateNamespace(t *testing.T) {
 	assert.NotEmpty(t, updatedUser.Namespace)
 	// validate in database
 	getUser, err := testRepo.GetById(ctx, createdUser)
-	assert.Nil(t, err)
-	assert.Nil(t, user_mock.CompareUsers(getUser, updatedUser))
+	assert.NoError(t, err)
+	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
 }

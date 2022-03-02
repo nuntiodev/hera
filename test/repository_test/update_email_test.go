@@ -17,7 +17,7 @@ func TestUpdateEmail(t *testing.T) {
 	user := user_mock.GetRandomUser(nil)
 	createdUser, err := testRepo.Create(ctx, user)
 	initialEmail := user.Email
-	initialUpdatedAt := user.UpdatedAt
+	initialUpdatedAt := createdUser.UpdatedAt
 	assert.Nil(t, err)
 	// act
 	newEmail := gofakeit.Email()
@@ -29,11 +29,11 @@ func TestUpdateEmail(t *testing.T) {
 	assert.NotEmpty(t, updatedUser.Email)
 	assert.NotEqual(t, initialEmail, updatedUser.Email)
 	assert.True(t, updatedUser.UpdatedAt.IsValid())
-	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
+	assert.NotEqual(t, initialUpdatedAt.String(), updatedUser.UpdatedAt.String())
 	// validate in database
 	getUser, err := testRepo.GetById(ctx, createdUser)
-	assert.Nil(t, err)
-	assert.Nil(t, user_mock.CompareUsers(getUser, updatedUser))
+	assert.NoError(t, err)
+	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
 }
 
 func TestUpdateInvalidEmail(t *testing.T) {

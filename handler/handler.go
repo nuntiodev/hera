@@ -123,6 +123,14 @@ func (h *defaultHandler) Get(ctx context.Context, req *block_user.UserRequest) (
 		return &block_user.UserResponse{
 			User: getUser,
 		}, nil
+	} else if req.User.OptionalId != "" {
+		getUser, err := h.repository.UserRepository.GetByOptionalId(ctx, req.User)
+		if err != nil {
+			return nil, err
+		}
+		return &block_user.UserResponse{
+			User: getUser,
+		}, nil
 	}
 	return &block_user.UserResponse{}, errors.New("missing required search parameter (mail or id)")
 }

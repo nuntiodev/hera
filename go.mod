@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/badoux/checkmail v1.2.1
-	github.com/brianvoe/gofakeit/v6 v6.14.5
+	github.com/brianvoe/gofakeit/v6 v6.15.0
 	github.com/go-passwd/validator v0.0.0-20180902184246-0b4c967e436b
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -14,7 +14,7 @@ require (
 	github.com/mattevans/pwned-passwords v0.5.0
 	github.com/ory/dockertest/v3 v3.8.1
 	github.com/satori/go.uuid v1.2.0
-	github.com/softcorp-io/block-proto v0.0.34
+	github.com/softcorp-io/block-proto v0.0.44
 	github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a
 	github.com/stretchr/testify v1.7.0
 	github.com/xdg-go/scram v1.1.0 // indirect

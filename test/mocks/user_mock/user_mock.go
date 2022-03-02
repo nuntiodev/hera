@@ -2,6 +2,7 @@ package user_mock
 
 import (
 	"errors"
+	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/block-proto/go_block/block_user"
@@ -69,23 +70,23 @@ func CompareUsers(userOne, userTwo *block_user.User) error {
 		return errors.New("one of the users are nil")
 	}
 	if userOne.Namespace != userTwo.Namespace {
-		return errors.New("different namespaces")
+		return errors.New(fmt.Sprintf("countries namespaces: user1: %s  user2: %s", userOne.Namespace, userTwo.Namespace))
 	} else if userOne.Name != userTwo.Name {
-		return errors.New("different names")
+		return errors.New(fmt.Sprintf("countries names: user1: %s  user2: %s", userOne.Name, userTwo.Name))
 	} else if userOne.Id != userTwo.Id {
-		return errors.New("different ids")
+		return errors.New(fmt.Sprintf("countries ids: user1: %s  user2: %s", userOne.Id, userTwo.Id))
 	} else if userOne.Email != userTwo.Email {
-		return errors.New("different emails")
-	} else if userOne.Birthdate.String() != userTwo.Birthdate.String() {
-		return errors.New("different birthdays")
-	} else if userOne.CreatedAt.String() != userTwo.CreatedAt.String() {
-		return errors.New("different created at")
+		return errors.New(fmt.Sprintf("countries emails: user1: %s  user2: %s", userOne.Email, userTwo.Email))
+	} else if (userOne.Birthdate != nil && userTwo.Birthdate != nil) && (userOne.Birthdate.Seconds != userTwo.Birthdate.Seconds) {
+		return errors.New(fmt.Sprintf("countries birthdays at: user1: %d  user2: %d", userOne.Birthdate.Seconds, userTwo.Birthdate.Seconds))
+	} else if userOne.CreatedAt.Seconds != userTwo.CreatedAt.Seconds {
+		return errors.New(fmt.Sprintf("countries created at: user1: %d  user2: %d", userOne.CreatedAt.Seconds, userTwo.CreatedAt.Seconds))
 	} else if userOne.Country != userTwo.Country {
-		return errors.New("different countries")
+		return errors.New(fmt.Sprintf("countries images: user1: %s  user2: %s", userOne.Country, userTwo.Country))
 	} else if userOne.Image != userTwo.Image {
-		return errors.New("different images")
+		return errors.New(fmt.Sprintf("different images: user1: %s  user2: %s", userOne.Image, userTwo.Image))
 	} else if userOne.Gender != userTwo.Gender {
-		return errors.New("different genders")
+		return errors.New(fmt.Sprintf("different genders: user1: %s  user2: %s", userOne.Gender.String(), userTwo.Gender.String()))
 	}
 	return nil
 }

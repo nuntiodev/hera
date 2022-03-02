@@ -84,6 +84,25 @@ func TestCreateDuplicateSameNamespace(t *testing.T) {
 	}
 }
 
+func TestCreateDuplicateOptionalIdSameNamespace(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	user := user_mock.GetRandomUser(nil)
+	user.OptionalId = uuid.NewV4().String()
+	createdUser, err := testRepo.Create(ctx, user)
+	assert.Nil(t, err)
+	assert.NotNil(t, createdUser)
+	// act & validate
+	newUser := user_mock.GetRandomUser(nil)
+	newUser.Id = uuid.NewV4().String()
+	newUser.OptionalId = user.OptionalId
+	newUser.Namespace = user.Namespace
+	if _, err := testRepo.Create(ctx, newUser); mongo.IsDuplicateKeyError(err) == false {
+		t.Fatal(errors.New("creating a user with the same optional id and same namespace is not allowed"))
+	}
+}
+
 func TestCreateDuplicateDifferentNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)

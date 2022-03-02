@@ -1,4 +1,4 @@
-package user_repository_test
+package respository_test
 
 import (
 	"context"
@@ -39,9 +39,7 @@ func TestSearchName(t *testing.T) {
 	_, err = testRepo.Create(ctx, userThree)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "Birthe", &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsers, err := testRepo.Search(ctx, "Birthe", namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -76,9 +74,7 @@ func TestSearchNameDifferentNamespace(t *testing.T) {
 	_, err = testRepo.Create(ctx, userThree)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "Birthe", &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsers, err := testRepo.Search(ctx, "Birthe", namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -116,9 +112,7 @@ func TestSearchEmail(t *testing.T) {
 	_, err = testRepo.Create(ctx, userThree)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "soft", &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsers, err := testRepo.Search(ctx, "soft", namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -157,9 +151,7 @@ func TestSearchId(t *testing.T) {
 	_, err = testRepo.Create(ctx, userThree)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, userOne.Id, &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsers, err := testRepo.Search(ctx, userOne.Id, namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -199,9 +191,7 @@ func TestSearchCountry(t *testing.T) {
 	_, err = testRepo.Create(ctx, userThree)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "Denma", &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsers, err := testRepo.Search(ctx, "Denma", namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -242,9 +232,7 @@ func TestSearchNoResults(t *testing.T) {
 	_, err = testRepo.Create(ctx, userThree)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "Norway", &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsers, err := testRepo.Search(ctx, "Norway", namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.Nil(t, getUsers)

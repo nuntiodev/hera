@@ -1,4 +1,4 @@
-package user_repository_test
+package respository_test
 
 import (
 	"context"
@@ -34,14 +34,10 @@ func TestDeleteNamespace(t *testing.T) {
 	err = testRepo.DeleteNamespace(ctx, namespace)
 	assert.Nil(t, err)
 	// validate
-	getUsersDeleteNamespace, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsersDeleteNamespace, err := testRepo.GetAll(ctx, nil, namespace)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, len(getUsersDeleteNamespace))
-	getUsersAliveNamespace, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: userThree.Namespace,
-	})
+	getUsersAliveNamespace, err := testRepo.GetAll(ctx, nil, userThree.Namespace)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(getUsersAliveNamespace))
 	assert.Nil(t, user_mock.CompareUsers(getUsersAliveNamespace[0], userThree))

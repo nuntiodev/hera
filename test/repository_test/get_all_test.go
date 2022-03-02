@@ -1,4 +1,4 @@
-package user_repository_test
+package respository_test
 
 import (
 	"context"
@@ -32,9 +32,7 @@ func TestGetAll(t *testing.T) {
 	createdUserTwo, err := testRepo.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{}, namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -64,10 +62,9 @@ func TestGetAllDifferentSortCreatedAt(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-		Sort:      block_user.UserFilter_CREATED_AT,
-		Order:     block_user.UserFilter_DEC,
-	})
+		Sort:  block_user.UserFilter_CREATED_AT,
+		Order: block_user.UserFilter_DEC,
+	}, namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -97,10 +94,9 @@ func TestGetAllDifferentSortUpdatedAt(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-		Sort:      block_user.UserFilter_UPDATE_AT,
-		Order:     block_user.UserFilter_DEC,
-	})
+		Sort:  block_user.UserFilter_UPDATE_AT,
+		Order: block_user.UserFilter_DEC,
+	}, namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -131,12 +127,11 @@ func TestGetAllDifferentSortBirthdate(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-		Sort:      block_user.UserFilter_BIRTHDATE,
-		Order:     block_user.UserFilter_DEC,
-	})
-	assert.Nil(t, err)
+		Sort:  block_user.UserFilter_BIRTHDATE,
+		Order: block_user.UserFilter_DEC,
+	}, namespace)
 	// validate
+	assert.NoError(t, err)
 	assert.NotNil(t, getUsers)
 	assert.Equal(t, 2, len(getUsers))
 	assert.Nil(t, user_mock.CompareUsers(createdUserOne, getUsers[1]))
@@ -173,10 +168,9 @@ func TestGetAllDifferentSortName(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-		Sort:      block_user.UserFilter_NAME,
-		Order:     block_user.UserFilter_INC,
-	})
+		Sort:  block_user.UserFilter_NAME,
+		Order: block_user.UserFilter_INC,
+	}, namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -204,9 +198,7 @@ func TestGetAllDifferentNamespace(t *testing.T) {
 	_, err = testRepo.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-	})
+	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{}, namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -235,10 +227,9 @@ func TestGetAllSetFromTo(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-		From:      0,
-		To:        1,
-	})
+		From: 0,
+		To:   1,
+	}, namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -267,10 +258,9 @@ func TestGetAllSetFromToWithSkip(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Namespace: namespace,
-		From:      1,
-		To:        2,
-	})
+		From: 1,
+		To:   2,
+	}, namespace)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)

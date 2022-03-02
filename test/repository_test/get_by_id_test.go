@@ -1,4 +1,4 @@
-package user_repository_test
+package respository_test
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func TestGetByEmail(t *testing.T) {
+func TestGetById(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
@@ -26,14 +26,14 @@ func TestGetByEmail(t *testing.T) {
 	createdUser, err := testRepo.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
-	getUser, err := testRepo.GetByEmail(ctx, createdUser)
+	getUser, err := testRepo.GetById(ctx, createdUser)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
 	assert.Nil(t, user_mock.CompareUsers(getUser, createdUser))
 }
 
-func TestGetByEmailDifferentNamespace(t *testing.T) {
+func TestGetByIdDifferentNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
@@ -48,7 +48,7 @@ func TestGetByEmailDifferentNamespace(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	createdUser.Namespace = ""
-	getUser, err := testRepo.GetByEmail(ctx, createdUser)
+	getUser, err := testRepo.GetById(ctx, createdUser)
 	assert.Error(t, err)
 	// validate
 	assert.Nil(t, getUser)

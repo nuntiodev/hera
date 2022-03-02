@@ -23,6 +23,7 @@ func TestCreate(t *testing.T) {
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Gender:    user_mock.GetRandomGender(),
+		Email:     gofakeit.Email(),
 	})
 	password := user.Password
 	user.Id = ""

@@ -16,20 +16,28 @@ func TestUpdateProfile(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(nil)
+	user := user_mock.GetRandomUser(&block_user.User{
+		Email:   gofakeit.Email(),
+		Name:    gofakeit.Name(),
+		Image:   gofakeit.ImageURL(10, 10),
+		Country: gofakeit.Country(),
+		Gender:  block_user.Gender_FEMALE,
+	})
 	createdUser, err := testRepo.Create(ctx, user)
 	initialName := user.Name
 	initialImage := user.Image
 	initialCountry := user.Country
 	initialGender := user.Gender
 	initialUpdatedAt := user.UpdatedAt
+	initialEmail := user.Email
 	initialBlocker := createdUser.Blocked
 	assert.Nil(t, err)
 	// act
 	createdUser.Name = gofakeit.Name()
-	createdUser.Image = gofakeit.ImageURL(10, 10)
+	createdUser.Image = uuid.NewV4().String()
 	createdUser.Country = gofakeit.Country()
 	createdUser.Birthdate = ts.Now()
+	createdUser.Email = gofakeit.Email()
 	createdUser.Gender = block_user.Gender_MALE
 	updatedUser, err := testRepo.UpdateProfile(ctx, createdUser)
 	assert.Nil(t, err)
@@ -37,6 +45,8 @@ func TestUpdateProfile(t *testing.T) {
 	assert.NotNil(t, updatedUser)
 	assert.NotEmpty(t, updatedUser.Name)
 	assert.NotEqual(t, initialName, updatedUser.Name)
+	assert.NotEmpty(t, updatedUser.Email)
+	assert.NotEqual(t, initialEmail, updatedUser.Email)
 	assert.NotEmpty(t, updatedUser.Image)
 	assert.NotEqual(t, initialImage, updatedUser.Image)
 	assert.NotEmpty(t, updatedUser.Country)

@@ -21,7 +21,6 @@ import (
 const (
 	actionCreate = iota
 	actionUpdatePassword
-	actionUpdateEmail
 	actionUpdateProfile
 	actionUpdateNamespace
 	actionUpdateSecurity
@@ -60,7 +59,6 @@ type User struct {
 type UserRepository interface {
 	Create(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	UpdatePassword(ctx context.Context, user *block_user.User) (*block_user.User, error)
-	UpdateEmail(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	UpdateProfile(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	UpdateNamespace(ctx context.Context, user *block_user.User) (*block_user.User, error)
 	UpdateSecurity(ctx context.Context, user *block_user.User) (*block_user.User, error)
@@ -95,7 +93,17 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, zapLog
 			{Key: "email", Value: 1},
 			{Key: "namespace", Value: 1},
 		},
-		Options: options.Index().SetUnique(true),
+		Options: options.Index().SetUnique(true).SetPartialFilterExpression(
+			bson.D{
+				{
+					"email", bson.D{
+						{
+							"$gt", "",
+						},
+					},
+				},
+			},
+		),
 	}
 	if _, err := collection.Indexes().CreateOne(ctx, emailNamespaceIndexModel); err != nil {
 		return nil, err
@@ -138,7 +146,7 @@ func prepare(action int, user *block_user.User) {
 		if user.Id == "" {
 			user.Id = uuid.NewV4().String()
 		}
-	case actionUpdatePassword, actionUpdateEmail, actionUpdateProfile, actionUpdateNamespace, actionUpdateSecurity:
+	case actionUpdatePassword, actionUpdateProfile, actionUpdateNamespace, actionUpdateSecurity:
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
@@ -162,7 +170,7 @@ func validate(action int, user *block_user.User) error {
 	case actionCreate:
 		if user.Id == "" {
 			return errors.New("invalid user id")
-		} else if err := checkmail.ValidateFormat(user.Email); err != nil {
+		} else if err := checkmail.ValidateFormat(user.Email); user.Email != "" && err != nil {
 			return err
 		} else if !user.CreatedAt.IsValid() {
 			return errors.New("invalid created at date")
@@ -180,11 +188,7 @@ func validate(action int, user *block_user.User) error {
 	case actionUpdateProfile, actionUpdateSecurity, actionGetByID, actionDelete:
 		if user.Id == "" {
 			return errors.New("invalid user id")
-		}
-	case actionUpdateEmail:
-		if user.Id == "" {
-			return errors.New("invalid user id")
-		} else if err := checkmail.ValidateFormat(user.Email); err != nil {
+		} else if err := checkmail.ValidateFormat(user.Email); user.Email != "" && err != nil {
 			return err
 		}
 	case actionGetByEmail:
@@ -258,33 +262,6 @@ func (umr *UserMongoRepository) UpdatePassword(ctx context.Context, user *block_
 	return user, nil
 }
 
-func (umr *UserMongoRepository) UpdateEmail(ctx context.Context, user *block_user.User) (*block_user.User, error) {
-	prepare(actionUpdateEmail, user)
-	if err := validate(actionUpdateEmail, user); err != nil {
-		return nil, err
-	}
-	updateUser := protoUserToUser(user)
-	update := bson.M{
-		"$set": bson.M{
-			"email":      updateUser.Email,
-			"updated_at": updateUser.UpdatedAt,
-		},
-	}
-	filter := bson.M{"id": user.Id, "namespace": user.Namespace}
-	updateResult, err := umr.collection.UpdateOne(
-		ctx,
-		filter,
-		update,
-	)
-	if err != nil {
-		return nil, err
-	}
-	if updateResult.MatchedCount == 0 {
-		return nil, errors.New("could not find user")
-	}
-	return user, nil
-}
-
 func (umr *UserMongoRepository) UpdateProfile(ctx context.Context, user *block_user.User) (*block_user.User, error) {
 	prepare(actionUpdateProfile, user)
 	if err := validate(actionUpdateProfile, user); err != nil {
@@ -297,6 +274,7 @@ func (umr *UserMongoRepository) UpdateProfile(ctx context.Context, user *block_u
 			"gender":     updateUser.Gender,
 			"image":      updateUser.Image,
 			"country":    updateUser.Country,
+			"email":      updateUser.Email,
 			"birthdate":  updateUser.Birthdate,
 			"updated_at": updateUser.UpdatedAt,
 		},

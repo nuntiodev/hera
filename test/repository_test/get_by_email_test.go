@@ -22,6 +22,7 @@ func TestGetByEmail(t *testing.T) {
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Gender:    user_mock.GetRandomGender(),
+		Email:     gofakeit.Email(),
 	})
 	createdUser, err := testRepo.Create(ctx, user)
 	assert.Nil(t, err)

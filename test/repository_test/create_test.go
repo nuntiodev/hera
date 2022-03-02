@@ -25,6 +25,7 @@ func TestCreate(t *testing.T) {
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Gender:    user_mock.GetRandomGender(),
+		Email:     gofakeit.Email(),
 	})
 	password := user.Password
 	user.Id = ""
@@ -63,14 +64,13 @@ func TestCreateWithEmptyFields(t *testing.T) {
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
-	assert.NotEmpty(t, createdUser.Email)
 	assert.NotEmpty(t, createdUser.Id)
 	assert.Nil(t, bcrypt.CompareHashAndPassword([]byte(createdUser.Password), []byte(password)))
 	assert.True(t, createdUser.UpdatedAt.IsValid())
 	assert.True(t, createdUser.CreatedAt.IsValid())
 }
 
-func TestCreateDuplicateSameNamespace(t *testing.T) {
+func TestCreateDuplicateIdSameNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
@@ -81,6 +81,63 @@ func TestCreateDuplicateSameNamespace(t *testing.T) {
 	// act & validate
 	if _, err := testRepo.Create(ctx, user); mongo.IsDuplicateKeyError(err) == false {
 		t.Fatal(errors.New("creating a user with the same email is not allowed"))
+	}
+}
+
+func TestCreateDuplicateEmailSameNamespace(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	userOne := user_mock.GetRandomUser(&block_user.User{
+		Email:     gofakeit.Email(),
+		Namespace: uuid.NewV4().String(),
+	})
+	userTwo := user_mock.GetRandomUser(&block_user.User{
+		Email:     userOne.Email,
+		Namespace: userOne.Namespace,
+	})
+	createdUser, err := testRepo.Create(ctx, userOne)
+	assert.Nil(t, err)
+	assert.NotNil(t, createdUser)
+	// act & validate
+	if _, err := testRepo.Create(ctx, userTwo); mongo.IsDuplicateKeyError(err) == false {
+		t.Fatal(errors.New("creating a user with the same email in the same namespace is not allowed"))
+	}
+}
+
+func TestCreateDuplicateEmailDifferentNamespace(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	userOne := user_mock.GetRandomUser(&block_user.User{
+		Email:     gofakeit.Email(),
+		Namespace: uuid.NewV4().String(),
+	})
+	userTwo := user_mock.GetRandomUser(&block_user.User{
+		Email:     userOne.Email,
+		Namespace: uuid.NewV4().String(),
+	})
+	createdUser, err := testRepo.Create(ctx, userOne)
+	assert.Nil(t, err)
+	assert.NotNil(t, createdUser)
+	// act & validate
+	if _, err := testRepo.Create(ctx, userTwo); err != nil {
+		t.Fatal(errors.New("creating a user with the same email in different namespaces are allowed"))
+	}
+}
+
+func TestCreateDuplicateEmptyEmail(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	userOne := user_mock.GetRandomUser(&block_user.User{})
+	userTwo := user_mock.GetRandomUser(&block_user.User{})
+	createdUser, err := testRepo.Create(ctx, userOne)
+	assert.Nil(t, err)
+	assert.NotNil(t, createdUser)
+	// act & validate
+	if _, err := testRepo.Create(ctx, userTwo); err != nil {
+		t.Fatal(errors.New("creating two users with empty emails are allowed"))
 	}
 }
 

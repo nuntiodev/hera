@@ -33,10 +33,12 @@ func TestUpdateProfile(t *testing.T) {
 	newBirthdate := ts.Now()
 	newCountry := gofakeit.Country()
 	newImage := gofakeit.ImageURL(10, 10)
+	newEmail := gofakeit.Email()
 	createUser.User.Name = newName
 	createUser.User.Birthdate = newBirthdate
 	createUser.User.Country = newCountry
 	createUser.User.Image = newImage
+	createUser.User.Email = newEmail
 	updateUser, err := testClient.UpdateProfile(ctx, &block_user.UserRequest{
 		Update: createUser.User,
 	})
@@ -46,6 +48,7 @@ func TestUpdateProfile(t *testing.T) {
 	assert.Equal(t, newBirthdate.String(), updateUser.User.Birthdate.String())
 	assert.Equal(t, newImage, updateUser.User.Image)
 	assert.Equal(t, newCountry, updateUser.User.Country)
+	assert.Equal(t, newEmail, updateUser.User.Email)
 }
 
 func TestUpdateProfileNoUser(t *testing.T) {

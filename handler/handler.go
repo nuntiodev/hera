@@ -13,7 +13,6 @@ type Handler interface {
 	Heartbeat(ctx context.Context, req *block_user.Request) (*block_user.Response, error)
 	Create(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdatePassword(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	UpdateEmail(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateProfile(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateSecurity(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
@@ -60,16 +59,6 @@ func (h *defaultHandler) UpdatePassword(ctx context.Context, req *block_user.Use
 	updatedUser, err := h.repository.UserRepository.UpdatePassword(ctx, req.Update)
 	if err != nil {
 		return &block_user.UserResponse{}, err
-	}
-	return &block_user.UserResponse{
-		User: updatedUser,
-	}, nil
-}
-
-func (h *defaultHandler) UpdateEmail(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	updatedUser, err := h.repository.UserRepository.UpdateEmail(ctx, req.Update)
-	if err != nil {
-		return nil, err
 	}
 	return &block_user.UserResponse{
 		User: updatedUser,
@@ -163,7 +152,9 @@ func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *block_use
 	if err := bcrypt.CompareHashAndPassword([]byte(resp.User.Password), []byte(req.User.Password)); err != nil {
 		return &block_user.UserResponse{}, err
 	}
-	return &block_user.UserResponse{}, nil
+	return &block_user.UserResponse{
+		User: resp.User,
+	}, nil
 }
 
 func (h *defaultHandler) Delete(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {

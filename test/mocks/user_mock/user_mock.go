@@ -26,7 +26,6 @@ func GetRandomGender() block_user.Gender {
 
 func GetRandomUser(user *block_user.User) *block_user.User {
 	resp := &block_user.User{
-		Email:     gofakeit.Email(),
 		Password:  gofakeit.Password(true, true, true, true, true, 10),
 		Namespace: uuid.NewV4().String(),
 	}
@@ -70,19 +69,19 @@ func CompareUsers(userOne, userTwo *block_user.User) error {
 		return errors.New("one of the users are nil")
 	}
 	if userOne.Namespace != userTwo.Namespace {
-		return errors.New(fmt.Sprintf("countries namespaces: user1: %s  user2: %s", userOne.Namespace, userTwo.Namespace))
+		return errors.New(fmt.Sprintf("different namespaces: user1: %s  user2: %s", userOne.Namespace, userTwo.Namespace))
 	} else if userOne.Name != userTwo.Name {
-		return errors.New(fmt.Sprintf("countries names: user1: %s  user2: %s", userOne.Name, userTwo.Name))
+		return errors.New(fmt.Sprintf("different names: user1: %s  user2: %s", userOne.Name, userTwo.Name))
 	} else if userOne.Id != userTwo.Id {
-		return errors.New(fmt.Sprintf("countries ids: user1: %s  user2: %s", userOne.Id, userTwo.Id))
+		return errors.New(fmt.Sprintf("different ids: user1: %s  user2: %s", userOne.Id, userTwo.Id))
 	} else if userOne.Email != userTwo.Email {
-		return errors.New(fmt.Sprintf("countries emails: user1: %s  user2: %s", userOne.Email, userTwo.Email))
+		return errors.New(fmt.Sprintf("different emails: user1: %s  user2: %s", userOne.Email, userTwo.Email))
 	} else if (userOne.Birthdate != nil && userTwo.Birthdate != nil) && (userOne.Birthdate.Seconds != userTwo.Birthdate.Seconds) {
-		return errors.New(fmt.Sprintf("countries birthdays at: user1: %d  user2: %d", userOne.Birthdate.Seconds, userTwo.Birthdate.Seconds))
+		return errors.New(fmt.Sprintf("different birthdays at: user1: %d  user2: %d", userOne.Birthdate.Seconds, userTwo.Birthdate.Seconds))
 	} else if userOne.CreatedAt.Seconds != userTwo.CreatedAt.Seconds {
-		return errors.New(fmt.Sprintf("countries created at: user1: %d  user2: %d", userOne.CreatedAt.Seconds, userTwo.CreatedAt.Seconds))
+		return errors.New(fmt.Sprintf("different created at: user1: %d  user2: %d", userOne.CreatedAt.Seconds, userTwo.CreatedAt.Seconds))
 	} else if userOne.Country != userTwo.Country {
-		return errors.New(fmt.Sprintf("countries images: user1: %s  user2: %s", userOne.Country, userTwo.Country))
+		return errors.New(fmt.Sprintf("different countries: user1: %s  user2: %s", userOne.Country, userTwo.Country))
 	} else if userOne.Image != userTwo.Image {
 		return errors.New(fmt.Sprintf("different images: user1: %s  user2: %s", userOne.Image, userTwo.Image))
 	} else if userOne.Gender != userTwo.Gender {

@@ -37,6 +37,7 @@ func TestSecurityProfile(t *testing.T) {
 	createUser.User.Role = newRole
 	updateUser, err := testClient.UpdateSecurity(ctx, &block_user.UserRequest{
 		Update: createUser.User,
+		User:   createUser.User,
 	})
 	assert.NoError(t, err)
 	// validate

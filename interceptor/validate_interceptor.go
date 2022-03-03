@@ -15,7 +15,6 @@ const (
 	Create              = "Create"
 	UpdatePassword      = "UpdatePassword"
 	UpdateProfile       = "UpdateProfile"
-	UpdateNamespace     = "UpdateNamespace"
 	UpdateSecurity      = "UpdateSecurity"
 	Get                 = "Get"
 	GetAll              = "GetAll"
@@ -56,10 +55,12 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		} else if translatedReq.User == nil {
 			return &block_user.UserResponse{}, UpdateIsNil
 		}
-	case UpdatePassword, UpdateSecurity, UpdateProfile, UpdateNamespace:
+	case UpdatePassword, UpdateSecurity, UpdateProfile:
 		if translatedReq == nil {
 			return nil, ErrorReqIsNil
 		} else if translatedReq.Update == nil {
+			return &block_user.UserResponse{}, UpdateIsNil
+		} else if translatedReq.User == nil {
 			return &block_user.UserResponse{}, UpdateIsNil
 		}
 	case GetAll, Search:

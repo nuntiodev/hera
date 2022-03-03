@@ -39,6 +39,12 @@ func GetRandomUser(user *block_user.User) *block_user.User {
 		if user.Id != "" {
 			resp.Id = user.Id
 		}
+		if user.OptionalId != "" {
+			resp.OptionalId = user.OptionalId
+		}
+		if user.Role != "" {
+			resp.Role = user.Role
+		}
 		if user.Password != "" {
 			resp.Password = user.Password
 		}
@@ -60,7 +66,10 @@ func GetRandomUser(user *block_user.User) *block_user.User {
 		if user.Gender != block_user.Gender_INVALID_GENDER {
 			resp.Gender = user.Gender
 		}
-		resp.DisableAuthentication = user.DisableAuthentication
+		resp.DisablePasswordValidation = user.DisablePasswordValidation
+		resp.Encrypted = user.Encrypted
+		resp.Verified = user.Verified
+		resp.Blocked = user.Blocked
 	}
 	return resp
 }

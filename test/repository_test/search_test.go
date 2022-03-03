@@ -32,14 +32,14 @@ func TestSearchName(t *testing.T) {
 		Name:      "Dan Sommer",
 		Namespace: namespace,
 	})
-	_, err := testRepo.Create(ctx, userOne)
+	_, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userTwo)
+	_, err = testRepo.Create(ctx, userTwo, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userThree)
+	_, err = testRepo.Create(ctx, userThree, nil)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "Birthe", namespace)
+	getUsers, err := testRepo.Search(ctx, "Birthe", namespace, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -67,14 +67,14 @@ func TestSearchNameDifferentNamespace(t *testing.T) {
 		Name:      "Dan Sommer",
 		Namespace: namespace,
 	})
-	_, err := testRepo.Create(ctx, userOne)
+	_, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userTwo)
+	_, err = testRepo.Create(ctx, userTwo, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userThree)
+	_, err = testRepo.Create(ctx, userThree, nil)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "Birthe", namespace)
+	getUsers, err := testRepo.Search(ctx, "Birthe", namespace, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -105,14 +105,14 @@ func TestSearchEmail(t *testing.T) {
 		Email:     "dan@gmail.com",
 		Namespace: namespace,
 	})
-	_, err := testRepo.Create(ctx, userOne)
+	_, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userTwo)
+	_, err = testRepo.Create(ctx, userTwo, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userThree)
+	_, err = testRepo.Create(ctx, userThree, nil)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "soft", namespace)
+	getUsers, err := testRepo.Search(ctx, "soft", namespace, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -144,14 +144,14 @@ func TestSearchId(t *testing.T) {
 		Email:     "dan@gmail.com",
 		Namespace: namespace,
 	})
-	_, err := testRepo.Create(ctx, userOne)
+	_, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userTwo)
+	_, err = testRepo.Create(ctx, userTwo, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userThree)
+	_, err = testRepo.Create(ctx, userThree, nil)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, userOne.Id, namespace)
+	getUsers, err := testRepo.Search(ctx, userOne.Id, namespace, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -184,14 +184,14 @@ func TestSearchCountry(t *testing.T) {
 		Email:     "dan@gmail.com",
 		Namespace: namespace,
 	})
-	_, err := testRepo.Create(ctx, userOne)
+	_, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userTwo)
+	_, err = testRepo.Create(ctx, userTwo, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userThree)
+	_, err = testRepo.Create(ctx, userThree, nil)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "Denma", namespace)
+	getUsers, err := testRepo.Search(ctx, "Denma", namespace, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -225,14 +225,14 @@ func TestSearchNoResults(t *testing.T) {
 		Email:     "dan@gmail.com",
 		Namespace: namespace,
 	})
-	_, err := testRepo.Create(ctx, userOne)
+	_, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userTwo)
+	_, err = testRepo.Create(ctx, userTwo, nil)
 	assert.Nil(t, err)
-	_, err = testRepo.Create(ctx, userThree)
+	_, err = testRepo.Create(ctx, userThree, nil)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := testRepo.Search(ctx, "Norway", namespace)
+	getUsers, err := testRepo.Search(ctx, "Norway", namespace, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.Nil(t, getUsers)

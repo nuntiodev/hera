@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/softcorp-io/block-proto/go_block/block_user"
 	"github.com/softcorp-io/block-user-service/repository"
+	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,7 +15,6 @@ type Handler interface {
 	Create(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdatePassword(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateProfile(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	UpdateNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateSecurity(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	Get(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	GetAll(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
@@ -46,7 +46,9 @@ func (h *defaultHandler) Heartbeat(ctx context.Context, req *block_user.Request)
 }
 
 func (h *defaultHandler) Create(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	createdUser, err := h.repository.UserRepository.Create(ctx, req.User)
+	createdUser, err := h.repository.UserRepository.Create(ctx, req.User, &user_repository.EncryptionOptions{
+		Key: req.EncryptionKey,
+	})
 	if err != nil {
 		return &block_user.UserResponse{}, err
 	}
@@ -56,7 +58,7 @@ func (h *defaultHandler) Create(ctx context.Context, req *block_user.UserRequest
 }
 
 func (h *defaultHandler) UpdatePassword(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	updatedUser, err := h.repository.UserRepository.UpdatePassword(ctx, req.Update)
+	updatedUser, err := h.repository.UserRepository.UpdatePassword(ctx, req.User, req.Update)
 	if err != nil {
 		return &block_user.UserResponse{}, err
 	}
@@ -66,17 +68,9 @@ func (h *defaultHandler) UpdatePassword(ctx context.Context, req *block_user.Use
 }
 
 func (h *defaultHandler) UpdateProfile(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	updatedUser, err := h.repository.UserRepository.UpdateProfile(ctx, req.Update)
-	if err != nil {
-		return nil, err
-	}
-	return &block_user.UserResponse{
-		User: updatedUser,
-	}, nil
-}
-
-func (h *defaultHandler) UpdateNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	updatedUser, err := h.repository.UserRepository.UpdateNamespace(ctx, req.Update)
+	updatedUser, err := h.repository.UserRepository.UpdateProfile(ctx, req.User, req.Update, &user_repository.EncryptionOptions{
+		Key: req.EncryptionKey,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +80,9 @@ func (h *defaultHandler) UpdateNamespace(ctx context.Context, req *block_user.Us
 }
 
 func (h *defaultHandler) UpdateSecurity(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	updatedUser, err := h.repository.UserRepository.UpdateSecurity(ctx, req.Update)
+	updatedUser, err := h.repository.UserRepository.UpdateSecurity(ctx, req.User, req.Update, &user_repository.EncryptionOptions{
+		Key: req.EncryptionKey,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -96,36 +92,21 @@ func (h *defaultHandler) UpdateSecurity(ctx context.Context, req *block_user.Use
 }
 
 func (h *defaultHandler) Get(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	if req.User.Id != "" {
-		getUser, err := h.repository.UserRepository.GetById(ctx, req.User)
-		if err != nil {
-			return nil, err
-		}
-		return &block_user.UserResponse{
-			User: getUser,
-		}, nil
-	} else if req.User.Email != "" {
-		getUser, err := h.repository.UserRepository.GetByEmail(ctx, req.User)
-		if err != nil {
-			return nil, err
-		}
-		return &block_user.UserResponse{
-			User: getUser,
-		}, nil
-	} else if req.User.OptionalId != "" {
-		getUser, err := h.repository.UserRepository.GetByOptionalId(ctx, req.User)
-		if err != nil {
-			return nil, err
-		}
-		return &block_user.UserResponse{
-			User: getUser,
-		}, nil
+	getUser, err := h.repository.UserRepository.Get(ctx, req.User, &user_repository.EncryptionOptions{
+		Key: req.EncryptionKey,
+	})
+	if err != nil {
+		return nil, err
 	}
-	return &block_user.UserResponse{}, errors.New("missing required search parameter (mail or id)")
+	return &block_user.UserResponse{
+		User: getUser,
+	}, nil
 }
 
 func (h *defaultHandler) GetAll(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	getUsers, err := h.repository.UserRepository.GetAll(ctx, req.Filter, req.Namespace)
+	getUsers, err := h.repository.UserRepository.GetAll(ctx, req.Filter, req.Namespace, &user_repository.EncryptionOptions{
+		Key: req.EncryptionKey,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +116,9 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *block_user.UserRequest
 }
 
 func (h *defaultHandler) Search(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	getUsers, err := h.repository.UserRepository.Search(ctx, req.Search, req.Namespace)
+	getUsers, err := h.repository.UserRepository.Search(ctx, req.Search, req.Namespace, &user_repository.EncryptionOptions{
+		Key: req.EncryptionKey,
+	})
 	if err != nil {
 		return nil, err
 	}

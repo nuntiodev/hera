@@ -6,6 +6,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,11 +27,12 @@ func TestCreate(t *testing.T) {
 		Image:     gofakeit.ImageURL(10, 10),
 		Gender:    user_mock.GetRandomGender(),
 		Email:     gofakeit.Email(),
+		Role:      gofakeit.Name(),
 	})
 	password := user.Password
 	user.Id = ""
 	// act
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
@@ -46,7 +48,48 @@ func TestCreate(t *testing.T) {
 	assert.True(t, createdUser.UpdatedAt.IsValid())
 	assert.True(t, createdUser.CreatedAt.IsValid())
 	// validate in database
-	getUser, err := testRepo.GetById(ctx, createdUser)
+	getUser, err := testRepo.Get(ctx, createdUser, nil)
+	assert.Nil(t, err)
+	assert.NotNil(t, createdUser)
+	assert.Nil(t, user_mock.CompareUsers(getUser, createdUser))
+}
+
+func TestCreateWithEncryption(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	user := user_mock.GetRandomUser(&block_user.User{
+		Name:      gofakeit.Name(),
+		Birthdate: ts.Now(),
+		Namespace: uuid.NewV4().String(),
+		Image:     gofakeit.ImageURL(10, 10),
+		Gender:    user_mock.GetRandomGender(),
+		Email:     gofakeit.Email(),
+		Role:      gofakeit.Name(),
+	})
+	password := user.Password
+	user.Id = ""
+	// act
+	createdUser, err := testRepo.Create(ctx, user, &user_repository.EncryptionOptions{
+		Key: encryptionKey,
+	})
+	assert.NoError(t, err)
+	// validate
+	assert.NotNil(t, createdUser)
+	assert.NotEmpty(t, createdUser.Name)
+	assert.NotEmpty(t, createdUser.Email)
+	assert.NotEmpty(t, createdUser.Id)
+	assert.NotEmpty(t, createdUser.Namespace)
+	assert.NotEmpty(t, createdUser.Image)
+	assert.NotEqual(t, block_user.Gender_INVALID_GENDER, createdUser.Gender)
+	assert.Nil(t, bcrypt.CompareHashAndPassword([]byte(createdUser.Password), []byte(password)))
+	assert.NotEmpty(t, createdUser.Gender)
+	assert.True(t, createdUser.UpdatedAt.IsValid())
+	assert.True(t, createdUser.CreatedAt.IsValid())
+	// validate in database
+	getUser, err := testRepo.Get(ctx, createdUser, &user_repository.EncryptionOptions{
+		Key: encryptionKey,
+	})
 	assert.Nil(t, err)
 	assert.NotNil(t, createdUser)
 	assert.Nil(t, user_mock.CompareUsers(getUser, createdUser))
@@ -60,7 +103,7 @@ func TestCreateWithEmptyFields(t *testing.T) {
 	password := user.Password
 	user.Id = ""
 	// act
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
@@ -75,11 +118,11 @@ func TestCreateWithEmptyPasswordDisableAuth(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		DisableAuthentication: true,
+		DisablePasswordValidation: true,
 	})
 	user.Password = ""
 	// act
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
@@ -93,11 +136,11 @@ func TestCreateDuplicateIdSameNamespace(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, createdUser)
 	// act & validate
-	if _, err := testRepo.Create(ctx, user); mongo.IsDuplicateKeyError(err) == false {
+	if _, err := testRepo.Create(ctx, user, nil); mongo.IsDuplicateKeyError(err) == false {
 		t.Fatal(errors.New("creating a user with the same email is not allowed"))
 	}
 }
@@ -114,11 +157,11 @@ func TestCreateDuplicateEmailSameNamespace(t *testing.T) {
 		Email:     userOne.Email,
 		Namespace: userOne.Namespace,
 	})
-	createdUser, err := testRepo.Create(ctx, userOne)
+	createdUser, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, createdUser)
 	// act & validate
-	if _, err := testRepo.Create(ctx, userTwo); mongo.IsDuplicateKeyError(err) == false {
+	if _, err := testRepo.Create(ctx, userTwo, nil); mongo.IsDuplicateKeyError(err) == false {
 		t.Fatal(errors.New("creating a user with the same email in the same namespace is not allowed"))
 	}
 }
@@ -135,11 +178,11 @@ func TestCreateDuplicateEmailDifferentNamespace(t *testing.T) {
 		Email:     userOne.Email,
 		Namespace: uuid.NewV4().String(),
 	})
-	createdUser, err := testRepo.Create(ctx, userOne)
+	createdUser, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, createdUser)
 	// act & validate
-	if _, err := testRepo.Create(ctx, userTwo); err != nil {
+	if _, err := testRepo.Create(ctx, userTwo, nil); err != nil {
 		t.Fatal(errors.New("creating a user with the same email in different namespaces are allowed"))
 	}
 }
@@ -150,11 +193,11 @@ func TestCreateDuplicateEmptyEmail(t *testing.T) {
 	defer cancel()
 	userOne := user_mock.GetRandomUser(&block_user.User{})
 	userTwo := user_mock.GetRandomUser(&block_user.User{})
-	createdUser, err := testRepo.Create(ctx, userOne)
+	createdUser, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, createdUser)
 	// act & validate
-	if _, err := testRepo.Create(ctx, userTwo); err != nil {
+	if _, err := testRepo.Create(ctx, userTwo, nil); err != nil {
 		t.Fatal(errors.New("creating two users with empty emails are allowed"))
 	}
 }
@@ -165,7 +208,7 @@ func TestCreateDuplicateOptionalIdSameNamespace(t *testing.T) {
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
 	user.OptionalId = uuid.NewV4().String()
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, createdUser)
 	// act & validate
@@ -173,7 +216,7 @@ func TestCreateDuplicateOptionalIdSameNamespace(t *testing.T) {
 	newUser.Id = uuid.NewV4().String()
 	newUser.OptionalId = user.OptionalId
 	newUser.Namespace = user.Namespace
-	if _, err := testRepo.Create(ctx, newUser); mongo.IsDuplicateKeyError(err) == false {
+	if _, err := testRepo.Create(ctx, newUser, nil); mongo.IsDuplicateKeyError(err) == false {
 		t.Fatal(errors.New("creating a user with the same optional id and same namespace is not allowed"))
 	}
 }
@@ -183,13 +226,13 @@ func TestCreateDuplicateDifferentNamespace(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, createdUser)
 	// act & validate
 	user.Namespace = uuid.NewV4().String()
 	user.Id = uuid.NewV4().String()
-	if _, err := testRepo.Create(ctx, user); err != nil {
+	if _, err := testRepo.Create(ctx, user, nil); err != nil {
 		t.Fatal(errors.New("creating users with the same email in two different namespaces is allowed"))
 	}
 }
@@ -201,7 +244,7 @@ func TestCreateInvalidEmail(t *testing.T) {
 	user := user_mock.GetRandomUser(nil)
 	// act
 	user.Email = "softcorp@@test.io"
-	_, err := testRepo.Create(ctx, user)
+	_, err := testRepo.Create(ctx, user, nil)
 	// validate
 	assert.Error(t, err)
 }
@@ -213,7 +256,7 @@ func TestCreateInvalidPassword(t *testing.T) {
 	user := user_mock.GetRandomUser(nil)
 	// act
 	user.Password = "Test1234"
-	_, err := testRepo.Create(ctx, user)
+	_, err := testRepo.Create(ctx, user, nil)
 	// validate
 	assert.Error(t, err)
 }
@@ -226,7 +269,7 @@ func TestCreateOverwriteId(t *testing.T) {
 	user.Id = uuid.NewV4().String()
 	id := user.Id
 	// act
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	// validate
 	assert.Nil(t, err)
 	assert.NotEmpty(t, createdUser.Id)

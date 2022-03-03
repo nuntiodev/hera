@@ -41,6 +41,7 @@ func TestUpdateProfile(t *testing.T) {
 	createUser.User.Email = newEmail
 	updateUser, err := testClient.UpdateProfile(ctx, &block_user.UserRequest{
 		Update: createUser.User,
+		User:   createUser.User,
 	})
 	assert.NoError(t, err)
 	// validate

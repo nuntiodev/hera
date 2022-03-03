@@ -43,7 +43,7 @@ func TestValidateCredentialsDisableAuth(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		DisableAuthentication: true,
+		DisablePasswordValidation: true,
 	})
 	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
 		User: user,

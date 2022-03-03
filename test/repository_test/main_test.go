@@ -2,6 +2,7 @@ package respository_test
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"github.com/softcorp-io/block-user-service/test/mocks/repository_mock"
@@ -11,6 +12,7 @@ import (
 )
 
 var testRepo user_repository.UserRepository
+var encryptionKey = "VmYq3t6w9z$C&F)J@McQfTjWnZr4u7x!"
 
 func TestMain(m *testing.M) {
 	// before test
@@ -18,6 +20,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(err)
 	}
+	encryptionKey = hex.EncodeToString([]byte(encryptionKey))
 	containerName := "mongodb-user-repo-test"
 	repository, pool, container, err := repository_mock.NewRepositoryMock(context.Background(), zapLog, containerName)
 	if err != nil {

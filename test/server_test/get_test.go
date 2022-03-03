@@ -38,6 +38,35 @@ func TestGet(t *testing.T) {
 	assert.NoError(t, user_mock.CompareUsers(getUser.User, createUser.User))
 }
 
+func TestGetWithEncryption(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	user := user_mock.GetRandomUser(&block_user.User{
+		Name:      gofakeit.Name(),
+		Birthdate: ts.Now(),
+		Namespace: uuid.NewV4().String(),
+		Image:     gofakeit.ImageURL(10, 10),
+		Gender:    user_mock.GetRandomGender(),
+	})
+	user.Id = ""
+	// act
+	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
+		User:           user,
+		WithEncryption: true,
+		EncryptionKey:  encryptionKey,
+	})
+	assert.NoError(t, err)
+	// validate
+	getUser, err := testClient.Get(ctx, &block_user.UserRequest{
+		User:          createUser.User,
+		EncryptionKey: encryptionKey,
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, getUser)
+	assert.NoError(t, user_mock.CompareUsers(getUser.User, createUser.User))
+}
+
 func TestGetNoUser(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)

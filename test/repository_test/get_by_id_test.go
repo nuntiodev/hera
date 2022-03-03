@@ -23,10 +23,13 @@ func TestGetById(t *testing.T) {
 		Image:     gofakeit.ImageURL(10, 10),
 		Gender:    user_mock.GetRandomGender(),
 	})
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	// act
-	getUser, err := testRepo.GetById(ctx, createdUser)
+	getUser, err := testRepo.Get(ctx, &block_user.User{
+		Id:        createdUser.Id,
+		Namespace: createdUser.Namespace,
+	}, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
@@ -44,11 +47,11 @@ func TestGetByIdDifferentNamespace(t *testing.T) {
 		Image:     gofakeit.ImageURL(10, 10),
 		Gender:    user_mock.GetRandomGender(),
 	})
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	// act
 	createdUser.Namespace = ""
-	getUser, err := testRepo.GetById(ctx, createdUser)
+	getUser, err := testRepo.Get(ctx, createdUser, nil)
 	assert.Error(t, err)
 	// validate
 	assert.Nil(t, getUser)

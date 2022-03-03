@@ -15,17 +15,17 @@ func TestDelete(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	// act
 	err = testRepo.Delete(ctx, createdUser)
 	assert.Nil(t, err)
 	// validate
-	getUser, err := testRepo.GetById(ctx, createdUser)
+	getUser, err := testRepo.Get(ctx, createdUser, nil)
 	assert.Error(t, err)
 	assert.Nil(t, getUser)
 	// validate in database
-	_, err = testRepo.GetById(ctx, createdUser)
+	_, err = testRepo.Get(ctx, createdUser, nil)
 	assert.Error(t, err)
 }
 
@@ -35,7 +35,7 @@ func TestDeleteDifferentNamespace(t *testing.T) {
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
 	namespace := user.Namespace
-	createdUser, err := testRepo.Create(ctx, user)
+	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	// act
 	createdUser.Namespace = uuid.NewV4().String()
@@ -44,7 +44,7 @@ func TestDeleteDifferentNamespace(t *testing.T) {
 	assert.Equal(t, user_repository.NoUsersDeletedErr, err)
 	// validate
 	createdUser.Namespace = namespace
-	getUser, err := testRepo.GetById(ctx, createdUser)
+	getUser, err := testRepo.Get(ctx, createdUser, nil)
 	assert.Nil(t, err)
 	assert.Nil(t, user_mock.CompareUsers(getUser, createdUser))
 }

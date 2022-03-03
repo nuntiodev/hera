@@ -15,6 +15,14 @@ import (
 	"time"
 )
 
+type ServerTest struct {
+	pool          *dockertest.Pool
+	resource      *dockertest.Resource
+	conn          *grpc.ClientConn
+	containerName string
+	Client        block_user.ServiceClient
+}
+
 func getClientConn(zapLog *zap.Logger, port int) (*grpc.ClientConn, error) {
 	retry := 5
 	for i := 0; i < retry; i++ {
@@ -29,37 +37,48 @@ func getClientConn(zapLog *zap.Logger, port int) (*grpc.ClientConn, error) {
 	return nil, errors.New("could not create client conn")
 }
 
-func NewServerMock(ctx context.Context, zapLog *zap.Logger, containerName string, port int) (block_user.ServiceClient, *dockertest.Pool, *dockertest.Resource, *grpc.ClientConn, error) {
-	zapLog, err := zap.NewProduction()
-	if err != nil {
-		panic(err)
+func (st *ServerTest) Purge() error {
+	fmt.Println("get in here :-)")
+	if st != nil && st.pool != nil {
+		if err := st.pool.Purge(st.resource); err != nil {
+			return err
+		}
+		if err := st.pool.RemoveContainerByName(st.containerName); err != nil {
+			return err
+		}
 	}
+	if st.conn != nil {
+		if err := st.conn.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func NewServerMock(ctx context.Context, zapLog *zap.Logger, containerName string, port int) (*ServerTest, error) {
 	_, pool, container, err := repository_mock.NewRepositoryMock(context.Background(), zapLog, containerName)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, err
 	}
 	os.Setenv("GRPC_PORT", fmt.Sprintf("%d", port))
+	serverTest := &ServerTest{
+		pool:          pool,
+		resource:      container,
+		containerName: containerName,
+	}
 	go func() {
+		defer serverTest.Purge()
 		if err := runner.Run(context.Background(), zapLog); err != nil {
 			zapLog.Fatal(err.Error())
-		}
-		if err := pool.Purge(container); err != nil {
-			zapLog.Error(fmt.Sprintf("failed to purge pool with err: %s", err))
-		}
-		if err := pool.RemoveContainerByName(containerName); err != nil {
-			zapLog.Error(fmt.Sprintf("failed to remove Docker container with err: %s", err))
 		}
 	}()
 	userServiceConn, err := getClientConn(zapLog, port)
 	if err != nil {
-		if err := pool.Purge(container); err != nil {
-			zapLog.Error(fmt.Sprintf("failed to purge pool with err: %s", err))
-		}
-		if err := pool.RemoveContainerByName(containerName); err != nil {
-			zapLog.Error(fmt.Sprintf("failed to remove Docker container with err: %s", err))
-		}
-		return nil, nil, nil, nil, err
+		serverTest.Purge()
+		return nil, err
 	}
 	testClient := block_user.NewServiceClient(userServiceConn)
-	return testClient, pool, container, userServiceConn, nil
+	serverTest.Client = testClient
+	serverTest.conn = userServiceConn
+	return serverTest, nil
 }

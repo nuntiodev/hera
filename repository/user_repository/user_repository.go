@@ -40,20 +40,22 @@ var (
 )
 
 type User struct {
-	Id         string            `bson:"id" json:"id"`
-	OptionalId string            `bson:"optional_id" json:"optional_id"`
-	Namespace  string            `bson:"namespace" json:"namespace"`
-	Role       string            `bson:"role" json:"role"`
-	Name       string            `bson:"name" json:"name"`
-	Email      string            `bson:"email" json:"email"`
-	Password   string            `bson:"password" json:"password"`
-	Gender     block_user.Gender `bson:"gender" json:"gender"`
-	Country    string            `bson:"country" json:"country"`
-	Image      string            `bson:"image" json:"image"`
-	Blocked    bool              `bson:"blocked" json:"blocked"`
-	Birthdate  time.Time         `bson:"birthdate" json:"birthdate"`
-	CreatedAt  time.Time         `bson:"created_at" json:"created_at"`
-	UpdatedAt  time.Time         `bson:"updated_at" json:"updated_at"`
+	Id                    string            `bson:"id" json:"id"`
+	OptionalId            string            `bson:"optional_id" json:"optional_id"`
+	Namespace             string            `bson:"namespace" json:"namespace"`
+	Role                  string            `bson:"role" json:"role"`
+	Name                  string            `bson:"name" json:"name"`
+	Email                 string            `bson:"email" json:"email"`
+	Password              string            `bson:"password" json:"password"`
+	Gender                block_user.Gender `bson:"gender" json:"gender"`
+	Country               string            `bson:"country" json:"country"`
+	Image                 string            `bson:"image" json:"image"`
+	Blocked               bool              `bson:"blocked" json:"blocked"`
+	Verified              bool              `bson:"verified" json:"verified"`
+	DisableAuthentication bool              `bson:"disable_authentication" json:"disable_authentication"`
+	Birthdate             time.Time         `bson:"birthdate" json:"birthdate"`
+	CreatedAt             time.Time         `bson:"created_at" json:"created_at"`
+	UpdatedAt             time.Time         `bson:"updated_at" json:"updated_at"`
 }
 
 type UserRepository interface {
@@ -177,7 +179,9 @@ func validate(action int, user *block_user.User) error {
 		} else if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at date")
 		} else if err := validatePassword(user.Password); err != nil {
-			return err
+			if user.DisableAuthentication == false || (user.Password != "" && user.DisableAuthentication == true) {
+				return err
+			}
 		}
 	case actionUpdatePassword:
 		if user.Id == "" {
@@ -216,13 +220,12 @@ func (umr *UserMongoRepository) Create(ctx context.Context, user *block_user.Use
 	if err := validate(actionCreate, user); err != nil {
 		return nil, err
 	}
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-	user.Password = string(hashedPassword)
-	if err != nil {
-		return nil, err
+	if user.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+		user.Password = string(hashedPassword)
 	}
 	if _, err := umr.collection.InsertOne(ctx, protoUserToUser(user)); err != nil {
 		return nil, err
@@ -329,9 +332,11 @@ func (umr *UserMongoRepository) UpdateSecurity(ctx context.Context, user *block_
 	updateUser := protoUserToUser(user)
 	update := bson.M{
 		"$set": bson.M{
-			"role":       updateUser.Role,
-			"blocked":    updateUser.Blocked,
-			"updated_at": updateUser.UpdatedAt,
+			"role":                   updateUser.Role,
+			"blocked":                updateUser.Blocked,
+			"verified":               updateUser.Verified,
+			"disable_authentication": updateUser.DisableAuthentication,
+			"updated_at":             updateUser.UpdatedAt,
 		},
 	}
 	filter := bson.M{"id": user.Id}

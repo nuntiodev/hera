@@ -31,7 +31,9 @@ func TestSecurityProfile(t *testing.T) {
 	// act
 	newRole := gofakeit.MacAddress()
 	isBlocked := true
+	isVerified := true
 	createUser.User.Blocked = isBlocked
+	createUser.User.Verified = isVerified
 	createUser.User.Role = newRole
 	updateUser, err := testClient.UpdateSecurity(ctx, &block_user.UserRequest{
 		Update: createUser.User,
@@ -40,6 +42,7 @@ func TestSecurityProfile(t *testing.T) {
 	// validate
 	assert.Equal(t, newRole, updateUser.User.Role)
 	assert.Equal(t, isBlocked, updateUser.User.Blocked)
+	assert.Equal(t, isVerified, updateUser.User.Verified)
 }
 
 func TestUpdateSecurityNoUser(t *testing.T) {

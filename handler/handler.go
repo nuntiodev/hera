@@ -149,6 +149,9 @@ func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *block_use
 	if err != nil {
 		return &block_user.UserResponse{}, err
 	}
+	if resp.User.Password == "" {
+		return &block_user.UserResponse{}, errors.New("please update the user with a non-empty password")
+	}
 	if err := bcrypt.CompareHashAndPassword([]byte(resp.User.Password), []byte(req.User.Password)); err != nil {
 		return &block_user.UserResponse{}, err
 	}

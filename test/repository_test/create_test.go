@@ -70,6 +70,24 @@ func TestCreateWithEmptyFields(t *testing.T) {
 	assert.True(t, createdUser.CreatedAt.IsValid())
 }
 
+func TestCreateWithEmptyPasswordDisableAuth(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	user := user_mock.GetRandomUser(&block_user.User{
+		DisableAuthentication: true,
+	})
+	user.Password = ""
+	// act
+	createdUser, err := testRepo.Create(ctx, user)
+	assert.Nil(t, err)
+	// validate
+	assert.NotNil(t, createdUser)
+	assert.NotEmpty(t, createdUser.Id)
+	assert.True(t, createdUser.UpdatedAt.IsValid())
+	assert.True(t, createdUser.CreatedAt.IsValid())
+}
+
 func TestCreateDuplicateIdSameNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)

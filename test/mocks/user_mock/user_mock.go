@@ -60,6 +60,7 @@ func GetRandomUser(user *block_user.User) *block_user.User {
 		if user.Gender != block_user.Gender_INVALID_GENDER {
 			resp.Gender = user.Gender
 		}
+		resp.DisableAuthentication = user.DisableAuthentication
 	}
 	return resp
 }

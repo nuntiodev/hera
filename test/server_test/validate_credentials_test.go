@@ -38,6 +38,25 @@ func TestValidateCredentials(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestValidateCredentialsDisableAuth(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	user := user_mock.GetRandomUser(&block_user.User{
+		DisableAuthentication: true,
+	})
+	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
+		User: user,
+	})
+	assert.NoError(t, err)
+	// act
+	_, err = testClient.ValidateCredentials(ctx, &block_user.UserRequest{
+		User: createUser.User,
+	})
+	// validate
+	assert.Error(t, err)
+}
+
 func TestValidateCredentialsNoUser(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)

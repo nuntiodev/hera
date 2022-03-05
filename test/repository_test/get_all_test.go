@@ -8,7 +8,6 @@ import (
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
@@ -19,11 +18,8 @@ func TestGetAll(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
 		Namespace: namespace,
@@ -48,11 +44,8 @@ func TestGetAllWithPartialEncryption(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
 		Namespace: namespace,
@@ -75,24 +68,44 @@ func TestGetAllWithPartialEncryption(t *testing.T) {
 	assert.Nil(t, user_mock.CompareUsers(createdUserTwo, getUsers[1]))
 }
 
+func TestGetAllWithInvalidEncryptionKey(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	namespace := uuid.NewV4().String()
+	userOne := user_mock.GetRandomUser(&block_user.User{
+		Namespace: namespace,
+		Image:     gofakeit.ImageURL(10, 10),
+	})
+	userTwo := user_mock.GetRandomUser(&block_user.User{
+		Namespace: namespace,
+	})
+	_, err := testRepo.Create(ctx, userOne, nil)
+	assert.Nil(t, err)
+	_, err = testRepo.Create(ctx, userTwo, &user_repository.EncryptionOptions{
+		Key: encryptionKey,
+	})
+	assert.Nil(t, err)
+	// act
+	_, err = testRepo.GetAll(ctx, &block_user.UserFilter{}, namespace, &user_repository.EncryptionOptions{
+		Key: invalidEncryptionKey,
+	})
+	// validate
+	assert.Error(t, err)
+}
+
 func TestGetAllWithPartialEncryptionNoDecryption(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	createdUserOne, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
@@ -117,11 +130,8 @@ func TestGetAllDifferentSortCreatedAt(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
 		Namespace: namespace,
@@ -149,11 +159,8 @@ func TestGetAllDifferentSortUpdatedAt(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
 		Namespace: namespace,
@@ -181,15 +188,11 @@ func TestGetAllDifferentSortBirthdate(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
 		Namespace: namespace,
-		Birthdate: ts.Now(),
 	})
 	createdUserOne, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
@@ -197,7 +200,6 @@ func TestGetAllDifferentSortBirthdate(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Sort:  block_user.UserFilter_BIRTHDATE,
 		Order: block_user.UserFilter_DEC,
 	}, namespace, nil)
 	// validate
@@ -214,21 +216,14 @@ func TestGetAllDifferentSortName(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      "Ole Hansen",
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
-		Name:      "Andreas Simonsen",
 		Namespace: namespace,
-		Birthdate: ts.Now(),
 	})
 	userThree := user_mock.GetRandomUser(&block_user.User{
-		Name:      "Birthe Hansen",
 		Namespace: namespace,
-		Birthdate: ts.Now(),
 	})
 	createdUserOne, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
@@ -238,16 +233,16 @@ func TestGetAllDifferentSortName(t *testing.T) {
 	assert.Nil(t, err)
 	// act
 	getUsers, err := testRepo.GetAll(ctx, &block_user.UserFilter{
-		Sort:  block_user.UserFilter_NAME,
-		Order: block_user.UserFilter_INC,
+		Order: block_user.UserFilter_DEC,
+		Sort:  block_user.UserFilter_CREATED_AT,
 	}, namespace, nil)
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
 	assert.Equal(t, 3, len(getUsers))
-	assert.Nil(t, user_mock.CompareUsers(createdUserTwo, getUsers[0]))
-	assert.Nil(t, user_mock.CompareUsers(createdUserThree, getUsers[1]))
 	assert.Nil(t, user_mock.CompareUsers(createdUserOne, getUsers[2]))
+	assert.Nil(t, user_mock.CompareUsers(createdUserTwo, getUsers[1]))
+	assert.Nil(t, user_mock.CompareUsers(createdUserThree, getUsers[0]))
 }
 
 func TestGetAllDifferentNamespace(t *testing.T) {
@@ -256,11 +251,8 @@ func TestGetAllDifferentNamespace(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{})
 	createdUserOne, err := testRepo.Create(ctx, userOne, nil)
@@ -282,11 +274,8 @@ func TestGetAllSetFromTo(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
 		Namespace: namespace,
@@ -313,11 +302,8 @@ func TestGetAllSetFromToWithSkip(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
 		Namespace: namespace,

@@ -38,7 +38,7 @@ func getClientConn(zapLog *zap.Logger, port int) (*grpc.ClientConn, error) {
 }
 
 func (st *ServerTest) Purge() error {
-	if st != nil && st.pool != nil {
+	if st.pool != nil {
 		if err := st.pool.Purge(st.resource); err != nil {
 			return err
 		}

@@ -7,7 +7,6 @@ import (
 	"github.com/softcorp-io/block-proto/go_block/block_user"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
@@ -18,24 +17,15 @@ func TestGetAll(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userThree := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
-		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	createUserOne, err := testClient.Create(ctx, &block_user.UserRequest{
 		User: userOne,
@@ -67,30 +57,20 @@ func TestGetAllWithPartialEncryption(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userThree := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	createUserOne, err := testClient.Create(ctx, &block_user.UserRequest{
-		User:           userOne,
-		WithEncryption: true,
-		EncryptionKey:  encryptionKey,
+		User:          userOne,
+		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
 	createUserTwo, err := testClient.Create(ctx, &block_user.UserRequest{
@@ -98,9 +78,8 @@ func TestGetAllWithPartialEncryption(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	_, err = testClient.Create(ctx, &block_user.UserRequest{
-		User:           userThree,
-		WithEncryption: true,
-		EncryptionKey:  encryptionKey,
+		User:          userThree,
+		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
 	// act
@@ -122,30 +101,20 @@ func TestGetAllWithPartialEncryptionNoKey(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	userOne := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userTwo := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	userThree := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	_, err := testClient.Create(ctx, &block_user.UserRequest{
-		User:           userOne,
-		WithEncryption: true,
-		EncryptionKey:  encryptionKey,
+		User:          userOne,
+		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
 	_, err = testClient.Create(ctx, &block_user.UserRequest{
@@ -153,9 +122,8 @@ func TestGetAllWithPartialEncryptionNoKey(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	_, err = testClient.Create(ctx, &block_user.UserRequest{
-		User:           userThree,
-		WithEncryption: true,
-		EncryptionKey:  encryptionKey,
+		User:          userThree,
+		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
 	// act

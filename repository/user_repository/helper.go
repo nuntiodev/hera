@@ -6,7 +6,6 @@ import (
 	hibp "github.com/mattevans/pwned-passwords"
 	"github.com/softcorp-io/block-proto/go_block/block_user"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 )
 
 var PwnedError = errors.New("this password has been involved in a data breach")
@@ -35,76 +34,40 @@ func validatePassword(password string) error {
 	return nil
 }
 
-func genderToString(gender block_user.Gender) string {
-	return gender.String()
-}
-
-func stringToGender(gender string) block_user.Gender {
-	switch gender {
-	case block_user.Gender_MALE.String():
-		return block_user.Gender_MALE
-	case block_user.Gender_FEMALE.String():
-		return block_user.Gender_FEMALE
-	case block_user.Gender_OTHER.String():
-		return block_user.Gender_OTHER
-	default:
-		return block_user.Gender_INVALID_GENDER
-	}
-}
-
-func stringToTime(t string) (time.Time, error) {
-	t2, err := time.Parse(timeLayout, t)
-	if err != nil {
-		return time.Time{}, err
-	}
-	return t2, err
-}
-
-func timeToString(t time.Time) string {
-	return t.Format(timeLayout)
-}
-
 func userToProtoUser(user *User) *block_user.User {
-	birthdate, _ := stringToTime(user.Birthdate)
+	if user == nil {
+		return nil
+	}
 	return &block_user.User{
-		Id:                        user.Id,
-		OptionalId:                user.OptionalId,
-		Namespace:                 user.Namespace,
-		Role:                      user.Role,
-		Name:                      user.Name,
-		Email:                     user.Email,
-		Password:                  user.Password,
-		Gender:                    stringToGender(user.Gender),
-		Country:                   user.Country,
-		Image:                     user.Image,
-		Blocked:                   user.Blocked,
-		Verified:                  user.Verified,
-		Encrypted:                 user.Encrypted,
-		DisablePasswordValidation: user.DisablePasswordValidation,
-		Birthdate:                 ts.New(birthdate),
-		CreatedAt:                 ts.New(user.CreatedAt),
-		UpdatedAt:                 ts.New(user.UpdatedAt),
+		Id:         user.Id,
+		OptionalId: user.OptionalId,
+		Namespace:  user.Namespace,
+		Email:      user.Email,
+		Role:       user.Role,
+		Password:   user.Password,
+		Image:      user.Image,
+		Encrypted:  user.Encrypted,
+		Metadata:   user.Metadata,
+		CreatedAt:  ts.New(user.CreatedAt),
+		UpdatedAt:  ts.New(user.UpdatedAt),
 	}
 }
 
 func protoUserToUser(user *block_user.User) *User {
+	if user == nil {
+		return nil
+	}
 	return &User{
-		Id:                        user.Id,
-		OptionalId:                user.OptionalId,
-		Namespace:                 user.Namespace,
-		Role:                      user.Role,
-		Name:                      user.Name,
-		Email:                     user.Email,
-		Password:                  user.Password,
-		Gender:                    genderToString(user.Gender),
-		Country:                   user.Country,
-		Image:                     user.Image,
-		Blocked:                   user.Blocked,
-		Verified:                  user.Verified,
-		Encrypted:                 user.Encrypted,
-		DisablePasswordValidation: user.DisablePasswordValidation,
-		Birthdate:                 timeToString(user.Birthdate.AsTime()),
-		CreatedAt:                 user.CreatedAt.AsTime(),
-		UpdatedAt:                 user.UpdatedAt.AsTime(),
+		Id:         user.Id,
+		OptionalId: user.OptionalId,
+		Namespace:  user.Namespace,
+		Email:      user.Email,
+		Role:       user.Role,
+		Password:   user.Password,
+		Image:      user.Image,
+		Encrypted:  user.Encrypted,
+		Metadata:   user.Metadata,
+		CreatedAt:  user.CreatedAt.AsTime(),
+		UpdatedAt:  user.UpdatedAt.AsTime(),
 	}
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
@@ -21,11 +20,8 @@ func TestCreate(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 		Email:     gofakeit.Email(),
 		Role:      gofakeit.Name(),
 	})
@@ -36,15 +32,11 @@ func TestCreate(t *testing.T) {
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
-	assert.NotEmpty(t, createdUser.Name)
 	assert.NotEmpty(t, createdUser.Email)
 	assert.NotEmpty(t, createdUser.Id)
 	assert.NotEmpty(t, createdUser.Namespace)
 	assert.NotEmpty(t, createdUser.Image)
-	assert.NotEqual(t, block_user.Gender_INVALID_GENDER, createdUser.Gender)
 	assert.Nil(t, bcrypt.CompareHashAndPassword([]byte(createdUser.Password), []byte(password)))
-	assert.NotEmpty(t, createdUser.Gender)
-	assert.True(t, createdUser.Birthdate.IsValid())
 	assert.True(t, createdUser.UpdatedAt.IsValid())
 	assert.True(t, createdUser.CreatedAt.IsValid())
 	// validate in database
@@ -59,11 +51,8 @@ func TestCreateWithEncryption(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 		Email:     gofakeit.Email(),
 		Role:      gofakeit.Name(),
 	})
@@ -76,14 +65,11 @@ func TestCreateWithEncryption(t *testing.T) {
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
-	assert.NotEmpty(t, createdUser.Name)
 	assert.NotEmpty(t, createdUser.Email)
 	assert.NotEmpty(t, createdUser.Id)
 	assert.NotEmpty(t, createdUser.Namespace)
 	assert.NotEmpty(t, createdUser.Image)
-	assert.NotEqual(t, block_user.Gender_INVALID_GENDER, createdUser.Gender)
 	assert.Nil(t, bcrypt.CompareHashAndPassword([]byte(createdUser.Password), []byte(password)))
-	assert.NotEmpty(t, createdUser.Gender)
 	assert.True(t, createdUser.UpdatedAt.IsValid())
 	assert.True(t, createdUser.CreatedAt.IsValid())
 	// validate in database
@@ -117,9 +103,7 @@ func TestCreateWithEmptyPasswordDisableAuth(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
-		DisablePasswordValidation: true,
-	})
+	user := user_mock.GetRandomUser(nil)
 	user.Password = ""
 	// act
 	createdUser, err := testRepo.Create(ctx, user, nil)

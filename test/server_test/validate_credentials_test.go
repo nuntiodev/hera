@@ -7,7 +7,6 @@ import (
 	"github.com/softcorp-io/block-proto/go_block/block_user"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
@@ -17,11 +16,8 @@ func TestValidateCredentials(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	user.Id = ""
 	password := user.Password
@@ -38,13 +34,12 @@ func TestValidateCredentials(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestValidateCredentialsDisableAuth(t *testing.T) {
+func TestValidateCredentialsNoPassword(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
-		DisablePasswordValidation: true,
-	})
+	user := user_mock.GetRandomUser(nil)
+	user.Password = ""
 	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
 		User: user,
 	})
@@ -62,11 +57,8 @@ func TestValidateCredentialsNoUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	_, err := testClient.Create(ctx, &block_user.UserRequest{
 		User: user,
@@ -83,11 +75,8 @@ func TestValidateCredentialsNoReq(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	user.Id = ""
 	_, err := testClient.Create(ctx, &block_user.UserRequest{

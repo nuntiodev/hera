@@ -14,11 +14,12 @@ const (
 	Heartbeat           = "Heartbeat"
 	Create              = "Create"
 	UpdatePassword      = "UpdatePassword"
-	UpdateProfile       = "UpdateProfile"
+	UpdateMetadata      = "UpdateMetadata"
+	UpdateEmail         = "UpdateEmail"
+	UpdateImage         = "UpdateImage"
 	UpdateSecurity      = "UpdateSecurity"
 	Get                 = "Get"
 	GetAll              = "GetAll"
-	Search              = "Search"
 	ValidateCredentials = "ValidateCredentials"
 	Delete              = "Delete"
 	DeleteNamespace     = "DeleteNamespace"
@@ -55,7 +56,8 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		} else if translatedReq.User == nil {
 			return &block_user.UserResponse{}, UpdateIsNil
 		}
-	case UpdatePassword, UpdateSecurity, UpdateProfile:
+	case UpdatePassword, UpdateSecurity, UpdateMetadata,
+		UpdateImage, UpdateEmail:
 		if translatedReq == nil {
 			return nil, ErrorReqIsNil
 		} else if translatedReq.Update == nil {
@@ -63,7 +65,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		} else if translatedReq.User == nil {
 			return &block_user.UserResponse{}, UpdateIsNil
 		}
-	case GetAll, Search:
+	case GetAll:
 		if translatedReq == nil {
 			return nil, ErrorReqIsNil
 		}

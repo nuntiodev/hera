@@ -7,7 +7,6 @@ import (
 	"github.com/softcorp-io/block-proto/go_block/block_user"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
@@ -17,11 +16,8 @@ func TestDelete(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
 		User: user,

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
+	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository"
 	database "github.com/softcorp-io/softcorp_db_helper"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -90,7 +92,8 @@ func NewRepositoryMock(ctx context.Context, zapLog *zap.Logger, containerName st
 		return nil, pool, container, err
 	}
 	// create the repository_mock
-	repo, err := repository.New(ctx, mongoClient, zapLog)
+	myCrypto, err := crypto.New()
+	repo, err := repository.New(ctx, mongoClient, myCrypto, block_user.MetadataType_METADATA_TYPE_JSON, zapLog)
 	if err != nil {
 		if err := pool.Purge(container); err != nil {
 			zapLog.Fatal(fmt.Sprintf("failed to purge pool with err: %s", err))

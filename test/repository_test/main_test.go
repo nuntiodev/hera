@@ -13,6 +13,7 @@ import (
 
 var testRepo user_repository.UserRepository
 var encryptionKey = "VmYq3t6w9z$C&F)J@McQfTjWnZr4u7x!"
+var invalidEncryptionKey = "kpLå3t6w9z$C&F)J@McQfTjWnZr4u7x!"
 
 func TestMain(m *testing.M) {
 	// before test

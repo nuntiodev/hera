@@ -8,7 +8,6 @@ import (
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
@@ -18,11 +17,8 @@ func TestCreate(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 		Email:     gofakeit.Email(),
 	})
 	password := user.Password
@@ -35,14 +31,12 @@ func TestCreate(t *testing.T) {
 	// validate
 	assert.NotNil(t, createUser)
 	assert.NotNil(t, createUser.User)
-	assert.NotEmpty(t, createUser.User.Name)
 	assert.NotEmpty(t, createUser.User.Email)
 	assert.NotEmpty(t, createUser.User.Id)
 	assert.NotEmpty(t, createUser.User.Namespace)
 	assert.NotEmpty(t, createUser.User.Image)
-	assert.NotEqual(t, block_user.Gender_INVALID_GENDER, createUser.User.Gender)
+	assert.NotEmpty(t, createUser.User.Metadata)
 	assert.Nil(t, bcrypt.CompareHashAndPassword([]byte(createUser.User.Password), []byte(password)))
-	assert.True(t, createUser.User.Birthdate.IsValid())
 	assert.True(t, createUser.User.UpdatedAt.IsValid())
 	assert.True(t, createUser.User.CreatedAt.IsValid())
 	// validate in database
@@ -60,33 +54,27 @@ func TestCreateWithEncryption(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 		Email:     gofakeit.Email(),
 	})
 	password := user.Password
 	user.Id = ""
 	// act
 	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
-		User:           user,
-		WithEncryption: true,
-		EncryptionKey:  encryptionKey,
+		User:          user,
+		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, createUser)
 	assert.NotNil(t, createUser.User)
-	assert.NotEmpty(t, createUser.User.Name)
 	assert.NotEmpty(t, createUser.User.Email)
 	assert.NotEmpty(t, createUser.User.Id)
 	assert.NotEmpty(t, createUser.User.Namespace)
 	assert.NotEmpty(t, createUser.User.Image)
-	assert.NotEqual(t, block_user.Gender_INVALID_GENDER, createUser.User.Gender)
+	assert.NotEmpty(t, createUser.User.Metadata)
 	assert.Nil(t, bcrypt.CompareHashAndPassword([]byte(createUser.User.Password), []byte(password)))
-	assert.True(t, createUser.User.Birthdate.IsValid())
 	assert.True(t, createUser.User.UpdatedAt.IsValid())
 	assert.True(t, createUser.User.CreatedAt.IsValid())
 	// validate in database

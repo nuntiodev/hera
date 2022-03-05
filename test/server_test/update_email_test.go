@@ -7,21 +7,17 @@ import (
 	"github.com/softcorp-io/block-proto/go_block/block_user"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
 
-func TestUpdateProfile(t *testing.T) {
+func TestUpdateEmail(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	user.Id = ""
 	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
@@ -29,60 +25,73 @@ func TestUpdateProfile(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	// act
-	newName := gofakeit.Name()
-	newBirthdate := ts.Now()
-	newCountry := gofakeit.Country()
-	newImage := gofakeit.ImageURL(10, 10)
 	newEmail := gofakeit.Email()
-	createUser.User.Name = newName
-	createUser.User.Birthdate = newBirthdate
-	createUser.User.Country = newCountry
-	createUser.User.Image = newImage
 	createUser.User.Email = newEmail
-	updateUser, err := testClient.UpdateProfile(ctx, &block_user.UserRequest{
+	updateUser, err := testClient.UpdateEmail(ctx, &block_user.UserRequest{
 		Update: createUser.User,
 		User:   createUser.User,
 	})
-	assert.NoError(t, err)
 	// validate
-	assert.Equal(t, newName, updateUser.User.Name)
-	assert.Equal(t, newBirthdate.String(), updateUser.User.Birthdate.String())
-	assert.Equal(t, newImage, updateUser.User.Image)
-	assert.Equal(t, newCountry, updateUser.User.Country)
-	assert.Equal(t, newEmail, updateUser.User.Email)
+	assert.NoError(t, err)
+	assert.NotNil(t, updateUser)
+	assert.NotNil(t, updateUser.User)
+	assert.Equal(t, updateUser.User.Email, newEmail)
 }
 
-func TestUpdateProfileNoUser(t *testing.T) {
+func TestUpdateEmailWithEncryption(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
+	})
+	user.Id = ""
+	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
+		User:          user,
+		EncryptionKey: encryptionKey,
+	})
+	assert.NoError(t, err)
+	// act
+	newEmail := gofakeit.Email()
+	createUser.User.Email = newEmail
+	updateUser, err := testClient.UpdateEmail(ctx, &block_user.UserRequest{
+		Update:        createUser.User,
+		User:          createUser.User,
+		EncryptionKey: encryptionKey,
+	})
+	// validate
+	assert.NoError(t, err)
+	assert.NotNil(t, updateUser)
+	assert.NotNil(t, updateUser.User)
+	assert.Equal(t, updateUser.User.Email, newEmail)
+}
+
+func TestUpdateEmailNoUser(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	user := user_mock.GetRandomUser(&block_user.User{
+		Namespace: uuid.NewV4().String(),
+		Image:     gofakeit.ImageURL(10, 10),
 	})
 	_, err := testClient.Create(ctx, &block_user.UserRequest{
 		User: user,
 	})
 	assert.NoError(t, err)
 	// act
-	_, err = testClient.UpdateProfile(ctx, &block_user.UserRequest{})
+	_, err = testClient.UpdateEmail(ctx, &block_user.UserRequest{})
 	// validate
 	assert.Error(t, err)
 }
 
-func TestUpdateProfileNoReq(t *testing.T) {
+func TestUpdateEmailNoReq(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&block_user.User{
-		Name:      gofakeit.Name(),
-		Birthdate: ts.Now(),
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
-		Gender:    user_mock.GetRandomGender(),
 	})
 	user.Id = ""
 	_, err := testClient.Create(ctx, &block_user.UserRequest{
@@ -90,7 +99,7 @@ func TestUpdateProfileNoReq(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	// act
-	_, err = testClient.UpdateProfile(ctx, nil)
+	_, err = testClient.UpdateEmail(ctx, nil)
 	// validate
 	assert.Error(t, err)
 }

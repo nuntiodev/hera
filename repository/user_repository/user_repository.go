@@ -24,6 +24,7 @@ const (
 	actionCreate = iota
 	actionUpdatePassword
 	actionUpdateEmail
+	actionUpdateOptionalId
 	actionUpdateImage
 	actionUpdateMetadata
 	actionUpdateNamespace
@@ -60,6 +61,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
 	UpdatePassword(ctx context.Context, get *block_user.User, update *block_user.User) (*block_user.User, error)
 	UpdateEmail(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
+	UpdateOptionalId(ctx context.Context, get *block_user.User, update *block_user.User) (*block_user.User, error)
 	UpdateImage(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
 	UpdateMetadata(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
 	UpdateSecurity(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
@@ -147,9 +149,9 @@ func prepare(action int, user *block_user.User) {
 		if user.Id == "" {
 			user.Id = uuid.NewV4().String()
 		}
-	case actionUpdatePassword, actionUpdateImage,
-		actionUpdateMetadata, actionUpdateNamespace,
-		actionUpdateSecurity, actionUpdateEmail:
+	case actionUpdatePassword, actionUpdateImage, actionUpdateMetadata,
+		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,
+		actionUpdateOptionalId:
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
@@ -180,7 +182,7 @@ func (r *mongoRepository) validate(action int, user *block_user.User) error {
 			return errors.New("invalid created at date")
 		} else if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at date")
-		} else if r.metadataType == block_user.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) {
+		} else if r.metadataType == block_user.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
 		}
 	case actionUpdatePassword:
@@ -198,14 +200,14 @@ func (r *mongoRepository) validate(action int, user *block_user.User) error {
 	case actionUpdateMetadata:
 		if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at")
-		} else if r.metadataType == block_user.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) {
+		} else if r.metadataType == block_user.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
 		}
 	case actionUpdateSecurity:
 		if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at")
 		}
-	case actionGetAll:
+	case actionGetAll, actionUpdateOptionalId:
 		return nil
 	}
 	if len(user.Email) > maxFieldLength {
@@ -336,6 +338,47 @@ func (r *mongoRepository) UpdateEmail(ctx context.Context, get *block_user.User,
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
 		bson.M{"id": getUser.Id, "namespace": getUser.Namespace},
+		mongoUpdate,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if updateResult.MatchedCount == 0 {
+		return nil, errors.New("could not find get")
+	}
+	return update, nil
+}
+
+func (r *mongoRepository) UpdateOptionalId(ctx context.Context, get *block_user.User, update *block_user.User) (*block_user.User, error) {
+	prepare(actionGet, get)
+	if err := r.validate(actionGet, get); err != nil {
+		return nil, err
+	}
+	prepare(actionUpdateOptionalId, update)
+	if err := r.validate(actionUpdateOptionalId, update); err != nil {
+		return nil, err
+	}
+	updateUser := protoUserToUser(&block_user.User{
+		OptionalId: update.OptionalId,
+		UpdatedAt:  update.UpdatedAt,
+	})
+	mongoUpdate := bson.M{
+		"$set": bson.M{
+			"optional_id": updateUser.OptionalId,
+			"updated_at":  updateUser.UpdatedAt,
+		},
+	}
+	filter := bson.M{}
+	if get.Id != "" {
+		filter = bson.M{"id": get.Id, "namespace": get.Namespace}
+	} else if get.Email != "" {
+		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(get.Email))), "namespace": get.Namespace}
+	} else if get.OptionalId != "" {
+		filter = bson.M{"optional_id": get.OptionalId, "namespace": get.Namespace}
+	}
+	updateResult, err := r.collection.UpdateOne(
+		ctx,
+		filter,
 		mongoUpdate,
 	)
 	if err != nil {

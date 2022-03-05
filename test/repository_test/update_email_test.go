@@ -2,7 +2,6 @@ package respository_test
 
 import (
 	"context"
-	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/block-proto/go_block/block_user"
@@ -40,7 +39,6 @@ func TestUpdateEmail(t *testing.T) {
 		Email: createdUser.Email,
 	}, nil)
 	assert.Error(t, err)
-	fmt.Println(updatedUser.Email)
 	getUser, err := testRepo.Get(ctx, &block_user.User{
 		Email:     updatedUser.Email,
 		Namespace: updatedUser.Namespace,
@@ -82,7 +80,6 @@ func TestUpdateEmailWithEncryption(t *testing.T) {
 		Key: encryptionKey,
 	})
 	assert.Error(t, err)
-	fmt.Println(updatedUser.Email)
 	getUser, err := testRepo.Get(ctx, &block_user.User{
 		Email:     updatedUser.Email,
 		Namespace: updatedUser.Namespace,
@@ -149,7 +146,7 @@ func TestUpdateUnencryptedEmailWithKey(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestEmailImageInvalidNamespace(t *testing.T) {
+func TestEmailInvalidNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()

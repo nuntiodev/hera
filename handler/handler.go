@@ -17,6 +17,7 @@ type Handler interface {
 	UpdateMetadata(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateImage(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateEmail(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
+	UpdateOptionalId(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateSecurity(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	Get(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	GetAll(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
@@ -96,6 +97,16 @@ func (h *defaultHandler) UpdateEmail(ctx context.Context, req *block_user.UserRe
 	updatedUser, err := h.repository.UserRepository.UpdateEmail(ctx, req.User, req.Update, &user_repository.EncryptionOptions{
 		Key: req.EncryptionKey,
 	})
+	if err != nil {
+		return nil, err
+	}
+	return &block_user.UserResponse{
+		User: updatedUser,
+	}, nil
+}
+
+func (h *defaultHandler) UpdateOptionalId(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+	updatedUser, err := h.repository.UserRepository.UpdateOptionalId(ctx, req.User, req.Update)
 	if err != nil {
 		return nil, err
 	}

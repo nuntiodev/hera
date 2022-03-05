@@ -14,7 +14,7 @@ require (
 	github.com/mattevans/pwned-passwords v0.5.0
 	github.com/ory/dockertest/v3 v3.8.1
 	github.com/satori/go.uuid v1.2.0
-	github.com/softcorp-io/block-proto v0.0.72
+	github.com/softcorp-io/block-proto v0.0.74
 	github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a
 	github.com/stretchr/testify v1.7.0
 	github.com/xdg-go/scram v1.1.0 // indirect

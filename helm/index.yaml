@@ -3,7 +3,27 @@ entries:
   block-user-service:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-03-06T16:43:00.177142865Z"
+    created: "2022-03-06T17:13:19.523670045Z"
+    description: A Helm chart for the block-user-service
+    digest: c20d22e6bfc44f7d8246bb344ae5f6d4626600722cea6e8439db34ce982c80d1
+    name: block-user-service
+    type: application
+    urls:
+    - charts/block-user-service-0.0.13.tgz
+    version: 0.0.13
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2022-03-06T17:13:19.522511144Z"
+    description: A Helm chart for the block-user-service
+    digest: 5422ff78f3ad5dac578f971b9c00bbf33c6727ed7bdc509829f193b2134bb02d
+    name: block-user-service
+    type: application
+    urls:
+    - charts/block-user-service-0.0.12.tgz
+    version: 0.0.12
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2022-03-06T17:13:19.521646443Z"
     description: A Helm chart for the block-user-service
     digest: a9c72f2dbb362fc83da7188b8d52f9883d8a6140e2a6680a1fd0ba2a28c4a588
     name: block-user-service
@@ -11,14 +31,4 @@ entries:
     urls:
     - charts/block-user-service-0.0.10.tgz
     version: 0.0.10
-  - apiVersion: v2
-    appVersion: 0.0.1
-    created: "2022-03-06T17:04:18.319357294Z"
-    description: A Helm chart for the block-user-service
-    digest: 5422ff78f3ad5dac578f971b9c00bbf33c6727ed7bdc509829f193b2134bb02d
-    name: block-user-service
-    type: application
-    urls:
-      - block-user-service-0.0.12.tgz
-    version: 0.0.12
-generated: "2022-03-06T16:43:00.175864349Z"
+generated: "2022-03-06T17:13:19.520770742Z"

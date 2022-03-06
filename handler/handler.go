@@ -162,7 +162,9 @@ func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *block_use
 	if err := bcrypt.CompareHashAndPassword([]byte(resp.User.Password), []byte(req.User.Password)); err != nil {
 		return &block_user.UserResponse{}, err
 	}
-	return &block_user.UserResponse{}, nil
+	return &block_user.UserResponse{
+		User: resp.User,
+	}, nil
 }
 
 func (h *defaultHandler) Delete(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {

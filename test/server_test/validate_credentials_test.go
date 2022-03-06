@@ -34,6 +34,55 @@ func TestValidateCredentials(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestValidateCredentialsWithEncryption(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	user := user_mock.GetRandomUser(&block_user.User{
+		Namespace: uuid.NewV4().String(),
+		Image:     gofakeit.ImageURL(10, 10),
+	})
+	user.Id = ""
+	password := user.Password
+	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
+		User:          user,
+		EncryptionKey: encryptionKey,
+	})
+	assert.NoError(t, err)
+	// act
+	createUser.User.Password = password
+	_, err = testClient.ValidateCredentials(ctx, &block_user.UserRequest{
+		User:          createUser.User,
+		EncryptionKey: encryptionKey,
+	})
+	// validate
+	assert.NoError(t, err)
+}
+
+func TestValidateCredentialsWithout(t *testing.T) {
+	// setup
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	user := user_mock.GetRandomUser(&block_user.User{
+		Namespace: uuid.NewV4().String(),
+		Image:     gofakeit.ImageURL(10, 10),
+	})
+	user.Id = ""
+	password := user.Password
+	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
+		User:          user,
+		EncryptionKey: encryptionKey,
+	})
+	assert.NoError(t, err)
+	// act
+	createUser.User.Password = password
+	_, err = testClient.ValidateCredentials(ctx, &block_user.UserRequest{
+		User: createUser.User,
+	})
+	// validate
+	assert.NoError(t, err)
+}
+
 func TestValidateCredentialsNoPassword(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)

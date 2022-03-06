@@ -1,10 +1,10 @@
 .PHONY: helm-install
 helm-install:
-	helm install -f ./helm/values.yaml softcorp-user-service ./helm --namespace=softcorp-user --create-namespace
+	helm install -f ./helm/values.yaml block-user-service ./helm --namespace=softcorp-blocks --create-namespace
 
 .PHONY: helm-delete
 helm-delete:
-	helm delete softcorp-user-service --namespace=softcorp-user
+	helm delete block-user-service --namespace=softcorp-blocks
 
 .PHONY: helm-package
 helm-package:

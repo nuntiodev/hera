@@ -14,13 +14,12 @@ deployment:
   ports:
     - 9000
   env:
-    - name: MONGO_DB_NAME
-      value: connect-user-db
     - name: MONGO_USER_COLLECTION
       value: users
     - name: GRPC_PORT
       value: 9000
   secretEnv:
+    - cloud-mongo-secret
     - mongo-secret
 service:
   type: ClusterIP

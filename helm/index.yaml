@@ -9,7 +9,7 @@ entries:
     name: block-user-service
     type: application
     urls:
-    - packages/block-user-service-0.0.8.tgz
+    - charts/block-user-service-0.0.8.tgz
     version: 0.0.8
   - apiVersion: v2
     appVersion: 0.0.1
@@ -19,7 +19,7 @@ entries:
     name: block-user-service
     type: application
     urls:
-    - packages/block-user-service-0.0.7.tgz
+    - charts/block-user-service-0.0.7.tgz
     version: 0.0.7
   - apiVersion: v2
     appVersion: 0.0.1
@@ -29,7 +29,7 @@ entries:
     name: block-user-service
     type: application
     urls:
-    - packages/block-user-service-0.0.6.tgz
+    - charts/block-user-service-0.0.6.tgz
     version: 0.0.6
   - apiVersion: v2
     appVersion: 0.0.1
@@ -39,7 +39,7 @@ entries:
     name: block-user-service
     type: application
     urls:
-    - packages/block-user-service-0.0.5.tgz
+    - charts/block-user-service-0.0.5.tgz
     version: 0.0.5
   - apiVersion: v2
     appVersion: 0.0.1
@@ -49,7 +49,7 @@ entries:
     name: block-user-service
     type: application
     urls:
-    - packages/block-user-service-0.0.4.tgz
+    - charts/block-user-service-0.0.4.tgz
     version: 0.0.4
   - apiVersion: v2
     appVersion: 0.0.1
@@ -59,7 +59,7 @@ entries:
     name: block-user-service
     type: application
     urls:
-    - packages/block-user-service-0.0.3.tgz
+    - charts/block-user-service-0.0.3.tgz
     version: 0.0.3
   - apiVersion: v2
     appVersion: 0.0.1
@@ -69,6 +69,6 @@ entries:
     name: block-user-service
     type: application
     urls:
-    - packages/block-user-service-0.0.2.tgz
+    - charts/block-user-service-0.0.2.tgz
     version: 0.0.2
 generated: "2022-03-06T08:02:23.004877566Z"

@@ -8,5 +8,5 @@ helm-delete:
 
 .PHONY: helm-package
 helm-package:
-	helm package ./helm -d ./helm/packages --version=$(tag) && \
+	helm package ./helm -d ./helm/charts --version=$(tag) && \
 	helm repo index ./helm

@@ -8,6 +8,6 @@ helm-delete:
 
 helm-package:
 	rm -rf * ./helm/charts/ &&
-	rm ./helm/index.yaml || true && touch ./helm/index.yaml
+	rm ./helm/index.yaml || true && touch ./helm/index.yaml && \
 	helm package ./helm -d ./helm/charts --version=$(tag) && \
 	helm repo index ./helm

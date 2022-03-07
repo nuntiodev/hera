@@ -54,6 +54,10 @@ jobs:
         run: rm -rf *
         working-directory: ./helm/charts
 
+      - name: Delete old index file
+        run: rm index.yaml && touch index.yaml
+        working-directory: ./helm
+
       - name: Helm package
         run: make helm-package tag=${{ steps.tag.outputs.VERSION }}
 

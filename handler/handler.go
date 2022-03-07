@@ -11,7 +11,7 @@ import (
 )
 
 type Handler interface {
-	Heartbeat(ctx context.Context, req *block_user.Request) (*block_user.Response, error)
+	Heartbeat(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	Create(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdatePassword(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
 	UpdateMetadata(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
@@ -40,11 +40,11 @@ func New(zapLog *zap.Logger, repository *repository.Repository) (Handler, error)
 	return handler, nil
 }
 
-func (h *defaultHandler) Heartbeat(ctx context.Context, req *block_user.Request) (*block_user.Response, error) {
+func (h *defaultHandler) Heartbeat(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
 	if err := h.repository.Liveness(ctx); err != nil {
-		return &block_user.Response{}, err
+		return &block_user.UserResponse{}, err
 	}
-	return &block_user.Response{}, nil
+	return &block_user.UserResponse{}, nil
 }
 
 func (h *defaultHandler) Create(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {

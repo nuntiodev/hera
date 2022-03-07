@@ -51,12 +51,10 @@ jobs:
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
       - name: Delete old helm packages
-        run: rm -rf *
-        working-directory: ./helm/charts
+        run: rm -rf * ./helm/charts
 
       - name: Delete old index file
-        run: rm index.yaml && touch index.yaml
-        working-directory: ./helm
+        run: rm ./helm/index.yaml || true && touch ./helm/index.yaml
 
       - name: Helm package
         run: make helm-package tag=${{ steps.tag.outputs.VERSION }}

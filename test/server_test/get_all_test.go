@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -16,31 +16,31 @@ func TestGetAll(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	namespace := uuid.NewV4().String()
-	userOne := user_mock.GetRandomUser(&block_user.User{
+	userOne := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
 	})
-	userTwo := user_mock.GetRandomUser(&block_user.User{
+	userTwo := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
 	})
-	userThree := user_mock.GetRandomUser(&block_user.User{
+	userThree := user_mock.GetRandomUser(&go_block.User{
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	createUserOne, err := testClient.Create(ctx, &block_user.UserRequest{
+	createUserOne, err := testClient.Create(ctx, &go_block.UserRequest{
 		User: userOne,
 	})
 	assert.NoError(t, err)
-	createUserTwo, err := testClient.Create(ctx, &block_user.UserRequest{
+	createUserTwo, err := testClient.Create(ctx, &go_block.UserRequest{
 		User: userTwo,
 	})
 	assert.NoError(t, err)
-	_, err = testClient.Create(ctx, &block_user.UserRequest{
+	_, err = testClient.Create(ctx, &go_block.UserRequest{
 		User: userThree,
 	})
 	assert.NoError(t, err)
 	// act
-	getUsers, err := testClient.GetAll(ctx, &block_user.UserRequest{
+	getUsers, err := testClient.GetAll(ctx, &go_block.UserRequest{
 		Namespace: namespace,
 	})
 	// validate
@@ -56,34 +56,34 @@ func TestGetAllWithPartialEncryption(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	namespace := uuid.NewV4().String()
-	userOne := user_mock.GetRandomUser(&block_user.User{
+	userOne := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
 	})
-	userTwo := user_mock.GetRandomUser(&block_user.User{
+	userTwo := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
 	})
-	userThree := user_mock.GetRandomUser(&block_user.User{
+	userThree := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
 	})
-	createUserOne, err := testClient.Create(ctx, &block_user.UserRequest{
+	createUserOne, err := testClient.Create(ctx, &go_block.UserRequest{
 		User:          userOne,
 		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
-	createUserTwo, err := testClient.Create(ctx, &block_user.UserRequest{
+	createUserTwo, err := testClient.Create(ctx, &go_block.UserRequest{
 		User: userTwo,
 	})
 	assert.NoError(t, err)
-	_, err = testClient.Create(ctx, &block_user.UserRequest{
+	_, err = testClient.Create(ctx, &go_block.UserRequest{
 		User:          userThree,
 		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
 	// act
-	getUsers, err := testClient.GetAll(ctx, &block_user.UserRequest{
+	getUsers, err := testClient.GetAll(ctx, &go_block.UserRequest{
 		Namespace:     namespace,
 		EncryptionKey: encryptionKey,
 	})
@@ -100,34 +100,34 @@ func TestGetAllWithPartialEncryptionNoKey(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	namespace := uuid.NewV4().String()
-	userOne := user_mock.GetRandomUser(&block_user.User{
+	userOne := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
 	})
-	userTwo := user_mock.GetRandomUser(&block_user.User{
+	userTwo := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
 	})
-	userThree := user_mock.GetRandomUser(&block_user.User{
+	userThree := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 		Image:     gofakeit.ImageURL(10, 10),
 	})
-	_, err := testClient.Create(ctx, &block_user.UserRequest{
+	_, err := testClient.Create(ctx, &go_block.UserRequest{
 		User:          userOne,
 		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
-	_, err = testClient.Create(ctx, &block_user.UserRequest{
+	_, err = testClient.Create(ctx, &go_block.UserRequest{
 		User: userTwo,
 	})
 	assert.NoError(t, err)
-	_, err = testClient.Create(ctx, &block_user.UserRequest{
+	_, err = testClient.Create(ctx, &go_block.UserRequest{
 		User:          userThree,
 		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
 	// act
-	getAll, err := testClient.GetAll(ctx, &block_user.UserRequest{
+	getAll, err := testClient.GetAll(ctx, &go_block.UserRequest{
 		Namespace: namespace,
 	})
 	// validate

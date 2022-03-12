@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.uber.org/zap"
@@ -11,19 +11,19 @@ import (
 )
 
 type Handler interface {
-	Heartbeat(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	Create(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	UpdatePassword(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	UpdateMetadata(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	UpdateImage(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	UpdateEmail(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	UpdateOptionalId(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	UpdateSecurity(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	Get(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	GetAll(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	ValidateCredentials(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	Delete(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
-	DeleteNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error)
+	Heartbeat(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	Create(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdatePassword(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateMetadata(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateImage(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateOptionalId(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateSecurity(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	Get(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	GetAll(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	ValidateCredentials(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	DeleteNamespace(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 }
 
 type defaultHandler struct {
@@ -40,106 +40,106 @@ func New(zapLog *zap.Logger, repository *repository.Repository) (Handler, error)
 	return handler, nil
 }
 
-func (h *defaultHandler) Heartbeat(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) Heartbeat(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	if err := h.repository.Liveness(ctx); err != nil {
-		return &block_user.UserResponse{}, err
+		return &go_block.UserResponse{}, err
 	}
-	return &block_user.UserResponse{}, nil
+	return &go_block.UserResponse{}, nil
 }
 
-func (h *defaultHandler) Create(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) Create(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	createdUser, err := h.repository.UserRepository.Create(ctx, req.User, &user_repository.EncryptionOptions{
 		Key: req.EncryptionKey,
 	})
 	if err != nil {
-		return &block_user.UserResponse{}, err
+		return &go_block.UserResponse{}, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: createdUser,
 	}, nil
 }
 
-func (h *defaultHandler) UpdatePassword(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) UpdatePassword(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	updatedUser, err := h.repository.UserRepository.UpdatePassword(ctx, req.User, req.Update)
 	if err != nil {
-		return &block_user.UserResponse{}, err
+		return &go_block.UserResponse{}, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: updatedUser,
 	}, nil
 }
 
-func (h *defaultHandler) UpdateMetadata(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) UpdateMetadata(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	updatedUser, err := h.repository.UserRepository.UpdateMetadata(ctx, req.User, req.Update, &user_repository.EncryptionOptions{
 		Key: req.EncryptionKey,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: updatedUser,
 	}, nil
 }
 
-func (h *defaultHandler) UpdateImage(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) UpdateImage(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	updatedUser, err := h.repository.UserRepository.UpdateImage(ctx, req.User, req.Update, &user_repository.EncryptionOptions{
 		Key: req.EncryptionKey,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: updatedUser,
 	}, nil
 }
 
-func (h *defaultHandler) UpdateEmail(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) UpdateEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	updatedUser, err := h.repository.UserRepository.UpdateEmail(ctx, req.User, req.Update, &user_repository.EncryptionOptions{
 		Key: req.EncryptionKey,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: updatedUser,
 	}, nil
 }
 
-func (h *defaultHandler) UpdateOptionalId(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) UpdateOptionalId(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	updatedUser, err := h.repository.UserRepository.UpdateOptionalId(ctx, req.User, req.Update)
 	if err != nil {
 		return nil, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: updatedUser,
 	}, nil
 }
 
-func (h *defaultHandler) UpdateSecurity(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) UpdateSecurity(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	updatedUser, err := h.repository.UserRepository.UpdateSecurity(ctx, req.User, req.Update, &user_repository.EncryptionOptions{
 		Key: req.EncryptionKey,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: updatedUser,
 	}, nil
 }
 
-func (h *defaultHandler) Get(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) Get(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	getUser, err := h.repository.UserRepository.Get(ctx, req.User, &user_repository.EncryptionOptions{
 		Key: req.EncryptionKey,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: getUser,
 	}, nil
 }
 
-func (h *defaultHandler) GetAll(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	getUsers, err := h.repository.UserRepository.GetAll(ctx, req.Filter, req.Namespace, &user_repository.EncryptionOptions{
 		Key: req.EncryptionKey,
 	})
@@ -150,32 +150,32 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *block_user.UserRequest
 	if err != nil {
 		return nil, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		Users:      getUsers,
 		UsersAmout: usersInNamespace,
 	}, nil
 }
 
-func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
+func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	resp, err := h.Get(ctx, req)
 	if err != nil {
-		return &block_user.UserResponse{}, err
+		return &go_block.UserResponse{}, err
 	}
 	if resp.User.Password == "" {
-		return &block_user.UserResponse{}, errors.New("please update the user with a non-empty password")
+		return &go_block.UserResponse{}, errors.New("please update the user with a non-empty password")
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(resp.User.Password), []byte(req.User.Password)); err != nil {
-		return &block_user.UserResponse{}, err
+		return &go_block.UserResponse{}, err
 	}
-	return &block_user.UserResponse{
+	return &go_block.UserResponse{
 		User: resp.User,
 	}, nil
 }
 
-func (h *defaultHandler) Delete(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	return &block_user.UserResponse{}, h.repository.UserRepository.Delete(ctx, req.User)
+func (h *defaultHandler) Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+	return &go_block.UserResponse{}, h.repository.UserRepository.Delete(ctx, req.User)
 }
 
-func (h *defaultHandler) DeleteNamespace(ctx context.Context, req *block_user.UserRequest) (*block_user.UserResponse, error) {
-	return &block_user.UserResponse{}, h.repository.UserRepository.DeleteNamespace(ctx, req.Namespace)
+func (h *defaultHandler) DeleteNamespace(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+	return &go_block.UserResponse{}, h.repository.UserRepository.DeleteNamespace(ctx, req.Namespace)
 }

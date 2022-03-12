@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/go-passwd/validator"
 	hibp "github.com/mattevans/pwned-passwords"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -34,11 +34,11 @@ func validatePassword(password string) error {
 	return nil
 }
 
-func userToProtoUser(user *User) *block_user.User {
+func userToProtoUser(user *User) *go_block.User {
 	if user == nil {
 		return nil
 	}
-	return &block_user.User{
+	return &go_block.User{
 		Id:         user.Id,
 		OptionalId: user.OptionalId,
 		Namespace:  user.Namespace,
@@ -53,7 +53,7 @@ func userToProtoUser(user *User) *block_user.User {
 	}
 }
 
-func protoUserToUser(user *block_user.User) *User {
+func protoUserToUser(user *go_block.User) *User {
 	if user == nil {
 		return nil
 	}

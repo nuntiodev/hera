@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"google.golang.org/grpc"
 	"strings"
 )
 
 const (
-	ProjectName         = "/BlockUser.Service/"
+	ProjectName         = "/BlockUser.UserService/"
 	Heartbeat           = "Heartbeat"
 	Create              = "Create"
 	UpdatePassword      = "UpdatePassword"
@@ -40,9 +40,9 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 	if info == nil {
 		return nil, errors.New("invalid request")
 	}
-	translatedReq, ok := req.(*block_user.UserRequest)
+	translatedReq, ok := req.(*go_block.UserRequest)
 	if !ok {
-		translatedReq = &block_user.UserRequest{}
+		translatedReq = &go_block.UserRequest{}
 	}
 	method := strings.Split(info.FullMethod, ProjectName)
 	if len(method) != 2 {
@@ -55,16 +55,16 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		if translatedReq == nil {
 			return nil, ErrorReqIsNil
 		} else if translatedReq.User == nil {
-			return &block_user.UserResponse{}, UpdateIsNil
+			return &go_block.UserResponse{}, UpdateIsNil
 		}
 	case UpdatePassword, UpdateSecurity, UpdateMetadata,
 		UpdateImage, UpdateEmail, UpdateOptionalId:
 		if translatedReq == nil {
 			return nil, ErrorReqIsNil
 		} else if translatedReq.Update == nil {
-			return &block_user.UserResponse{}, UpdateIsNil
+			return &go_block.UserResponse{}, UpdateIsNil
 		} else if translatedReq.User == nil {
-			return &block_user.UserResponse{}, UpdateIsNil
+			return &go_block.UserResponse{}, UpdateIsNil
 		}
 	case GetAll:
 		if translatedReq == nil {
@@ -83,7 +83,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 			return nil, NamespaceIsEmpty
 		}
 	default:
-		return &block_user.UserResponse{}, errors.New(fmt.Sprintf("invalid request: %s", info.FullMethod))
+		return &go_block.UserResponse{}, errors.New(fmt.Sprintf("invalid request: %s", info.FullMethod))
 	}
 	h, err := handler(ctx, req) // make actual request
 	return h, err

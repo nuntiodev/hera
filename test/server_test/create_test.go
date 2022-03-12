@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
@@ -16,7 +16,7 @@ func TestCreate(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -24,7 +24,7 @@ func TestCreate(t *testing.T) {
 	password := user.Password
 	user.Id = ""
 	// act
-	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
+	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
 		User: user,
 	})
 	assert.NoError(t, err)
@@ -40,7 +40,7 @@ func TestCreate(t *testing.T) {
 	assert.True(t, createUser.User.UpdatedAt.IsValid())
 	assert.True(t, createUser.User.CreatedAt.IsValid())
 	// validate in database
-	getUser, err := testClient.Get(ctx, &block_user.UserRequest{
+	getUser, err := testClient.Get(ctx, &go_block.UserRequest{
 		User: createUser.User,
 	})
 	assert.Nil(t, err)
@@ -53,7 +53,7 @@ func TestCreateWithEncryption(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -61,7 +61,7 @@ func TestCreateWithEncryption(t *testing.T) {
 	password := user.Password
 	user.Id = ""
 	// act
-	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
+	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
 		User:          user,
 		EncryptionKey: encryptionKey,
 	})
@@ -78,7 +78,7 @@ func TestCreateWithEncryption(t *testing.T) {
 	assert.True(t, createUser.User.UpdatedAt.IsValid())
 	assert.True(t, createUser.User.CreatedAt.IsValid())
 	// validate in database
-	getUser, err := testClient.Get(ctx, &block_user.UserRequest{
+	getUser, err := testClient.Get(ctx, &go_block.UserRequest{
 		User:          createUser.User,
 		EncryptionKey: encryptionKey,
 	})
@@ -93,7 +93,7 @@ func TestCreateNoUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	// act
-	_, err := testClient.Create(ctx, &block_user.UserRequest{})
+	_, err := testClient.Create(ctx, &go_block.UserRequest{})
 	assert.Error(t, err)
 }
 

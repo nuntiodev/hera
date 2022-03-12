@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"time"
 )
 
@@ -40,8 +40,8 @@ func GetMetadata(metadata *MetadataMock) string {
 	return string(metaString)
 }
 
-func GetRandomUser(user *block_user.User) *block_user.User {
-	resp := &block_user.User{
+func GetRandomUser(user *go_block.User) *go_block.User {
+	resp := &go_block.User{
 		Password:  gofakeit.Password(true, true, true, true, true, 10),
 		Namespace: uuid.NewV4().String(),
 		Metadata:  GetMetadata(nil),
@@ -75,7 +75,7 @@ func GetRandomUser(user *block_user.User) *block_user.User {
 	return resp
 }
 
-func CompareUsers(userOne, userTwo *block_user.User) error {
+func CompareUsers(userOne, userTwo *go_block.User) error {
 	if userOne == nil || userTwo == nil {
 		return errors.New("one of the users are nil")
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +16,7 @@ func TestGetByEmail(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -24,7 +24,7 @@ func TestGetByEmail(t *testing.T) {
 	createdUser, err := testRepo.Create(ctx, user, nil)
 	assert.Nil(t, err)
 	// act
-	getUser, err := testRepo.Get(ctx, &block_user.User{
+	getUser, err := testRepo.Get(ctx, &go_block.User{
 		Email:     createdUser.Email,
 		Namespace: createdUser.Namespace,
 	}, nil)
@@ -38,7 +38,7 @@ func TestGetByEmailWithEncryption(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -48,7 +48,7 @@ func TestGetByEmailWithEncryption(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	// act
-	getUser, err := testRepo.Get(ctx, &block_user.User{
+	getUser, err := testRepo.Get(ctx, &go_block.User{
 		Email:     user.Email,
 		Namespace: createdUser.Namespace,
 	}, &user_repository.EncryptionOptions{
@@ -64,7 +64,7 @@ func TestGetByEmailWithInvalidEncryptionKey(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -74,7 +74,7 @@ func TestGetByEmailWithInvalidEncryptionKey(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	// act
-	_, err = testRepo.Get(ctx, &block_user.User{
+	_, err = testRepo.Get(ctx, &go_block.User{
 		Email:     user.Email,
 		Namespace: createdUser.Namespace,
 	}, &user_repository.EncryptionOptions{
@@ -88,7 +88,7 @@ func TestGetByEmailWithEncryptionNoDecryption(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -98,7 +98,7 @@ func TestGetByEmailWithEncryptionNoDecryption(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	// act
-	getUser, err := testRepo.Get(ctx, &block_user.User{
+	getUser, err := testRepo.Get(ctx, &go_block.User{
 		Email:     user.Email,
 		Namespace: createdUser.Namespace,
 	}, &user_repository.EncryptionOptions{
@@ -113,7 +113,7 @@ func TestGetByEmailDifferentNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 	})

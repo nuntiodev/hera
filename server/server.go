@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/handler"
 	"github.com/softcorp-io/block-user-service/interceptor"
@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	METADATA_TYPE = block_user.MetadataType_METADATA_TYPE_JSON
+	METADATA_TYPE = go_block.MetadataType_METADATA_TYPE_JSON
 )
 
 type Server struct {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/handler"
 	"github.com/softcorp-io/block-user-service/interceptor"
 	"go.uber.org/zap"
@@ -61,6 +61,6 @@ func (s *Server) Run() error {
 		),
 	)
 	reflection.Register(grpcServer)
-	block_user.RegisterServiceServer(grpcServer, s.handler)
+	go_block.RegisterUserServiceServer(grpcServer, s.handler)
 	return grpcServer.Serve(lis)
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +19,7 @@ func TestCreate(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -50,7 +50,7 @@ func TestCreateWithEncryption(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -133,11 +133,11 @@ func TestCreateDuplicateEmailSameNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	userOne := user_mock.GetRandomUser(&block_user.User{
+	userOne := user_mock.GetRandomUser(&go_block.User{
 		Email:     gofakeit.Email(),
 		Namespace: uuid.NewV4().String(),
 	})
-	userTwo := user_mock.GetRandomUser(&block_user.User{
+	userTwo := user_mock.GetRandomUser(&go_block.User{
 		Email:     userOne.Email,
 		Namespace: userOne.Namespace,
 	})
@@ -154,11 +154,11 @@ func TestCreateDuplicateEmailDifferentNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	userOne := user_mock.GetRandomUser(&block_user.User{
+	userOne := user_mock.GetRandomUser(&go_block.User{
 		Email:     gofakeit.Email(),
 		Namespace: uuid.NewV4().String(),
 	})
-	userTwo := user_mock.GetRandomUser(&block_user.User{
+	userTwo := user_mock.GetRandomUser(&go_block.User{
 		Email:     userOne.Email,
 		Namespace: uuid.NewV4().String(),
 	})
@@ -175,8 +175,8 @@ func TestCreateDuplicateEmptyEmail(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	userOne := user_mock.GetRandomUser(&block_user.User{})
-	userTwo := user_mock.GetRandomUser(&block_user.User{})
+	userOne := user_mock.GetRandomUser(&go_block.User{})
+	userTwo := user_mock.GetRandomUser(&go_block.User{})
 	createdUser, err := testRepo.Create(ctx, userOne, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, createdUser)

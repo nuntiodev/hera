@@ -3,7 +3,7 @@ package respository_test
 import (
 	"context"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -15,13 +15,13 @@ func TestDeleteNamespace(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	namespace := uuid.NewV4().String()
-	userOne := user_mock.GetRandomUser(&block_user.User{
+	userOne := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 	})
-	userTwo := user_mock.GetRandomUser(&block_user.User{
+	userTwo := user_mock.GetRandomUser(&go_block.User{
 		Namespace: namespace,
 	})
-	userThree := user_mock.GetRandomUser(&block_user.User{
+	userThree := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 	})
 	_, err := testRepo.Create(ctx, userOne, nil)

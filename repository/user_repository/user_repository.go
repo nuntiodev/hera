@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/badoux/checkmail"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -58,28 +58,28 @@ type User struct {
 }
 
 type UserRepository interface {
-	Create(ctx context.Context, user *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
-	UpdatePassword(ctx context.Context, get *block_user.User, update *block_user.User) (*block_user.User, error)
-	UpdateEmail(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
-	UpdateOptionalId(ctx context.Context, get *block_user.User, update *block_user.User) (*block_user.User, error)
-	UpdateImage(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
-	UpdateMetadata(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
-	UpdateSecurity(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
-	Get(ctx context.Context, user *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
-	GetAll(ctx context.Context, userFilter *block_user.UserFilter, namespace string, encryptionOptions *EncryptionOptions) ([]*block_user.User, error)
+	Create(ctx context.Context, user *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
+	UpdatePassword(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdateEmail(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
+	UpdateOptionalId(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
+	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
+	UpdateSecurity(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
+	Get(ctx context.Context, user *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
+	GetAll(ctx context.Context, userFilter *go_block.UserFilter, namespace string, encryptionOptions *EncryptionOptions) ([]*go_block.User, error)
 	Count(ctx context.Context, namespace string) (int64, error)
-	Delete(ctx context.Context, user *block_user.User) error
+	Delete(ctx context.Context, user *go_block.User) error
 	DeleteNamespace(ctx context.Context, namespace string) error
 }
 
 type mongoRepository struct {
 	collection   *mongo.Collection
 	crypto       crypto.Crypto
-	metadataType block_user.MetadataType
+	metadataType go_block.MetadataType
 	zapLog       *zap.Logger
 }
 
-func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto crypto.Crypto, metadataType block_user.MetadataType, zapLog *zap.Logger) (UserRepository, error) {
+func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto crypto.Crypto, metadataType go_block.MetadataType, zapLog *zap.Logger) (UserRepository, error) {
 	zapLog.Info("creating user repository...")
 	idNamespaceIndexModel := mongo.IndexModel{
 		Keys: bson.D{
@@ -100,10 +100,10 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 			bson.D{
 				{
 					"email_hash", bson.D{
-						{
-							"$gt", "",
-						},
+					{
+						"$gt", "",
 					},
+				},
 				},
 			},
 		),
@@ -120,10 +120,10 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 			bson.D{
 				{
 					"optional_id", bson.D{
-						{
-							"$gt", "",
-						},
+					{
+						"$gt", "",
 					},
+				},
 				},
 			},
 		),
@@ -139,7 +139,7 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 	}, nil
 }
 
-func prepare(action int, user *block_user.User) {
+func prepare(action int, user *go_block.User) {
 	if user == nil {
 		return
 	}
@@ -163,7 +163,7 @@ func prepare(action int, user *block_user.User) {
 	user.Metadata = strings.TrimSpace(user.Metadata)
 }
 
-func (r *mongoRepository) validate(action int, user *block_user.User) error {
+func (r *mongoRepository) validate(action int, user *go_block.User) error {
 	if user == nil {
 		return errors.New("user is nil")
 	}
@@ -183,7 +183,7 @@ func (r *mongoRepository) validate(action int, user *block_user.User) error {
 			return errors.New("invalid created at date")
 		} else if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at date")
-		} else if r.metadataType == block_user.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
+		} else if r.metadataType == go_block.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
 		}
 	case actionUpdatePassword:
@@ -201,7 +201,7 @@ func (r *mongoRepository) validate(action int, user *block_user.User) error {
 	case actionUpdateMetadata:
 		if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at")
-		} else if r.metadataType == block_user.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
+		} else if r.metadataType == go_block.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
 		}
 	case actionUpdateSecurity:
@@ -223,7 +223,7 @@ func (r *mongoRepository) validate(action int, user *block_user.User) error {
 	return nil
 }
 
-func (r *mongoRepository) Create(ctx context.Context, user *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error) {
+func (r *mongoRepository) Create(ctx context.Context, user *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error) {
 	prepare(actionCreate, user)
 	if err := r.validate(actionCreate, user); err != nil {
 		return nil, err
@@ -256,7 +256,7 @@ func (r *mongoRepository) Create(ctx context.Context, user *block_user.User, enc
 	return user, nil
 }
 
-func (r *mongoRepository) UpdatePassword(ctx context.Context, get *block_user.User, update *block_user.User) (*block_user.User, error) {
+func (r *mongoRepository) UpdatePassword(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -299,7 +299,7 @@ func (r *mongoRepository) UpdatePassword(ctx context.Context, get *block_user.Us
 	return update, nil
 }
 
-func (r *mongoRepository) UpdateEmail(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error) {
+func (r *mongoRepository) UpdateEmail(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -308,7 +308,7 @@ func (r *mongoRepository) UpdateEmail(ctx context.Context, get *block_user.User,
 	if err := r.validate(actionUpdateEmail, update); err != nil {
 		return nil, err
 	}
-	updateUser := protoUserToUser(&block_user.User{
+	updateUser := protoUserToUser(&go_block.User{
 		Email:     update.Email,
 		UpdatedAt: update.UpdatedAt,
 	})
@@ -350,7 +350,7 @@ func (r *mongoRepository) UpdateEmail(ctx context.Context, get *block_user.User,
 	return update, nil
 }
 
-func (r *mongoRepository) UpdateOptionalId(ctx context.Context, get *block_user.User, update *block_user.User) (*block_user.User, error) {
+func (r *mongoRepository) UpdateOptionalId(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -359,7 +359,7 @@ func (r *mongoRepository) UpdateOptionalId(ctx context.Context, get *block_user.
 	if err := r.validate(actionUpdateOptionalId, update); err != nil {
 		return nil, err
 	}
-	updateUser := protoUserToUser(&block_user.User{
+	updateUser := protoUserToUser(&go_block.User{
 		OptionalId: update.OptionalId,
 		UpdatedAt:  update.UpdatedAt,
 	})
@@ -391,7 +391,7 @@ func (r *mongoRepository) UpdateOptionalId(ctx context.Context, get *block_user.
 	return update, nil
 }
 
-func (r *mongoRepository) UpdateImage(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error) {
+func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -400,7 +400,7 @@ func (r *mongoRepository) UpdateImage(ctx context.Context, get *block_user.User,
 	if err := r.validate(actionUpdateImage, update); err != nil {
 		return nil, err
 	}
-	updateUser := protoUserToUser(&block_user.User{
+	updateUser := protoUserToUser(&go_block.User{
 		Image:     update.Image,
 		UpdatedAt: update.UpdatedAt,
 	})
@@ -438,7 +438,7 @@ func (r *mongoRepository) UpdateImage(ctx context.Context, get *block_user.User,
 	return update, nil
 }
 
-func (r *mongoRepository) UpdateMetadata(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error) {
+func (r *mongoRepository) UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -447,7 +447,7 @@ func (r *mongoRepository) UpdateMetadata(ctx context.Context, get *block_user.Us
 	if err := r.validate(actionUpdateMetadata, update); err != nil {
 		return nil, err
 	}
-	updateUser := protoUserToUser(&block_user.User{
+	updateUser := protoUserToUser(&go_block.User{
 		Metadata:  update.Metadata,
 		UpdatedAt: update.UpdatedAt,
 	}) // check if user encryption is turned on
@@ -484,7 +484,7 @@ func (r *mongoRepository) UpdateMetadata(ctx context.Context, get *block_user.Us
 	return update, nil
 }
 
-func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error) {
+func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -537,7 +537,7 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *block_user.Us
 	return userToProtoUser(getUser), nil
 }
 
-func (r *mongoRepository) Get(ctx context.Context, user *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error) {
+func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error) {
 	prepare(actionGet, user)
 	if err := r.validate(actionGet, user); err != nil {
 		return nil, err
@@ -562,21 +562,21 @@ func (r *mongoRepository) Get(ctx context.Context, user *block_user.User, encryp
 	return userToProtoUser(&resp), nil
 }
 
-func (r *mongoRepository) GetAll(ctx context.Context, userFilter *block_user.UserFilter, namespace string, encryptionOptions *EncryptionOptions) ([]*block_user.User, error) {
-	var resp []*block_user.User
+func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter, namespace string, encryptionOptions *EncryptionOptions) ([]*go_block.User, error) {
+	var resp []*go_block.User
 	sortOptions := options.FindOptions{}
 	limitOptions := options.Find()
 	limitOptions.SetLimit(maximumGetLimit)
 	filter := bson.M{"namespace": namespace}
 	if userFilter != nil {
 		order := -1
-		if userFilter.Order == block_user.UserFilter_INC {
+		if userFilter.Order == go_block.UserFilter_INC {
 			order = 1
 		}
 		switch userFilter.Sort {
-		case block_user.UserFilter_CREATED_AT:
+		case go_block.UserFilter_CREATED_AT:
 			sortOptions.SetSort(bson.D{{"created_at", order}, {"_id", order}})
-		case block_user.UserFilter_UPDATE_AT:
+		case go_block.UserFilter_UPDATE_AT:
 			sortOptions.SetSort(bson.D{{"updated_at", order}, {"_id", order}})
 		default:
 			return nil, errors.New("invalid sorting")
@@ -618,7 +618,7 @@ func (r *mongoRepository) Count(ctx context.Context, namespace string) (int64, e
 	return count, nil
 }
 
-func (r *mongoRepository) Delete(ctx context.Context, user *block_user.User) error {
+func (r *mongoRepository) Delete(ctx context.Context, user *go_block.User) error {
 	prepare(actionGet, user)
 	if err := r.validate(actionGet, user); err != nil {
 		return err
@@ -654,11 +654,11 @@ func (r *mongoRepository) DeleteNamespace(ctx context.Context, namespace string)
 }
 
 /*
-func (r *mongoRepository) Search(ctx context.Context, search string, namespace string, encryptionOptions *EncryptionOptions) ([]*block_user.User, error) {
+func (r *mongoRepository) Search(ctx context.Context, search string, namespace string, encryptionOptions *EncryptionOptions) ([]*go_block.User, error) {
 	if search == "" {
 		return nil, errors.New("empty search string")
 	}
-	var resp []*block_user.User
+	var resp []*go_block.User
 	limitOptions := options.Find()
 	limitOptions.SetLimit(50)
 	filter := bson.D{

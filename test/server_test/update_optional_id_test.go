@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -15,18 +15,18 @@ func TestUpdateOptionalId(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 	})
 	user.Id = ""
-	createUser, err := testClient.Create(ctx, &block_user.UserRequest{
+	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
 		User: user,
 	})
 	assert.NoError(t, err)
 	// act
 	newOptionalId := uuid.NewV4().String()
 	createUser.User.OptionalId = newOptionalId
-	updateUser, err := testClient.UpdateOptionalId(ctx, &block_user.UserRequest{
+	updateUser, err := testClient.UpdateOptionalId(ctx, &go_block.UserRequest{
 		Update: createUser.User,
 		User:   createUser.User,
 	})
@@ -41,15 +41,15 @@ func TestUpdateOptionalIdNoUser(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 	})
-	_, err := testClient.Create(ctx, &block_user.UserRequest{
+	_, err := testClient.Create(ctx, &go_block.UserRequest{
 		User: user,
 	})
 	assert.NoError(t, err)
 	// act
-	_, err = testClient.UpdateOptionalId(ctx, &block_user.UserRequest{})
+	_, err = testClient.UpdateOptionalId(ctx, &go_block.UserRequest{})
 	// validate
 	assert.Error(t, err)
 }
@@ -58,12 +58,12 @@ func TestUpdateOptionalIdNoReq(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Namespace: uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
-	_, err := testClient.Create(ctx, &block_user.UserRequest{
+	_, err := testClient.Create(ctx, &go_block.UserRequest{
 		User: user,
 	})
 	assert.NoError(t, err)

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +16,7 @@ func TestUpdateImage(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
@@ -43,7 +43,7 @@ func TestUpdateImageWithEncryption(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
@@ -76,7 +76,7 @@ func TestUpdateImageWithInvalidEncryptionKey(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
@@ -97,7 +97,7 @@ func TestUpdateEncryptedImageWithoutKey(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
@@ -116,7 +116,7 @@ func TestUpdateUnencryptedImageWithKey(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})

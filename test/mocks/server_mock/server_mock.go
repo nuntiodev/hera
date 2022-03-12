@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ory/dockertest/v3"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/runner"
 	"github.com/softcorp-io/block-user-service/test/mocks/repository_mock"
 	"go.uber.org/zap"
@@ -20,7 +20,7 @@ type ServerTest struct {
 	resource      *dockertest.Resource
 	conn          *grpc.ClientConn
 	containerName string
-	Client        block_user.ServiceClient
+	Client        go_block.UserServiceClient
 }
 
 func getClientConn(zapLog *zap.Logger, port int) (*grpc.ClientConn, error) {
@@ -76,7 +76,7 @@ func NewServerMock(ctx context.Context, zapLog *zap.Logger, containerName string
 		serverTest.Purge()
 		return nil, err
 	}
-	testClient := block_user.NewServiceClient(userServiceConn)
+	testClient := go_block.NewUserServiceClient(userServiceConn)
 	serverTest.Client = testClient
 	serverTest.conn = userServiceConn
 	return serverTest, nil

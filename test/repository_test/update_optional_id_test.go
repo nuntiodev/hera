@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -15,7 +15,7 @@ func TestUpdateOptionalId(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	user := user_mock.GetRandomUser(&block_user.User{
+	user := user_mock.GetRandomUser(&go_block.User{
 		Email:      gofakeit.Email(),
 		OptionalId: uuid.NewV4().String(),
 	})
@@ -35,11 +35,11 @@ func TestUpdateOptionalId(t *testing.T) {
 	assert.Equal(t, newOptionalId, updatedUser.OptionalId)
 	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
 	// validate in database
-	_, err = testRepo.Get(ctx, &block_user.User{
+	_, err = testRepo.Get(ctx, &go_block.User{
 		Email: createdUser.Email,
 	}, nil)
 	assert.Error(t, err)
-	getUser, err := testRepo.Get(ctx, &block_user.User{
+	getUser, err := testRepo.Get(ctx, &go_block.User{
 		Email:     updatedUser.Email,
 		Namespace: updatedUser.Namespace,
 	}, nil)

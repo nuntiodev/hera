@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block/block_user"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -41,7 +41,7 @@ func (r *Repository) Liveness(ctx context.Context) error {
 	return nil
 }
 
-func New(ctx context.Context, mongoClient *mongo.Client, crypto crypto.Crypto, metadataType block_user.MetadataType, zapLog *zap.Logger) (*Repository, error) {
+func New(ctx context.Context, mongoClient *mongo.Client, crypto crypto.Crypto, metadataType go_block.MetadataType, zapLog *zap.Logger) (*Repository, error) {
 	zapLog.Info("creating repository_mock...")
 	if err := initialize(); err != nil {
 		return nil, err

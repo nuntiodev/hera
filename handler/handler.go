@@ -146,8 +146,13 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *block_user.UserRequest
 	if err != nil {
 		return nil, err
 	}
+	usersInNamespace, err := h.repository.UserRepository.Count(ctx, req.Namespace)
+	if err != nil {
+		return nil, err
+	}
 	return &block_user.UserResponse{
-		Users: getUsers,
+		Users:      getUsers,
+		UsersAmout: usersInNamespace,
 	}, nil
 }
 

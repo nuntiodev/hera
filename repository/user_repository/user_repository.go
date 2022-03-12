@@ -67,6 +67,7 @@ type UserRepository interface {
 	UpdateSecurity(ctx context.Context, get *block_user.User, update *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
 	Get(ctx context.Context, user *block_user.User, encryptionOptions *EncryptionOptions) (*block_user.User, error)
 	GetAll(ctx context.Context, userFilter *block_user.UserFilter, namespace string, encryptionOptions *EncryptionOptions) ([]*block_user.User, error)
+	Count(ctx context.Context, namespace string) (int64, error)
 	Delete(ctx context.Context, user *block_user.User) error
 	DeleteNamespace(ctx context.Context, namespace string) error
 }
@@ -606,6 +607,15 @@ func (r *mongoRepository) GetAll(ctx context.Context, userFilter *block_user.Use
 	}
 
 	return resp, nil
+}
+
+func (r *mongoRepository) Count(ctx context.Context, namespace string) (int64, error) {
+	filter := bson.M{"namespace": namespace}
+	count, err := r.collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (r *mongoRepository) Delete(ctx context.Context, user *block_user.User) error {

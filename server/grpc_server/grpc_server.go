@@ -59,6 +59,12 @@ func (s *Server) Run() error {
 				s.interceptor.WithValidateUnaryInterceptor,
 			),
 		),
+		grpc.StreamInterceptor(
+			grpc_middleware.ChainStreamServer(
+				s.interceptor.WithLogStreamInterceptor,
+				s.interceptor.WithValidateStreamInterceptor,
+			),
+		),
 	)
 	reflection.Register(grpcServer)
 	go_block.RegisterUserServiceServer(grpcServer, s.handler)

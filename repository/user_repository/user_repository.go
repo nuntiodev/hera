@@ -43,7 +43,7 @@ var (
 )
 
 type User struct {
-	Id         string    `bson:"id" json:"id"`
+	Id         string    `bson:"_id" json:"id"`
 	OptionalId string    `bson:"optional_id" json:"optional_id"`
 	Namespace  string    `bson:"namespace" json:"namespace"`
 	Email      string    `bson:"email" json:"email"`
@@ -67,7 +67,7 @@ type UserRepository interface {
 	UpdateSecurity(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
 	Get(ctx context.Context, user *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
 	GetAll(ctx context.Context, userFilter *go_block.UserFilter, namespace string, encryptionOptions *EncryptionOptions) ([]*go_block.User, error)
-	//GetStream(ctx context.Context, namespace string)
+	GetUsersStream(ctx context.Context, namespace string, userIds []string) (*mongo.ChangeStream, error)
 	Count(ctx context.Context, namespace string) (int64, error)
 	Delete(ctx context.Context, user *go_block.User) error
 	DeleteBatch(ctx context.Context, userBatch []*go_block.User, namespace string) error
@@ -85,7 +85,7 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 	zapLog.Info("creating user repository...")
 	idNamespaceIndexModel := mongo.IndexModel{
 		Keys: bson.D{
-			{Key: "id", Value: 1},
+			{Key: "_id", Value: 1},
 			{Key: "namespace", Value: 1},
 		},
 		Options: options.Index().SetUnique(true),
@@ -281,7 +281,7 @@ func (r *mongoRepository) UpdatePassword(ctx context.Context, get *go_block.User
 	}
 	filter := bson.M{}
 	if get.Id != "" {
-		filter = bson.M{"id": get.Id, "namespace": get.Namespace}
+		filter = bson.M{"_id": get.Id, "namespace": get.Namespace}
 	} else if get.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(get.Email))), "namespace": get.Namespace}
 	} else if get.OptionalId != "" {
@@ -340,7 +340,7 @@ func (r *mongoRepository) UpdateEmail(ctx context.Context, get *go_block.User, u
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"id": getUser.Id, "namespace": getUser.Namespace},
+		bson.M{"_id": getUser.Id, "namespace": getUser.Namespace},
 		mongoUpdate,
 	)
 	if err != nil {
@@ -373,7 +373,7 @@ func (r *mongoRepository) UpdateOptionalId(ctx context.Context, get *go_block.Us
 	}
 	filter := bson.M{}
 	if get.Id != "" {
-		filter = bson.M{"id": get.Id, "namespace": get.Namespace}
+		filter = bson.M{"_id": get.Id, "namespace": get.Namespace}
 	} else if get.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(get.Email))), "namespace": get.Namespace}
 	} else if get.OptionalId != "" {
@@ -428,7 +428,7 @@ func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, u
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"id": getUser.Id, "namespace": getUser.Namespace},
+		bson.M{"_id": getUser.Id, "namespace": getUser.Namespace},
 		mongoUpdate,
 	)
 	if err != nil {
@@ -474,7 +474,7 @@ func (r *mongoRepository) UpdateMetadata(ctx context.Context, get *go_block.User
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"id": getUser.Id, "namespace": getUser.Namespace},
+		bson.M{"_id": getUser.Id, "namespace": getUser.Namespace},
 		mongoUpdate,
 	)
 	if err != nil {
@@ -527,7 +527,7 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"id": getUser.Id, "namespace": getUser.Namespace},
+		bson.M{"_id": getUser.Id, "namespace": getUser.Namespace},
 		mongoUpdate,
 	)
 	if err != nil {
@@ -546,7 +546,7 @@ func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, encrypti
 	}
 	filter := bson.M{}
 	if user.Id != "" {
-		filter = bson.M{"id": user.Id, "namespace": user.Namespace}
+		filter = bson.M{"_id": user.Id, "namespace": user.Namespace}
 	} else if user.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email))), "namespace": user.Namespace}
 	} else if user.OptionalId != "" {
@@ -611,6 +611,39 @@ func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserF
 	return resp, nil
 }
 
+func (r *mongoRepository) GetUsersStream(ctx context.Context, namespace string, userIds []string) (*mongo.ChangeStream, error) {
+	// (create) stream match on specific namespace
+	createStreamFilterNamespace := bson.D{
+		{"operationType", "insert"},
+		{"fullDocument.namespace", namespace},
+	}
+	// (update) stream match for specific user ids
+	deleteStreamFilterMatchUsers := bson.D{
+		{"operationType", "delete"},
+		{"documentKey._id", bson.D{{"$in", userIds}}},
+	}
+	// (delete) stream match for specific user ids
+	updateStreamFilterMatchUsers := bson.D{
+		{"operationType", "update"},
+		{"documentKey._id", bson.D{{"$in", userIds}}},
+	}
+	matchPipeline := bson.D{
+		{"$match",
+			bson.M{"$or": bson.A{
+				createStreamFilterNamespace,
+				deleteStreamFilterMatchUsers,
+				updateStreamFilterMatchUsers,
+			},
+			},
+		},
+	}
+	userStream, err := r.collection.Watch(ctx, mongo.Pipeline{matchPipeline})
+	if err != nil {
+		return nil, err
+	}
+	return userStream, nil
+}
+
 func (r *mongoRepository) Count(ctx context.Context, namespace string) (int64, error) {
 	filter := bson.M{"namespace": namespace}
 	count, err := r.collection.CountDocuments(ctx, filter)
@@ -627,7 +660,7 @@ func (r *mongoRepository) Delete(ctx context.Context, user *go_block.User) error
 	}
 	filter := bson.M{}
 	if user.Id != "" {
-		filter = bson.M{"id": user.Id, "namespace": user.Namespace}
+		filter = bson.M{"_id": user.Id, "namespace": user.Namespace}
 	} else if user.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email))), "namespace": user.Namespace}
 	} else if user.OptionalId != "" {
@@ -675,7 +708,7 @@ func (r *mongoRepository) DeleteBatch(ctx context.Context, userBatch []*go_block
 	filter := bson.D{
 		{"namespace", namespace},
 		{"$or", bson.A{
-			bson.D{{"id", idsFilter}},
+			bson.D{{"_id", idsFilter}},
 			bson.D{{"email", emailsFilter}},
 			bson.D{{"optional_id", optionalIdsFilter}},
 		},

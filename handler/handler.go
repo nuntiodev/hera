@@ -3,9 +3,11 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -159,7 +161,19 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) 
 }
 
 func (h *defaultHandler) GetStream(request *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
-
+	stream, err := h.repository.UserRepository.GetUsersStream(context.Background(), request.Namespace, []string{"test 1"})
+	if err != nil {
+		return err
+	}
+	defer stream.Close(context.Background())
+	for stream.Next(context.Background()) {
+		fmt.Printf("get in here....")
+		var data bson.M
+		if err := stream.Decode(&data); err != nil {
+			panic(err)
+		}
+		fmt.Printf("%v\n", data)
+	}
 	return nil
 }
 

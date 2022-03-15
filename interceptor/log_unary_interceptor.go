@@ -7,10 +7,7 @@ import (
 	"time"
 )
 
-func (i *DefaultInterceptor) WithLogUnaryInterceptor(ctx context.Context,
-	req interface{},
-	info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler) (interface{}, error) {
+func (i *DefaultInterceptor) WithLogUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 	h, err := handler(ctx, req) // make actual request
 	if err != nil {

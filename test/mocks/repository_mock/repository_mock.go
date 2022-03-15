@@ -66,7 +66,8 @@ func NewRepositoryMock(ctx context.Context, zapLog *zap.Logger, containerName st
 		return nil, nil, nil, err
 	}
 	// setup environment
-	mongoUri := "mongodb://localhost:" + mongoPort
+	//mongoUri := "mongodb://localhost:" + mongoPort
+	mongoUri := "mongodb+srv://oscarorellana-m1-max:TeamSoftcorp21@cluster0.piv4o.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 	os.Setenv("MONGO_URI", mongoUri)
 	os.Setenv("MONGO_DB_NAME", mongoDbName)
 	os.Setenv("MONGO_USER_COLLECTION", mongoUserCollection)

@@ -35,10 +35,7 @@ var (
 	UserBatchIsNil   = errors.New("user batch is nil")
 )
 
-func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
-	req interface{},
-	info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler) (interface{}, error) {
+func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	if info == nil {
 		return nil, errors.New("invalid request")
 	}
@@ -55,7 +52,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		break
 	case Create, Get:
 		if translatedReq.User == nil {
-			return &go_block.UserResponse{}, UpdateIsNil
+			return &go_block.UserResponse{}, UserIsNil
 		}
 	case UpdatePassword, UpdateSecurity, UpdateMetadata,
 		UpdateImage, UpdateEmail, UpdateOptionalId:

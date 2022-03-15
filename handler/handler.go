@@ -21,8 +21,10 @@ type Handler interface {
 	UpdateSecurity(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Get(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	GetAll(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	GetStream(request *go_block.UserRequest, server go_block.UserService_GetStreamServer) error
 	ValidateCredentials(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	DeleteBatch(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteNamespace(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 }
 
@@ -156,6 +158,11 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) 
 	}, nil
 }
 
+func (h *defaultHandler) GetStream(request *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
+
+	return nil
+}
+
 func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	resp, err := h.Get(ctx, req)
 	if err != nil {
@@ -170,6 +177,10 @@ func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *go_block.
 	return &go_block.UserResponse{
 		User: resp.User,
 	}, nil
+}
+
+func (h *defaultHandler) DeleteBatch(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+	return &go_block.UserResponse{}, h.repository.UserRepository.DeleteBatch(ctx, req.UserBatch, req.Namespace)
 }
 
 func (h *defaultHandler) Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {

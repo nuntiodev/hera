@@ -67,8 +67,10 @@ type UserRepository interface {
 	UpdateSecurity(ctx context.Context, get *go_block.User, update *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
 	Get(ctx context.Context, user *go_block.User, encryptionOptions *EncryptionOptions) (*go_block.User, error)
 	GetAll(ctx context.Context, userFilter *go_block.UserFilter, namespace string, encryptionOptions *EncryptionOptions) ([]*go_block.User, error)
+	//GetStream(ctx context.Context, namespace string)
 	Count(ctx context.Context, namespace string) (int64, error)
 	Delete(ctx context.Context, user *go_block.User) error
+	DeleteBatch(ctx context.Context, userBatch []*go_block.User, namespace string) error
 	DeleteNamespace(ctx context.Context, namespace string) error
 }
 
@@ -637,6 +639,50 @@ func (r *mongoRepository) Delete(ctx context.Context, user *go_block.User) error
 	}
 	if result.DeletedCount == 0 {
 		return NoUsersDeletedErr
+	}
+	return nil
+}
+
+func (r *mongoRepository) DeleteBatch(ctx context.Context, userBatch []*go_block.User, namespace string) error {
+	var ids []string
+	var emails []string
+	var optionalIds []string
+	for _, user := range userBatch {
+		if user == nil {
+			return errors.New("a user is nil")
+		}
+		prepare(actionGet, user)
+		if user.Id != "" {
+			ids = append(ids, user.Id)
+		} else if user.Email != "" {
+			emails = append(emails, fmt.Sprintf("%x", md5.Sum([]byte(user.Email))))
+		} else if user.OptionalId != "" {
+			ids = append(optionalIds, user.OptionalId)
+		}
+	}
+	var idsFilter bson.D
+	var emailsFilter bson.D
+	var optionalIdsFilter bson.D
+	if len(ids) > 0 {
+		idsFilter = bson.D{{"$in", ids}}
+	}
+	if len(emails) > 0 {
+		emailsFilter = bson.D{{"$in", emails}}
+	}
+	if len(optionalIds) > 0 {
+		optionalIdsFilter = bson.D{{"$in", optionalIds}}
+	}
+	filter := bson.D{
+		{"namespace", namespace},
+		{"$or", bson.A{
+			bson.D{{"id", idsFilter}},
+			bson.D{{"email", emailsFilter}},
+			bson.D{{"optional_id", optionalIdsFilter}},
+		},
+		},
+	}
+	if _, err := r.collection.DeleteMany(ctx, filter); err != nil {
+		return err
 	}
 	return nil
 }

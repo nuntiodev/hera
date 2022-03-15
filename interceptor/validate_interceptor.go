@@ -24,6 +24,7 @@ const (
 	ValidateCredentials = "ValidateCredentials"
 	Delete              = "Delete"
 	DeleteNamespace     = "DeleteNamespace"
+	DeleteBatch         = "DeleteBatch"
 )
 
 var (
@@ -31,6 +32,7 @@ var (
 	UpdateIsNil      = errors.New("update is nil")
 	UserIsNil        = errors.New("user is nil")
 	NamespaceIsEmpty = errors.New("namespace is empty")
+	UserBatchIsNil   = errors.New("user batch is nil")
 )
 
 func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
@@ -49,38 +51,30 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context,
 		return nil, errors.New(fmt.Sprintf("invalid method call: %s", info.FullMethod))
 	}
 	switch method[1] {
-	case Heartbeat:
+	case Heartbeat, GetAll:
 		break
 	case Create, Get:
-		if translatedReq == nil {
-			return nil, ErrorReqIsNil
-		} else if translatedReq.User == nil {
+		if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UpdateIsNil
 		}
 	case UpdatePassword, UpdateSecurity, UpdateMetadata,
 		UpdateImage, UpdateEmail, UpdateOptionalId:
-		if translatedReq == nil {
-			return nil, ErrorReqIsNil
-		} else if translatedReq.Update == nil {
+		if translatedReq.Update == nil {
 			return &go_block.UserResponse{}, UpdateIsNil
 		} else if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UpdateIsNil
-		}
-	case GetAll:
-		if translatedReq == nil {
-			return nil, ErrorReqIsNil
 		}
 	case ValidateCredentials, Delete:
-		if translatedReq == nil {
-			return nil, ErrorReqIsNil
-		} else if translatedReq.User == nil {
+		if translatedReq.User == nil {
 			return nil, UserIsNil
 		}
 	case DeleteNamespace:
-		if translatedReq == nil {
-			return nil, ErrorReqIsNil
-		} else if translatedReq.Namespace == "" {
+		if translatedReq.Namespace == "" {
 			return nil, NamespaceIsEmpty
+		}
+	case DeleteBatch:
+		if translatedReq.UserBatch == nil {
+			return nil, UserBatchIsNil
 		}
 	default:
 		return &go_block.UserResponse{}, errors.New(fmt.Sprintf("invalid request: %s", info.FullMethod))

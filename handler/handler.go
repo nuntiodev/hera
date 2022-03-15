@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
@@ -151,7 +150,6 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) 
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(usersInNamespace)
 	return &go_block.UserResponse{
 		Users:       getUsers,
 		UsersAmount: usersInNamespace,

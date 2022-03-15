@@ -151,8 +151,8 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) 
 		return nil, err
 	}
 	return &go_block.UserResponse{
-		Users:      getUsers,
-		UsersAmout: usersInNamespace,
+		Users:       getUsers,
+		UsersAmount: usersInNamespace,
 	}, nil
 }
 

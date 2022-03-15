@@ -100,10 +100,10 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 			bson.D{
 				{
 					"email_hash", bson.D{
-					{
-						"$gt", "",
+						{
+							"$gt", "",
+						},
 					},
-				},
 				},
 			},
 		),
@@ -120,10 +120,10 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 			bson.D{
 				{
 					"optional_id", bson.D{
-					{
-						"$gt", "",
+						{
+							"$gt", "",
+						},
 					},
-				},
 				},
 			},
 		),
@@ -643,12 +643,8 @@ func (r *mongoRepository) Delete(ctx context.Context, user *go_block.User) error
 
 func (r *mongoRepository) DeleteNamespace(ctx context.Context, namespace string) error {
 	filter := bson.M{"namespace": namespace}
-	result, err := r.collection.DeleteMany(ctx, filter)
-	if err != nil {
+	if _, err := r.collection.DeleteMany(ctx, filter); err != nil {
 		return err
-	}
-	if result.DeletedCount == 0 {
-		return NoUsersDeletedErr
 	}
 	return nil
 }

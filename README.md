@@ -24,7 +24,7 @@ Softcorp Cloud enables your organization to build an MVP fast, and when you have
 easily move the open-source building blocks from Softcorp Cloud to your own data center! We will even help you with it.
 Go to <a href="https://cloud.softcorp.io"> https://cloud.softcorp.io <a/> and get started right away! 
 
-If you need help building a new product, [contact us](https://softcorp.io/contact) - we are experts in Cloud Native infrastructure and building scalable, secure and aesthetic software.
+If you need help building a new product or want to get started with Softcorp Cloud, [contact us](https://softcorp.io/contact) - we are experts in Cloud Native infrastructure and building scalable, secure and aesthetic software.
 
 ## Get Started
 If you're looking to jump straight into it, go ahead:

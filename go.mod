@@ -1,6 +1,6 @@
 module github.com/softcorp-io/block-user-service
 
-go 1.16
+go 1.17
 
 require (
 	github.com/badoux/checkmail v1.2.1
@@ -38,6 +38,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect

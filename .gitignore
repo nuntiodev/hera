@@ -19,7 +19,6 @@ ns
 **/client_secret.json
 *creds*
 *.dat
-*password*
 *.httr-oauth*
 
 # Private Node Modules

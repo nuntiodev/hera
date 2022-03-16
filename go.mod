@@ -1,6 +1,6 @@
 module github.com/softcorp-io/block-user-service
 
-go 1.17
+go 1.16
 
 require (
 	github.com/badoux/checkmail v1.2.1

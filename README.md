@@ -20,7 +20,7 @@ The User Service block is an API block written in Golang that communicates over 
 your organization's user management.
 
 ## Softcorp Cloud
-Softcorp Cloud enables your organization to build an MVP fast, and when you have a battle-tested your idea, you can
+Softcorp Cloud enables your organization to build an MVP fast, and when you have a battle-tested idea, you can
 easily move the open-source building blocks from Softcorp Cloud to your own data center! We will even help you with it.
 Go to <a href="https://cloud.softcorp.io"> https://cloud.softcorp.io <a/> and get started right away! 
 

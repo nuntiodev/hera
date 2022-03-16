@@ -31,6 +31,5 @@ func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, encrypti
 			return nil, err
 		}
 	}
-	fmt.Println(protoUser.String())
 	return protoUser, nil
 }

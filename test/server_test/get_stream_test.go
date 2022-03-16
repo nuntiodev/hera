@@ -2,6 +2,7 @@ package server_test
 
 import (
 	"context"
+	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/block-proto/go_block"
@@ -214,6 +215,55 @@ func TestGetUpdateDeleteStreamWithEncryptionWithoutAutoFollow(t *testing.T) {
 	streamResp, err = stream.Recv()
 	assert.NoError(t, err)
 	assert.Equal(t, go_block.StreamType_DELETE, streamResp.StreamType)
+}
+
+func TestGetStreamDeleteBatch(t *testing.T) {
+	skipStream(t)
+	// setup 50 users
+	namespace := uuid.NewV4().String()
+	var userBatch []*go_block.User
+	for i := 0; i < 20; i++ {
+		user := user_mock.GetRandomUser(&go_block.User{
+			Namespace: namespace,
+			Image:     gofakeit.ImageURL(10, 10),
+			Email:     gofakeit.Email(),
+			Id:        uuid.NewV4().String(),
+		})
+		userResp, err := testClient.Create(context.Background(), &go_block.UserRequest{
+			User:          user,
+			EncryptionKey: encryptionKey,
+		})
+		assert.NoError(t, err)
+		userBatch = append(userBatch, userResp.User)
+	}
+	// setup update/delete stream
+	stream, err := testClient.GetStream(context.Background(), &go_block.UserRequest{
+		Namespace: namespace,
+		UserBatch: userBatch,
+		StreamType: []go_block.StreamType{
+			go_block.StreamType_UPDATE,
+			go_block.StreamType_DELETE,
+		},
+		EncryptionKey:    encryptionKey,
+		AutoFollowStream: false,
+	})
+	assert.NoError(t, err)
+	defer stream.CloseSend()
+	// act one - update user
+	go func() {
+		userBatch[0].Email = gofakeit.Email()
+		_, err = testClient.DeleteBatch(context.Background(), &go_block.UserRequest{
+			UserBatch: userBatch,
+			Namespace: namespace,
+		})
+		assert.NoError(t, err)
+	}()
+	// validate one
+	streamResp, err := stream.Recv()
+	assert.NoError(t, err)
+	assert.NotNil(t, streamResp)
+	assert.Equal(t, go_block.StreamType_DELETE, streamResp.StreamType)
+	fmt.Println(streamResp)
 }
 
 func TestGetUpdateDeleteStreamWithEncryptionWithAutoFollow(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -71,7 +72,11 @@ func (h *defaultHandler) handleUsersStream(ctx context.Context, filter *go_block
 	autoEstablish := autoFollowStream && len(userBatch) > 0 && (updateStream || deleteStream)
 	currentWatchedUsers := userBatch
 	var newWatchedUsers []*go_block.User
-	for stream.Next(context.Background()) {
+	for stream.Next(ctx) {
+		var data bson.M
+		if err := stream.Decode(&data); err != nil {
+			panic(err)
+		}
 		// handle event
 		var changeEvent ChangeEvent
 		var streamType go_block.StreamType
@@ -82,7 +87,6 @@ func (h *defaultHandler) handleUsersStream(ctx context.Context, filter *go_block
 			streamType = go_block.StreamType_DELETE
 			// handle delete event internally
 			if autoEstablish {
-
 				// delete from currently watched users
 				for index, user := range currentWatchedUsers {
 					if user.Id == changeEvent.DocumentKey.ID {
@@ -118,8 +122,10 @@ func (h *defaultHandler) handleUsersStream(ctx context.Context, filter *go_block
 		case go_block.StreamType_UPDATE:
 			userResp = user_repository.UserToProtoUser(&changeEvent.UpdateDescription.UpdatedFields)
 		case go_block.StreamType_DELETE:
-			userResp = user_repository.UserToProtoUser(&changeEvent.FullDocument)
+			break
 		}
+		// set id
+		userResp.Id = changeEvent.DocumentKey.ID
 		if encryptionKey != "" && userResp.EncryptedAt.IsValid() {
 			h.crypto.DecryptUser(encryptionKey, userResp)
 		}

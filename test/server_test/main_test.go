@@ -15,7 +15,6 @@ var encryptionKey = "VmYq3t6w9z$C&F)J@McQfTjWnZr4u7x!"
 
 func TestMain(m *testing.M) {
 	// before test
-	os.Setenv("SKIP_STREAM", "TRUE")
 	zapLog, err := zap.NewProduction()
 	if err != nil {
 		panic(err)

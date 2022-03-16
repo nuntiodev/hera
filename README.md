@@ -7,6 +7,9 @@
     <a href="https://www.softcorp.io">About Softcorp</a> |
     <a href="https://www.blocks.softcorp.io">About Blocks</a>
 </h4>
+
+![example workflow](https://github.com/softcorp-io/block-user-service/actions/workflows/build.yaml/badge.svg)
+
 Are you tired of wasting your time writing the same service over and over again?
 We are, and that's why we have created Softcorp Blocks. These are modular and simple API building blocks that run in
 any Linux-based environment and that you can connect to through our simple SDK.

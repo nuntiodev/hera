@@ -7,10 +7,6 @@
     <a href="https://www.softcorp.io">About Softcorp</a> |
     <a href="https://www.blocks.softcorp.io">About Blocks</a>
 </h4>
-<br/>
-
----
-<br/>
 
 ## Softcorp Blocks
 Are you tired of wasting your time writing the same service over and over again?

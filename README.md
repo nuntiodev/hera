@@ -11,10 +11,10 @@
 ![example workflow](https://github.com/softcorp-io/block-user-service/actions/workflows/build.yaml/badge.svg)
 
 Are you tired of wasting your time writing the same service over and over again?
-We are, and that's why we have created Softcorp Blocks. These are modular and simple API building blocks that run in
+We are, and that's why we have created Softcorp Blocks. These are modular and simple API building blocks that run on
 any Linux-based environment and that you can connect to through our simple SDK.
-Our blocks are simple and are meant for your applications to build upon. The blocks are all stateless, scales horizontally and comes with a large suit of tests.
-Furthermore, each block automatically handles extra metadata and encryption which means you can customize them to handle almost any environment!
+Our blocks are simple and are meant for your applications to build upon. The blocks are all stateless, scales horizontally and comes with a large set of tests.
+Furthermore, each block automatically handles extra metadata and encryption, which means you can customize them to handle almost any environment!
 <br/><br/>
 The User Service block is an API block written in Golang that communicates over gRPC. The user-block is responsible for handling
 your organization's user management.

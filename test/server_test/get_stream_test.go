@@ -2,7 +2,6 @@ package server_test
 
 import (
 	"context"
-	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/block-proto/go_block"
@@ -263,7 +262,6 @@ func TestGetStreamDeleteBatch(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, streamResp)
 	assert.Equal(t, go_block.StreamType_DELETE, streamResp.StreamType)
-	fmt.Println(streamResp)
 }
 
 func TestGetUpdateDeleteStreamWithEncryptionWithAutoFollow(t *testing.T) {

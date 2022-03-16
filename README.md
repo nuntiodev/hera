@@ -8,16 +8,21 @@
     <a href="https://www.blocks.softcorp.io">About Blocks</a>
 </h4>
 Are you tired of wasting your time writing the same service over and over again?
-We are and that's why we have created Softcorp Blocks. These are modular and simple API building blocks that run in
+We are, and that's why we have created Softcorp Blocks. These are modular and simple API building blocks that run in
 any Linux-based environment and that you can connect to through our simple SDK.
-Our blocks are simple and are meant to build upon, stateless, scales horizontally well and comes with a large suit of tests.
+Our blocks are simple and are meant for your applications to build upon. The blocks are all stateless, scales horizontally and comes with a large suit of tests.
+Furthermore, each block automatically handles extra metadata and encryption which means you can customize them to handle almost any environment!
 <br/><br/>
-The User Service block is an API block written in Golang that communicates over gRPC, and handles
+The User Service block is an API block written in Golang that communicates over gRPC. The user-block is responsible for handling
 your organization's user management.
 
 ## Softcorp Cloud
+If you want to get quickly started and access to a state-of-the-art dashboard, go to <a href="https://cloud.softcorp.io"> https://cloud.softcorp.io <a/> and get started right away!
+Softcorp Cloud makes it easy to get quickly started with Softcorp Blocks, but also makes it easy to move from Softcorp Cloud to your existing
+Cloud (or datacenter) environemnt.
 
 ## Installation
+```block-user-service``` compiles to a small binary and can thus be deployed almost anywhere. 
 
 ### Environment
 

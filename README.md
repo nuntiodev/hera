@@ -11,9 +11,10 @@ Are you tired of wasting your time writing the same service over and over again?
 We are and that's why we have created Softcorp Blocks. These are modular and simple API building blocks that run in
 any Linux-based environment and that you can connect to through our simple SDK.
 Our blocks are simple and are meant to build upon, stateless, scales horizontally well and comes with a large suit of tests.
-
+<br/><br/>
 The User Service block is an API block written in Golang that communicates over gRPC, and handles
 your organization's user management.
+
 ## Softcorp Cloud
 
 ## Installation

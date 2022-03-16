@@ -20,9 +20,9 @@ The User Service block is an API block written in Golang that communicates over 
 your organization's user management.
 
 ## Softcorp Cloud
-If you want to get quickly started and access to a state-of-the-art dashboard, go to <a href="https://cloud.softcorp.io"> https://cloud.softcorp.io <a/> and get started right away!
-Softcorp Cloud makes it easy to get quickly started with Softcorp Blocks, but also makes it easy to move from Softcorp Cloud to your existing
-Cloud (or datacenter) environemnt.
+Softcorp Cloud enables your organization to move quickly and build an MVP fast. Furthermore, when you have a battle-tested idea,
+you can easily move the open-source building blocks inside Softcorp Cloud to your own datacenter! We will even help you with it.
+Go to <a href="https://cloud.softcorp.io"> https://cloud.softcorp.io <a/> and get started right away!
 
 ## Installation
 ```block-user-service``` compiles to a small binary and can thus be deployed almost anywhere. 

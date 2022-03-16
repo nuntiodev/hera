@@ -37,7 +37,7 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myHandler, err := handler.New(zapLog, myRepository)
+	myHandler, err := handler.New(zapLog, myRepository, myCrypto)
 	if err != nil {
 		return nil, err
 	}

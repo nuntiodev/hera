@@ -19,7 +19,7 @@ func TestUpdateOptionalId(t *testing.T) {
 		Email:      gofakeit.Email(),
 		OptionalId: uuid.NewV4().String(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, nil)
+	createdUser, err := testRepo.Create(ctx, user, "")
 	initialOptionalId := user.OptionalId
 	initialUpdatedAt := user.UpdatedAt
 	assert.Nil(t, err)
@@ -37,12 +37,12 @@ func TestUpdateOptionalId(t *testing.T) {
 	// validate in database
 	_, err = testRepo.Get(ctx, &go_block.User{
 		Email: createdUser.Email,
-	}, nil)
+	}, "")
 	assert.Error(t, err)
 	getUser, err := testRepo.Get(ctx, &go_block.User{
 		Email:     updatedUser.Email,
 		Namespace: updatedUser.Namespace,
-	}, nil)
+	}, "")
 	assert.NoError(t, err)
 	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
 }
@@ -52,7 +52,7 @@ func TestOptionalIdInvalidNamespace(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	createdUser, err := testRepo.Create(ctx, user, nil)
+	createdUser, err := testRepo.Create(ctx, user, "")
 	assert.Nil(t, err)
 	// act
 	createdUser.OptionalId = uuid.NewV4().String()

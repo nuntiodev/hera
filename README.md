@@ -26,15 +26,17 @@ Go to <a href="https://cloud.softcorp.io"> https://cloud.softcorp.io <a/> and ge
 
 If you need help building a new product, [contact us](https://softcorp.io/contact) - we are experts in Cloud Native infrastructure and building scalable, secure and aesthetic software.
 
-## Installation
+## Get Started
+If you're looking to jump straight into it, go ahead:
+
+- [Run Block User Service locally and connect your client](): A guide to set up Block User Service on your local machine and connect to the service through our SDK. 
+- [Run Block User Service in Docker](): Set up and use Block User Service using Docker Compose in under 5 Minutes. Good for hacking a Proof of Concept.
+- [Run Block User Service in Kubernetes using Helm](): An advanced guide to a fully functional set up with Block User Service in Kubernetes.
+- [Connect your application to Block User Service](): Connect to Softcorp Cloud or your own client through our SDK.
+
+
+## What is User Block?
 ```block-user-service``` compiles to a small binary and can thus be deployed almost anywhere. 
-
-### Environment
-
-### Endpoints
-
-### Usage
-
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

@@ -136,14 +136,15 @@ func (h *defaultHandler) handleUsersStream(ctx context.Context, filter *go_block
 		// check if changes has happened and auto establish a new connection
 		if autoEstablish && len(currentWatchedUsers) == 0 {
 			// rebase
+			h.zapLog.Info("rebasing stream with new users")
 			users, err := h.repository.UserRepository.GetAll(ctx, filter, namespace, encryptionKey)
 			if err != nil {
 				return err
 			}
-			h.zapLog.Info("rebasing stream with new users")
 			if err := stream.Close(ctx); err != nil {
 				return err
 			}
+			// transmit new users to client
 			return h.handleUsersStream(ctx, filter, encryptionKey, types, namespace, users, server, autoFollowStream)
 		} else if autoEstablish && len(newWatchedUsers) > 0 {
 			// restart

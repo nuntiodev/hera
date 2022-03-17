@@ -40,9 +40,6 @@ If you're looking to jump straight into it, go ahead:
 - [Connect your application to Block User Service](): Connect to Softcorp Cloud or your private environment through our SDK.
 
 
-## What is User Block?
-```block-user-service``` compiles to a small binary and can thus be deployed almost anywhere. 
-
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 

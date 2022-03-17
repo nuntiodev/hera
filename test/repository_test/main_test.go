@@ -4,16 +4,18 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/softcorp-io/block-user-service/repository/user_repository"
+	uuid "github.com/satori/go.uuid"
+	"github.com/softcorp-io/block-user-service/repository"
 	"github.com/softcorp-io/block-user-service/test/mocks/repository_mock"
 	"go.uber.org/zap"
 	"os"
 	"testing"
 )
 
-var testRepo user_repository.UserRepository
+var testRepository repository.Repository
 var encryptionKey = "VmYq3t6w9z$C&F)J@McQfTjWnZr4u7x!"
 var invalidEncryptionKey = "kpLå3t6w9z$C&F)J@McQfTjWnZr4u7x!"
+var namespace = uuid.NewV4().String()
 
 func TestMain(m *testing.M) {
 	// before test
@@ -27,7 +29,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		zapLog.Fatal(err.Error())
 	}
-	testRepo = repository.UserRepository
+	testRepository = repository
 	code := m.Run()
 	// after test
 	if err := pool.Purge(container); err != nil {

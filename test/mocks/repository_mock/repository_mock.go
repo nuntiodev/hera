@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
-	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository"
 	database "github.com/softcorp-io/softcorp_db_helper"
@@ -23,10 +22,7 @@ import (
 	and connecting the user repository  to that
 	MongoDB instance.
 */
-func NewRepositoryMock(ctx context.Context, zapLog *zap.Logger, containerName string) (*repository.Repository, *dockertest.Pool, *dockertest.Resource, error) {
-	// name variables
-	mongoDbName := "softcorp"
-	mongoUserCollection := "users"
+func NewRepositoryMock(ctx context.Context, zapLog *zap.Logger, containerName string) (repository.Repository, *dockertest.Pool, *dockertest.Resource, error) {
 	// create the pool (docker instance).
 	pool, err := dockertest.NewPool("")
 	if err != nil {
@@ -53,9 +49,6 @@ func NewRepositoryMock(ctx context.Context, zapLog *zap.Logger, containerName st
 		Name:         containerName,
 		Tag:          "latest",
 		ExposedPorts: []string{"27017"},
-		Env: []string{
-			"MONGO_INITDB_DATABASE=" + mongoDbName,
-		},
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"27017": {
 				{HostIP: "0.0.0.0", HostPort: mongoPort},
@@ -68,8 +61,6 @@ func NewRepositoryMock(ctx context.Context, zapLog *zap.Logger, containerName st
 	// setup environment
 	mongoUri := "mongodb://localhost:" + mongoPort
 	os.Setenv("MONGO_URI", mongoUri)
-	os.Setenv("MONGO_DB_NAME", mongoDbName)
-	os.Setenv("MONGO_USER_COLLECTION", mongoUserCollection)
 	// check db connection and create mongo client
 	var mongoClient *mongo.Client
 	if err = pool.Retry(func() error {
@@ -93,7 +84,7 @@ func NewRepositoryMock(ctx context.Context, zapLog *zap.Logger, containerName st
 	}
 	// create the repository_mock
 	myCrypto, err := crypto.New()
-	repo, err := repository.New(ctx, mongoClient, myCrypto, go_block.MetadataType_METADATA_TYPE_JSON, zapLog)
+	repo, err := repository.New(mongoClient, myCrypto, zapLog)
 	if err != nil {
 		if err := pool.Purge(container); err != nil {
 			zapLog.Fatal(fmt.Sprintf("failed to purge pool with err: %s", err))

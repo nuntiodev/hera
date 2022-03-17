@@ -16,16 +16,16 @@ func TestGetByEmail(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
-		Email:     gofakeit.Email(),
+		Image: gofakeit.ImageURL(10, 10),
+		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, "")
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, "")
 	assert.Nil(t, err)
 	// act
-	getUser, err := testRepo.Get(ctx, &go_block.User{
-		Email:     createdUser.Email,
-		Namespace: createdUser.Namespace,
+	getUser, err := users.Get(ctx, &go_block.User{
+		Email: createdUser.Email,
 	}, "")
 	assert.Nil(t, err)
 	// validate
@@ -38,16 +38,16 @@ func TestGetByEmailWithEncryption(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
-		Email:     gofakeit.Email(),
+		Image: gofakeit.ImageURL(10, 10),
+		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, encryptionKey)
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
-	getUser, err := testRepo.Get(ctx, &go_block.User{
-		Email:     createdUser.Email,
-		Namespace: createdUser.Namespace,
+	getUser, err := users.Get(ctx, &go_block.User{
+		Email: createdUser.Email,
 	}, encryptionKey)
 	assert.Nil(t, err)
 	// validate
@@ -60,16 +60,16 @@ func TestGetByEmailWithInvalidEncryptionKey(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
-		Email:     gofakeit.Email(),
+		Image: gofakeit.ImageURL(10, 10),
+		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, encryptionKey)
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	_, err = users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
-	_, err = testRepo.Get(ctx, &go_block.User{
-		Email:     user.Email,
-		Namespace: createdUser.Namespace,
+	_, err = users.Get(ctx, &go_block.User{
+		Email: user.Email,
 	}, invalidEncryptionKey)
 	// validate
 	assert.Error(t, err)
@@ -80,16 +80,16 @@ func TestGetByEmailWithEncryptionNoDecryption(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
-		Email:     gofakeit.Email(),
+		Image: gofakeit.ImageURL(10, 10),
+		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, encryptionKey)
+	users, err := testRepository.Users(ctx, "")
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
-	getUser, err := testRepo.Get(ctx, &go_block.User{
-		Email:     createdUser.Email,
-		Namespace: createdUser.Namespace,
+	getUser, err := users.Get(ctx, &go_block.User{
+		Email: createdUser.Email,
 	}, encryptionKey)
 	assert.Nil(t, err)
 	// validate
@@ -100,15 +100,17 @@ func TestGetByEmailDifferentNamespace(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
-	createdUser, err := testRepo.Create(ctx, user, "")
+	createdUser, err := usersOne.Create(ctx, user, "")
 	assert.Nil(t, err)
 	// act
-	createdUser.Namespace = ""
-	getUser, err := testRepo.Get(ctx, createdUser, "")
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	getUser, err := usersTwo.Get(ctx, createdUser, "")
 	assert.Error(t, err)
 	// validate
 	assert.Nil(t, getUser)

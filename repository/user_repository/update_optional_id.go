@@ -30,11 +30,11 @@ func (r *mongoRepository) UpdateOptionalId(ctx context.Context, get *go_block.Us
 	}
 	filter := bson.M{}
 	if get.Id != "" {
-		filter = bson.M{"_id": get.Id, "namespace": get.Namespace}
+		filter = bson.M{"_id": get.Id}
 	} else if get.Email != "" {
-		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(get.Email))), "namespace": get.Namespace}
+		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(get.Email)))}
 	} else if get.OptionalId != "" {
-		filter = bson.M{"optional_id": get.OptionalId, "namespace": get.Namespace}
+		filter = bson.M{"optional_id": get.OptionalId}
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,

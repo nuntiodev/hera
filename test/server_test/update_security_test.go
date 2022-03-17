@@ -16,24 +16,24 @@ func TestSecurityProfile(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
+	namespace := uuid.NewV4().String()
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user,
+		User:      user,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	// act
-	newRole := gofakeit.MacAddress()
-	createUser.User.Role = newRole
 	updateUser, err := testClient.UpdateSecurity(ctx, &go_block.UserRequest{
-		Update: createUser.User,
-		User:   createUser.User,
+		Update:    createUser.User,
+		User:      createUser.User,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	// validate
-	assert.Equal(t, newRole, updateUser.User.Role)
+	assert.NotNil(t, updateUser)
 }
 
 func TestUpdateSecurityNoUser(t *testing.T) {
@@ -41,11 +41,12 @@ func TestUpdateSecurityNoUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
+	namespace := uuid.NewV4().String()
 	_, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user,
+		User:      user,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	// act
@@ -59,8 +60,7 @@ func TestUpdateSecurityNoReq(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
 	_, err := testClient.Create(ctx, &go_block.UserRequest{

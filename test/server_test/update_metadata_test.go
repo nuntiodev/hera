@@ -16,20 +16,22 @@ func TestUpdateMetadata(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
+	namespace := uuid.NewV4().String()
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user,
+		User:      user,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	// act
 	newMetadata := user_mock.GetMetadata(nil)
 	createUser.User.Metadata = newMetadata
 	updateUser, err := testClient.UpdateMetadata(ctx, &go_block.UserRequest{
-		Update: createUser.User,
-		User:   createUser.User,
+		Update:    createUser.User,
+		User:      createUser.User,
+		Namespace: namespace,
 	})
 	// validate
 	assert.NoError(t, err)
@@ -43,13 +45,14 @@ func TestUpdateMetadataWithEncryption(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
+	namespace := uuid.NewV4().String()
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
 		User:          user,
 		EncryptionKey: encryptionKey,
+		Namespace:     namespace,
 	})
 	assert.NoError(t, err)
 	// act
@@ -59,6 +62,7 @@ func TestUpdateMetadataWithEncryption(t *testing.T) {
 		Update:        createUser.User,
 		User:          createUser.User,
 		EncryptionKey: encryptionKey,
+		Namespace:     namespace,
 	})
 	// validate
 	assert.NoError(t, err)
@@ -71,12 +75,13 @@ func TestUpdateMetadataNoUser(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
+	namespace := uuid.NewV4().String()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	_, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user,
+		User:      user,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	// act
@@ -90,12 +95,13 @@ func TestUpdateMetadataNoReq(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
+	namespace := uuid.NewV4().String()
 	_, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user,
+		User:      user,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	// act

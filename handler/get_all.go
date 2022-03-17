@@ -6,11 +6,15 @@ import (
 )
 
 func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	getUsers, err := h.repository.UserRepository.GetAll(ctx, req.Filter, req.Namespace, req.EncryptionKey)
+	users, err := h.repository.Users(ctx, req.Namespace)
+	if err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	getUsers, err := users.GetAll(ctx, req.Filter, req.EncryptionKey)
 	if err != nil {
 		return nil, err
 	}
-	usersInNamespace, err := h.repository.UserRepository.Count(ctx, req.Namespace)
+	usersInNamespace, err := users.Count(ctx)
 	if err != nil {
 		return nil, err
 	}

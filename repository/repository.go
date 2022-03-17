@@ -2,58 +2,47 @@ package repository
 
 import (
 	"context"
-	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
-	"os"
 )
 
-var (
-	mongoName           = ""
-	mongoUserCollection = ""
-)
-
-type Repository struct {
-	UserRepository user_repository.UserRepository
-	mongoClient    *mongo.Client
+type Repository interface {
+	Liveness(ctx context.Context) error
+	Users(ctx context.Context, namespace string) (user_repository.UserRepository, error)
 }
 
-func initialize() error {
-	var ok bool
-	mongoName, ok = os.LookupEnv("MONGO_DB_NAME")
-	if !ok || mongoName == "" {
-		return errors.New("missing required MONGO_DB_NAME")
-	}
-	mongoUserCollection, ok = os.LookupEnv("MONGO_USER_COLLECTION")
-	if !ok || mongoUserCollection == "" {
-		return errors.New("missing required MONGO_USER_COLLECTION")
-	}
-	return nil
+type defaultRepository struct {
+	namespace   string
+	mongoClient *mongo.Client
+	crypto      crypto.Crypto
 }
 
-func (r *Repository) Liveness(ctx context.Context) error {
+func (r *defaultRepository) Liveness(ctx context.Context) error {
 	if err := r.mongoClient.Ping(ctx, nil); err != nil {
 		return err
 	}
 	return nil
 }
 
-func New(ctx context.Context, mongoClient *mongo.Client, crypto crypto.Crypto, metadataType go_block.MetadataType, zapLog *zap.Logger) (*Repository, error) {
-	zapLog.Info("creating repository_mock...")
-	if err := initialize(); err != nil {
-		return nil, err
+func (r *defaultRepository) Users(ctx context.Context, namespace string) (user_repository.UserRepository, error) {
+	if namespace == "" {
+		namespace = "blocks-db"
 	}
-	userCollection := mongoClient.Database(mongoName).Collection(mongoUserCollection)
-	userRepository, err := user_repository.NewUserRepository(ctx, userCollection, crypto, metadataType, zapLog)
+	collection := r.mongoClient.Database(namespace).Collection("users")
+	userRepository, err := user_repository.NewUserRepository(ctx, collection, r.crypto)
 	if err != nil {
 		return nil, err
 	}
-	repository := &Repository{
-		UserRepository: userRepository,
-		mongoClient:    mongoClient,
+	return userRepository, nil
+}
+
+func New(mongoClient *mongo.Client, crypto crypto.Crypto, zapLog *zap.Logger) (Repository, error) {
+	zapLog.Info("creating repository_mock...")
+	repository := &defaultRepository{
+		mongoClient: mongoClient,
+		crypto:      crypto,
 	}
 	return repository, nil
 }

@@ -34,14 +34,12 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 		get.Encrypted = false
 		get.EncryptedAt = &ts.Timestamp{}
 	}
-	get.Role = update.Role
 	get.UpdatedAt = update.UpdatedAt
 	updateUser := ProtoUserToUser(get)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"email":        updateUser.Email,
 			"image":        updateUser.Image,
-			"role":         updateUser.Role,
 			"encrypted":    updateUser.Encrypted,
 			"metadata":     updateUser.Metadata,
 			"updated_at":   updateUser.UpdatedAt,
@@ -50,7 +48,7 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"_id": get.Id, "namespace": get.Namespace},
+		bson.M{"_id": get.Id},
 		mongoUpdate,
 	)
 	if err != nil {

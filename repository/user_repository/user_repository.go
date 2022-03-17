@@ -28,6 +28,8 @@ const (
 const (
 	maximumGetLimit = 75
 	maxFieldLength  = 150
+	emailHashIndex  = "block_email_hash_index"
+	optionalIdIndex = "block_optional_id_index"
 )
 
 var (
@@ -37,9 +39,7 @@ var (
 type User struct {
 	Id          string    `bson:"_id" json:"id"`
 	OptionalId  string    `bson:"optional_id" json:"optional_id"`
-	Namespace   string    `bson:"namespace" json:"namespace"`
 	Email       string    `bson:"email" json:"email"`
-	Role        string    `bson:"role" json:"role"`
 	Password    string    `bson:"password" json:"password"`
 	Image       string    `bson:"image" json:"image"`
 	Encrypted   bool      `bson:"encrypted" json:"encrypted"`
@@ -59,38 +59,24 @@ type UserRepository interface {
 	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error)
 	UpdateSecurity(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error)
 	Get(ctx context.Context, user *go_block.User, encryptionKey string) (*go_block.User, error)
-	GetAll(ctx context.Context, userFilter *go_block.UserFilter, namespace string, encryptionKey string) ([]*go_block.User, error)
-	GetUsersStream(ctx context.Context, namespace string, userBatch []*go_block.User) (*mongo.ChangeStream, error)
-	Count(ctx context.Context, namespace string) (int64, error)
+	GetAll(ctx context.Context, userFilter *go_block.UserFilter, encryptionKey string) ([]*go_block.User, error)
+	GetStream(ctx context.Context, get *go_block.User) (*mongo.ChangeStream, error)
+	Count(ctx context.Context) (int64, error)
 	Delete(ctx context.Context, user *go_block.User) error
-	DeleteBatch(ctx context.Context, userBatch []*go_block.User, namespace string) error
-	DeleteNamespace(ctx context.Context, namespace string) error
+	DeleteBatch(ctx context.Context, userBatch []*go_block.User) error
+	DeleteAll(ctx context.Context) error
 }
 
 type mongoRepository struct {
-	collection   *mongo.Collection
-	crypto       crypto.Crypto
-	metadataType go_block.MetadataType
-	zapLog       *zap.Logger
+	collection *mongo.Collection
+	crypto     crypto.Crypto
+	zapLog     *zap.Logger
 }
 
-func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto crypto.Crypto, metadataType go_block.MetadataType, zapLog *zap.Logger) (UserRepository, error) {
-	zapLog.Info("creating user repository...")
-	collection.Indexes().DropAll(context.Background())
-	idNamespaceIndexModel := mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "_id", Value: 1},
-			{Key: "namespace", Value: 1},
-		},
-		Options: options.Index().SetUnique(true).SetName("id_index_model"),
-	}
-	if _, err := collection.Indexes().CreateOne(ctx, idNamespaceIndexModel); err != nil {
-		return nil, err
-	}
+func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto crypto.Crypto) (UserRepository, error) {
 	emailNamespaceIndexModel := mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "email_hash", Value: 1},
-			{Key: "namespace", Value: 1},
 		},
 		Options: options.Index().SetUnique(true).SetPartialFilterExpression(
 			bson.D{
@@ -102,7 +88,7 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 					},
 				},
 			},
-		).SetName("email_index_model"),
+		).SetName(emailHashIndex),
 	}
 	if _, err := collection.Indexes().CreateOne(ctx, emailNamespaceIndexModel); err != nil {
 		return nil, err
@@ -110,7 +96,6 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 	optionalIdIndexModel := mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "optional_id", Value: 1},
-			{Key: "namespace", Value: 1},
 		},
 		Options: options.Index().SetUnique(true).SetPartialFilterExpression(
 			bson.D{
@@ -122,15 +107,13 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 					},
 				},
 			},
-		).SetName("optional_id_index_model"),
+		).SetName(optionalIdIndex),
 	}
 	if _, err := collection.Indexes().CreateOne(ctx, optionalIdIndexModel); err != nil {
 		return nil, err
 	}
 	return &mongoRepository{
-		collection:   collection,
-		zapLog:       zapLog,
-		crypto:       crypto,
-		metadataType: metadataType,
+		collection: collection,
+		crypto:     crypto,
 	}, nil
 }

@@ -15,11 +15,11 @@ func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, encrypti
 	}
 	filter := bson.M{}
 	if user.Id != "" {
-		filter = bson.M{"_id": user.Id, "namespace": user.Namespace}
+		filter = bson.M{"_id": user.Id}
 	} else if user.Email != "" {
-		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email))), "namespace": user.Namespace}
+		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email)))}
 	} else if user.OptionalId != "" {
-		filter = bson.M{"optional_id": user.OptionalId, "namespace": user.Namespace}
+		filter = bson.M{"optional_id": user.OptionalId}
 	}
 	resp := User{}
 	if err := r.collection.FindOne(ctx, filter).Decode(&resp); err != nil {

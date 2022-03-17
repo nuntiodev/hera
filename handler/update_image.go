@@ -6,7 +6,11 @@ import (
 )
 
 func (h *defaultHandler) UpdateImage(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	updatedUser, err := h.repository.UserRepository.UpdateImage(ctx, req.User, req.Update, req.EncryptionKey)
+	users, err := h.repository.Users(ctx, req.Namespace)
+	if err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	updatedUser, err := users.UpdateImage(ctx, req.User, req.Update, req.EncryptionKey)
 	if err != nil {
 		return nil, err
 	}

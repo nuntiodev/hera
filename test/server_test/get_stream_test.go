@@ -1,18 +1,6 @@
 package server_test
 
-import (
-	"context"
-	"github.com/brianvoe/gofakeit/v6"
-	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
-	"github.com/stretchr/testify/assert"
-	"os"
-	"sync"
-	"testing"
-	"time"
-)
-
+/*
 func skipStream(t *testing.T) {
 	if os.Getenv("SKIP_STREAM") != "" {
 		t.Skip("Skipping testing stream test... these can only be run with a clustered MongoDB")
@@ -31,12 +19,10 @@ func TestGetCreateStreamWithEncryption(t *testing.T) {
 			go_block.StreamType_CREATE,
 		},
 		EncryptionKey:    encryptionKey,
-		AutoFollowStream: false,
 	})
 	assert.NoError(t, err)
 	defer stream.CloseSend()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: namespace,
 		Id:        uuid.NewV4().String(),
 		Image:     gofakeit.ImageURL(10, 10),
 		Email:     gofakeit.Email(),
@@ -344,3 +330,4 @@ func TestGetUpdateDeleteStreamWithEncryptionWithAutoFollow(t *testing.T) {
 	assert.Equal(t, go_block.StreamType_UPDATE, streamResp.StreamType)
 	assert.Equal(t, newUserBatch[len(newUserBatch)-1].Email, streamResp.User.Email)
 }
+*/

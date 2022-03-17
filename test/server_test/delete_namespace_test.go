@@ -16,22 +16,18 @@ func TestDeleteNamespace(t *testing.T) {
 	defer cancel()
 	namespace := uuid.NewV4().String()
 	_, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user_mock.GetRandomUser(&go_block.User{
-			Namespace: namespace,
-		}),
+		User:      user_mock.GetRandomUser(&go_block.User{}),
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	_, err = testClient.Create(ctx, &go_block.UserRequest{
-		User: user_mock.GetRandomUser(&go_block.User{
-			Namespace: namespace,
-		}),
+		User: user_mock.GetRandomUser(&go_block.User{}),
 	})
 	assert.NoError(t, err)
 	newNamespace := uuid.NewV4().String()
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user_mock.GetRandomUser(&go_block.User{
-			Namespace: newNamespace,
-		}),
+		User:      user_mock.GetRandomUser(&go_block.User{}),
+		Namespace: newNamespace,
 	})
 	assert.NoError(t, err)
 	// act

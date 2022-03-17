@@ -31,7 +31,6 @@ func prepare(action int, user *go_block.User) {
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
-	user.Namespace = strings.TrimSpace(user.Namespace)
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	user.Image = strings.TrimSpace(user.Image)
 	user.OptionalId = strings.TrimSpace(user.OptionalId)
@@ -58,7 +57,7 @@ func (r *mongoRepository) validate(action int, user *go_block.User) error {
 			return errors.New("invalid created at date")
 		} else if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at date")
-		} else if r.metadataType == go_block.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
+		} else if !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
 		}
 	case actionUpdatePassword:
@@ -76,7 +75,7 @@ func (r *mongoRepository) validate(action int, user *go_block.User) error {
 	case actionUpdateMetadata:
 		if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at")
-		} else if r.metadataType == go_block.MetadataType_METADATA_TYPE_JSON && !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
+		} else if !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
 		}
 	case actionUpdateSecurity:
@@ -87,8 +86,6 @@ func (r *mongoRepository) validate(action int, user *go_block.User) error {
 		return nil
 	}
 	if len(user.Email) > maxFieldLength {
-
-	} else if len(user.Role) > maxFieldLength {
 
 	} else if len(user.OptionalId) > maxFieldLength {
 
@@ -139,9 +136,7 @@ func UserToProtoUser(user *User) *go_block.User {
 	return &go_block.User{
 		Id:          user.Id,
 		OptionalId:  user.OptionalId,
-		Namespace:   user.Namespace,
 		Email:       user.Email,
-		Role:        user.Role,
 		Password:    user.Password,
 		Image:       user.Image,
 		Encrypted:   user.Encrypted,
@@ -159,9 +154,7 @@ func ProtoUserToUser(user *go_block.User) *User {
 	return &User{
 		Id:          user.Id,
 		OptionalId:  user.OptionalId,
-		Namespace:   user.Namespace,
 		Email:       user.Email,
-		Role:        user.Role,
 		Password:    user.Password,
 		Image:       user.Image,
 		Encrypted:   user.Encrypted,

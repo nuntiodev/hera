@@ -16,20 +16,22 @@ func TestUpdateImage(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
+	namespace := uuid.NewV4().String()
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user,
+		User:      user,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	// act
 	newImage := gofakeit.ImageURL(20, 10)
 	createUser.User.Image = newImage
 	updateUser, err := testClient.UpdateImage(ctx, &go_block.UserRequest{
-		Update: createUser.User,
-		User:   createUser.User,
+		Update:    createUser.User,
+		User:      createUser.User,
+		Namespace: namespace,
 	})
 	// validate
 	assert.NoError(t, err)
@@ -43,13 +45,14 @@ func TestUpdateImageWithEncryption(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
+	namespace := uuid.NewV4().String()
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
 		User:          user,
 		EncryptionKey: encryptionKey,
+		Namespace:     namespace,
 	})
 	assert.NoError(t, err)
 	// act
@@ -59,6 +62,7 @@ func TestUpdateImageWithEncryption(t *testing.T) {
 		Update:        createUser.User,
 		User:          createUser.User,
 		EncryptionKey: encryptionKey,
+		Namespace:     namespace,
 	})
 	// validate
 	assert.NoError(t, err)
@@ -72,8 +76,7 @@ func TestUpdateImageNoUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	_, err := testClient.Create(ctx, &go_block.UserRequest{
 		User: user,
@@ -90,8 +93,7 @@ func TestUpdateImageNoReq(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
 	_, err := testClient.Create(ctx, &go_block.UserRequest{

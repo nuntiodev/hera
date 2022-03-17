@@ -45,7 +45,7 @@ func (r *mongoRepository) UpdateEmail(ctx context.Context, get *go_block.User, u
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"_id": getUser.Id, "namespace": getUser.Namespace},
+		bson.M{"_id": getUser.Id},
 		mongoUpdate,
 	)
 	if err != nil {

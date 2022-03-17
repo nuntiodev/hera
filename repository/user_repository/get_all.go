@@ -9,12 +9,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter, namespace string, encryptionKey string) ([]*go_block.User, error) {
+func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter, encryptionKey string) ([]*go_block.User, error) {
 	var resp []*go_block.User
 	sortOptions := options.FindOptions{}
 	limitOptions := options.Find()
 	limitOptions.SetLimit(maximumGetLimit)
-	filter := bson.M{"namespace": namespace}
+	filter := bson.M{}
 	if userFilter != nil {
 		order := -1
 		if userFilter.Order == go_block.UserFilter_INC {

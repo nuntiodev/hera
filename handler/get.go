@@ -6,7 +6,11 @@ import (
 )
 
 func (h *defaultHandler) Get(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	getUser, err := h.repository.UserRepository.Get(ctx, req.User, req.EncryptionKey)
+	users, err := h.repository.Users(ctx, req.Namespace)
+	if err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	getUser, err := users.Get(ctx, req.User, req.EncryptionKey)
 	if err != nil {
 		return nil, err
 	}

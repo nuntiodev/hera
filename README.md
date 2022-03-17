@@ -1,4 +1,4 @@
-## Hi, welcome to 👋
+## Welcome to the User Block 👋
 
 ![User Block - User Management API Block](https://softcorp-io.github.io/website/blocks/user_block_cover.png)
 

@@ -27,12 +27,12 @@ type Handler interface {
 }
 
 type defaultHandler struct {
-	repository *repository.Repository
+	repository repository.Repository
 	crypto     crypto.Crypto
 	zapLog     *zap.Logger
 }
 
-func New(zapLog *zap.Logger, repository *repository.Repository, crypto crypto.Crypto) (Handler, error) {
+func New(zapLog *zap.Logger, repository repository.Repository, crypto crypto.Crypto) (Handler, error) {
 	zapLog.Info("creating handler")
 	handler := &defaultHandler{
 		repository: repository,

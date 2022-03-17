@@ -15,22 +15,25 @@ func TestDelete(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
+	namespace := uuid.NewV4().String()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user,
+		User:      user,
+		Namespace: namespace,
 	})
 	// act
 	_, err = testClient.Delete(ctx, &go_block.UserRequest{
-		User: createUser.User,
+		User:      createUser.User,
+		Namespace: namespace,
 	})
 	// validate
 	assert.NoError(t, err)
 	// validate in database
 	_, err = testClient.Get(ctx, &go_block.UserRequest{
-		User: createUser.User,
+		User:      createUser.User,
+		Namespace: namespace,
 	})
 	assert.Error(t, err)
 }
@@ -40,7 +43,9 @@ func TestDeleteNoUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	// act
-	_, err := testClient.Delete(ctx, &go_block.UserRequest{})
+	_, err := testClient.Delete(ctx, &go_block.UserRequest{
+		Namespace: uuid.NewV4().String(),
+	})
 	assert.Error(t, err)
 }
 

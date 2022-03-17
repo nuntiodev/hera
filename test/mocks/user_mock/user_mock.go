@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/block-proto/go_block"
 	"time"
 )
@@ -42,9 +41,8 @@ func GetMetadata(metadata *MetadataMock) string {
 
 func GetRandomUser(user *go_block.User) *go_block.User {
 	resp := &go_block.User{
-		Password:  gofakeit.Password(true, true, true, true, true, 10),
-		Namespace: uuid.NewV4().String(),
-		Metadata:  GetMetadata(nil),
+		Password: gofakeit.Password(true, true, true, true, true, 10),
+		Metadata: GetMetadata(nil),
 	}
 	if user != nil {
 		if user.Email != "" {
@@ -56,17 +54,11 @@ func GetRandomUser(user *go_block.User) *go_block.User {
 		if user.OptionalId != "" {
 			resp.OptionalId = user.OptionalId
 		}
-		if user.Role != "" {
-			resp.Role = user.Role
-		}
 		if user.Password != "" {
 			resp.Password = user.Password
 		}
 		if user.Image != "" {
 			resp.Image = user.Image
-		}
-		if user.Namespace != "" {
-			resp.Namespace = user.Namespace
 		}
 		if user.Metadata != "" {
 			resp.Metadata = user.Metadata
@@ -78,9 +70,6 @@ func GetRandomUser(user *go_block.User) *go_block.User {
 func CompareUsers(userOne, userTwo *go_block.User) error {
 	if userOne == nil || userTwo == nil {
 		return errors.New("one of the users are nil")
-	}
-	if userOne.Namespace != userTwo.Namespace {
-		return errors.New(fmt.Sprintf("different namespaces: user1: %s  user2: %s", userOne.Namespace, userTwo.Namespace))
 	} else if userOne.Id != userTwo.Id {
 		return errors.New(fmt.Sprintf("different ids: user1: %s  user2: %s", userOne.Id, userTwo.Id))
 	} else if userOne.Email != userTwo.Email {

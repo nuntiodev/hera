@@ -18,14 +18,16 @@ func TestUpdateEmail(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, "")
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, "")
 	initialEmail := user.Email
 	initialUpdatedAt := user.UpdatedAt
 	assert.Nil(t, err)
 	// act
 	updateEmail := "info@softcorp.io"
 	createdUser.Email = updateEmail
-	updatedUser, err := testRepo.UpdateEmail(ctx, createdUser, createdUser, "")
+	updatedUser, err := users.UpdateEmail(ctx, createdUser, createdUser, "")
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
@@ -34,13 +36,12 @@ func TestUpdateEmail(t *testing.T) {
 	assert.Equal(t, updateEmail, updatedUser.Email)
 	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
 	// validate in database
-	_, err = testRepo.Get(ctx, &go_block.User{
-		Email: createdUser.Email,
+	_, err = users.Get(ctx, &go_block.User{
+		Email: user.Email,
 	}, "")
 	assert.Error(t, err)
-	getUser, err := testRepo.Get(ctx, &go_block.User{
-		Email:     updatedUser.Email,
-		Namespace: updatedUser.Namespace,
+	getUser, err := users.Get(ctx, &go_block.User{
+		Email: updatedUser.Email,
 	}, "")
 	assert.NoError(t, err)
 	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
@@ -53,14 +54,16 @@ func TestUpdateEmailWithEncryption(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, encryptionKey)
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, encryptionKey)
 	initialEmail := user.Email
 	initialUpdatedAt := user.UpdatedAt
 	assert.Nil(t, err)
 	// act
 	updateEmail := "info@softcorp.io"
 	createdUser.Email = updateEmail
-	updatedUser, err := testRepo.UpdateEmail(ctx, createdUser, createdUser, encryptionKey)
+	updatedUser, err := users.UpdateEmail(ctx, createdUser, createdUser, encryptionKey)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
@@ -69,13 +72,12 @@ func TestUpdateEmailWithEncryption(t *testing.T) {
 	assert.Equal(t, updateEmail, updatedUser.Email)
 	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
 	// validate in database
-	_, err = testRepo.Get(ctx, &go_block.User{
+	_, err = users.Get(ctx, &go_block.User{
 		Email: createdUser.Email,
 	}, encryptionKey)
 	assert.Error(t, err)
-	getUser, err := testRepo.Get(ctx, &go_block.User{
-		Email:     updatedUser.Email,
-		Namespace: updatedUser.Namespace,
+	getUser, err := users.Get(ctx, &go_block.User{
+		Email: updatedUser.Email,
 	}, encryptionKey)
 	assert.NoError(t, err)
 	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
@@ -88,11 +90,13 @@ func TestUpdateEmailWithInvalidEncryptionKey(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, encryptionKey)
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
 	createdUser.Email = gofakeit.Email()
-	_, err = testRepo.UpdateEmail(ctx, createdUser, createdUser, invalidEncryptionKey)
+	_, err = users.UpdateEmail(ctx, createdUser, createdUser, invalidEncryptionKey)
 	// validate
 	assert.Error(t, err)
 }
@@ -104,11 +108,13 @@ func TestUpdateEncryptedEmailWithoutKey(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, encryptionKey)
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
 	createdUser.Email = gofakeit.Email()
-	_, err = testRepo.UpdateEmail(ctx, createdUser, createdUser, "")
+	_, err = users.UpdateEmail(ctx, createdUser, createdUser, "")
 	// validate
 	assert.Error(t, err)
 }
@@ -120,11 +126,13 @@ func TestUpdateUnencryptedEmailWithKey(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 	})
-	createdUser, err := testRepo.Create(ctx, user, "")
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, "")
 	assert.Nil(t, err)
 	// act
 	createdUser.Email = gofakeit.Email()
-	_, err = testRepo.UpdateEmail(ctx, createdUser, createdUser, encryptionKey)
+	_, err = users.UpdateEmail(ctx, createdUser, createdUser, encryptionKey)
 	// validate
 	assert.Error(t, err)
 }
@@ -134,12 +142,15 @@ func TestEmailInvalidNamespace(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	createdUser, err := testRepo.Create(ctx, user, "")
+	users, err := testRepository.Users(ctx, namespace)
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, "")
 	assert.Nil(t, err)
 	// act
 	createdUser.Email = gofakeit.Email()
-	createdUser.Namespace = uuid.NewV4().String()
-	_, err = testRepo.UpdateEmail(ctx, createdUser, createdUser, "")
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	_, err = usersTwo.UpdateEmail(ctx, createdUser, createdUser, "")
 	// validate
 	assert.Error(t, err)
 }

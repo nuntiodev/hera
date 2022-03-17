@@ -16,18 +16,20 @@ func TestGet(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
+	namespace := uuid.NewV4().String()
 	// act
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
-		User: user,
+		User:      user,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	// validate
 	getUser, err := testClient.Get(ctx, &go_block.UserRequest{
-		User: createUser.User,
+		User:      createUser.User,
+		Namespace: namespace,
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, getUser)
@@ -38,21 +40,23 @@ func TestGetWithEncryption(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
+	namespace := uuid.NewV4().String()
 	user := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-		Image:     gofakeit.ImageURL(10, 10),
+		Image: gofakeit.ImageURL(10, 10),
 	})
 	user.Id = ""
 	// act
 	createUser, err := testClient.Create(ctx, &go_block.UserRequest{
 		User:          user,
 		EncryptionKey: encryptionKey,
+		Namespace:     namespace,
 	})
 	assert.NoError(t, err)
 	// validate
 	getUser, err := testClient.Get(ctx, &go_block.UserRequest{
 		User:          createUser.User,
 		EncryptionKey: encryptionKey,
+		Namespace:     namespace,
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, getUser)

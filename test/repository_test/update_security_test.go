@@ -3,6 +3,7 @@ package respository_test
 import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
+	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/test/mocks/user_mock"
 	"github.com/stretchr/testify/assert"
@@ -18,19 +19,20 @@ func TestUpdateUnencryptedSecurity(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	createdUser, err := testRepo.Create(ctx, user, "")
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, "")
 	assert.Nil(t, err)
 	// act
-	createdUser.Role = gofakeit.Name()
-	updatedUser, err := testRepo.UpdateSecurity(ctx, createdUser, createdUser, encryptionKey)
+	updatedUser, err := users.UpdateSecurity(ctx, createdUser, createdUser, encryptionKey)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
 	assert.True(t, updatedUser.Encrypted)
 	// validate in database
-	_, err = testRepo.Get(ctx, createdUser, encryptionKey)
+	_, err = users.Get(ctx, createdUser, encryptionKey)
 	assert.NoError(t, err)
-	getUser, err := testRepo.Get(ctx, createdUser, encryptionKey)
+	getUser, err := users.Get(ctx, createdUser, encryptionKey)
 	assert.NoError(t, err)
 	createdUser.Encrypted = true
 	assert.NoError(t, user_mock.CompareUsers(getUser, createdUser))
@@ -44,17 +46,18 @@ func TestUpdateEncryptedSecurity(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	createdUser, err := testRepo.Create(ctx, user, encryptionKey)
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
-	createdUser.Role = gofakeit.Name()
-	updatedUser, err := testRepo.UpdateSecurity(ctx, createdUser, createdUser, encryptionKey)
+	updatedUser, err := users.UpdateSecurity(ctx, createdUser, createdUser, encryptionKey)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
 	assert.False(t, updatedUser.Encrypted)
 	// validate in database
-	_, err = testRepo.Get(ctx, createdUser, "")
+	_, err = users.Get(ctx, createdUser, "")
 	assert.NoError(t, err)
 }
 
@@ -66,11 +69,12 @@ func TestUpdateSecurityWithInvalidEncryptionKey(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	createdUser, err := testRepo.Create(ctx, user, encryptionKey)
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	assert.NoError(t, err)
+	createdUser, err := users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
-	createdUser.Role = gofakeit.Name()
-	_, err = testRepo.UpdateSecurity(ctx, createdUser, createdUser, invalidEncryptionKey)
+	_, err = users.UpdateSecurity(ctx, createdUser, createdUser, invalidEncryptionKey)
 	// validate
 	assert.Error(t, err)
 }

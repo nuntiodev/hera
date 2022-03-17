@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongoRepository) DeleteBatch(ctx context.Context, userBatch []*go_block.User, namespace string) error {
+func (r *mongoRepository) DeleteBatch(ctx context.Context, userBatch []*go_block.User) error {
 	var ids []string
 	var emails []string
 	var optionalIds []string
@@ -39,7 +39,6 @@ func (r *mongoRepository) DeleteBatch(ctx context.Context, userBatch []*go_block
 		optionalIdsFilter = bson.D{{"$in", optionalIds}}
 	}
 	filter := bson.D{
-		{"namespace", namespace},
 		{"$or", bson.A{
 			bson.D{{"_id", idsFilter}},
 			bson.D{{"email", emailsFilter}},

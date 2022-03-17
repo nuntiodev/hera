@@ -14,31 +14,19 @@ func TestDeleteBatch(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	namespace := uuid.NewV4().String()
-	userOne := user_mock.GetRandomUser(&go_block.User{
-		Namespace: namespace,
-	})
-	userTwo := user_mock.GetRandomUser(&go_block.User{
-		Namespace: namespace,
-	})
-	userThree := user_mock.GetRandomUser(&go_block.User{
-		Namespace: uuid.NewV4().String(),
-	})
-	_, err := testRepo.Create(ctx, userOne, "")
+	userOne := user_mock.GetRandomUser(&go_block.User{})
+	userTwo := user_mock.GetRandomUser(&go_block.User{})
+	users, err := testRepository.Users(ctx, uuid.NewV4().String())
 	assert.NoError(t, err)
-	_, err = testRepo.Create(ctx, userTwo, "")
+	_, err = users.Create(ctx, userOne, "")
 	assert.NoError(t, err)
-	_, err = testRepo.Create(ctx, userThree, "")
+	_, err = users.Create(ctx, userTwo, "")
 	assert.NoError(t, err)
 	// act
-	err = testRepo.DeleteBatch(ctx, []*go_block.User{userOne, userTwo, userThree}, namespace)
+	err = users.DeleteBatch(ctx, []*go_block.User{userOne, userTwo})
 	assert.NoError(t, err)
 	// validate
-	getUsersDeletedNamespace, err := testRepo.GetAll(ctx, nil, namespace, "")
+	getUsersDeletedNamespace, err := users.GetAll(ctx, nil, "")
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(getUsersDeletedNamespace))
-	getUsersAliveNamespace, err := testRepo.GetAll(ctx, nil, userThree.Namespace, "")
-	assert.NoError(t, err)
-	assert.Equal(t, 1, len(getUsersAliveNamespace))
-	assert.NoError(t, user_mock.CompareUsers(getUsersAliveNamespace[0], userThree))
 }

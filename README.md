@@ -1,4 +1,7 @@
-<h1 align="center"><img src="https://softcorp-io.github.io/website/blocks/user_block_cover.png" alt="User Block - User Management API Block"></h1>
+## Hi, welcome to 👋
+
+![User Block - User Management API Block](https://softcorp-io.github.io/website/blocks/user_block_cover.png)
+
 <br/>
 <h4 align="center">
     <a href="https://www.softcorp.io/blocks/user/docs/guide">Guides</a> |
@@ -14,9 +17,11 @@ Are you tired of wasting your time writing the same service over and over again?
 We are, and that's why we have created Softcorp Blocks. These are modular and simple API building blocks that run on
 any Linux-based environment and that you can connect to through our simple SDK.
 Our blocks are simple and are meant for your applications to build upon. The blocks are all stateless, scales horizontally and comes with a large set of tests.
-Furthermore, each block automatically handles extra metadata and encryption, which means you can customize them to handle almost any environment!
-<br/><br/>
-The User Service block is an API block written in Golang that communicates over gRPC. The user-block is responsible for handling
+Furthermore, each block supports encryption and (un)marshaling metadata such that you can customize them to handle almost any task!
+
+## Block User Service
+
+The User Service Block is an API block written in Golang that communicates over gRPC. The user-block is responsible for handling
 your organization's user management.
 
 ## Softcorp Cloud
@@ -34,9 +39,6 @@ If you're looking to jump straight into it, go ahead:
 - [Run Block User Service in Kubernetes using Helm](): An advanced guide to deploy a fully functional set up in Kubernetes.
 - [Connect your application to Block User Service](): Connect to Softcorp Cloud or your private environment through our SDK.
 
-
-## What is User Block?
-```block-user-service``` compiles to a small binary and can thus be deployed almost anywhere. 
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

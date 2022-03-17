@@ -1,4 +1,5 @@
-<h1 align="center"><img src="https://softcorp-io.github.io/website/blocks/user_block_cover.png" alt="User Block - User Management API Block"></h1>
+![User Block - User Management API Block](https://softcorp-io.github.io/website/blocks/user_block_cover.png)
+
 <br/>
 <h4 align="center">
     <a href="https://www.softcorp.io/blocks/user/docs/guide">Guides</a> |

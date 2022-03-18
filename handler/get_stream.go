@@ -98,7 +98,7 @@ func removeConnection(ctx context.Context, sessionID string) {
 	}
 }
 
-func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer, encryptionKey, sessionId string) error {
+func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	g := new(errgroup.Group)
 	for stream.Next(ctx) {
 		var changeEvent ChangeEvent
@@ -118,14 +118,13 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 			streamType = go_block.StreamType_DELETE
 		}
 		userResp.Id = changeEvent.DocumentKey.ID
-		if encryptionKey != "" && userResp.EncryptedAt.IsValid() {
-			if err := h.crypto.DecryptUser(encryptionKey, userResp); err != nil {
-				h.zapLog.Debug(err.Error())
+		if req.EncryptionKey != "" && userResp.EncryptedAt.IsValid() {
+			if err := h.crypto.DecryptUser(req.EncryptionKey, userResp); err != nil {
 				return err
 			}
 		}
 		fmt.Println("ENC KEY")
-		fmt.Println(encryptionKey, userResp.EncryptedAt.IsValid())
+		fmt.Println(req.EncryptionKey, userResp.EncryptedAt.IsValid())
 		fmt.Println("ENC KEY")
 		streamResp := &go_block.UserStream{
 			StreamType: streamType,
@@ -133,22 +132,33 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 		}
 		h.zapLog.Debug(fmt.Sprintf("streaming new user info: %s", streamResp.String()))
 		mu.Lock()
-		connections[sessionId].UsedAt = time.Now()
+		connections[req.SessionId].UsedAt = time.Now()
 		mu.Unlock()
 		g.Go(func() error {
 			if err := server.Send(streamResp); err != nil {
-				h.zapLog.Debug(err.Error())
 				return err
 			}
 			return nil
 		})
 	}
 	if err := g.Wait(); err != nil {
+		return err
+	}
+	if err := stream.Err(); err != nil {
 		h.zapLog.Debug(err.Error())
 		return err
 	}
+	// setup new mongo stream
 	h.zapLog.Debug("returning from broken stream...")
-	return nil
+	users, err := h.repository.Users(context.Background(), req.Namespace)
+	if err != nil {
+		return err
+	}
+	newMongoStream, err := users.GetStream(ctx, req.User)
+	if err != nil {
+		return err
+	}
+	return h.handleStream(ctx, newMongoStream, req, server)
 }
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
@@ -156,14 +166,13 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	defer cancel()
 	if conn, err := getStream(req.SessionId); err == nil {
 		h.zapLog.Debug("stream is already running")
-		return h.handleStream(ctx, conn.Connection, conn.Server, req.EncryptionKey, req.SessionId)
+		return h.handleStream(ctx, conn.Connection, req, conn.Server)
 	}
 	h.zapLog.Debug("initializing stream")
 	users, err := h.repository.Users(context.Background(), req.Namespace)
 	if err != nil {
 		return err
 	}
-	// remove old connection if exist
 	stream, err := users.GetStream(context.Background(), req.User)
 	if err != nil {
 		return err
@@ -173,5 +182,5 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	defer removeConnection(ctx, req.SessionId)
 	h.zapLog.Debug(fmt.Sprintf("adding new connection with a total count of: %d", len(connections)))
 	// stream
-	return h.handleStream(ctx, stream, server, req.EncryptionKey, req.SessionId)
+	return h.handleStream(ctx, stream, req, server)
 }

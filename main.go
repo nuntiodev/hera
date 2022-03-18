@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	zapLog, err := zap.NewProduction()
+	zapLog, err := zap.NewDevelopment()
 	if err != nil {
 		panic(err)
 	}

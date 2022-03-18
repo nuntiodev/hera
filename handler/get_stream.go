@@ -70,7 +70,9 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 			streamType = go_block.StreamType_DELETE
 		}
 		userResp.Id = changeEvent.DocumentKey.ID
+		h.zapLog.Debug(req.EncryptionKey)
 		if req.EncryptionKey != "" && userResp.EncryptedAt.IsValid() {
+			h.zapLog.Debug("decrypting user stream")
 			if err := h.crypto.DecryptUser(req.EncryptionKey, userResp); err != nil {
 				h.zapLog.Debug(err.Error())
 			}

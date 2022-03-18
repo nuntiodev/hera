@@ -2,15 +2,12 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/sync/errgroup"
-	"sync"
-	"time"
 )
 
 const (
@@ -46,58 +43,6 @@ type ChangeEvent struct {
 	Ns                namespace            `bson:"ns"`
 }
 
-type StreamConn struct {
-	ProjectId  string
-	Connection *mongo.ChangeStream
-	Server     go_block.UserService_GetStreamServer
-	UsedAt     time.Time
-}
-
-var (
-	mu          sync.Mutex
-	connections = map[string]*StreamConn{}
-)
-
-func getStream(sessionId string) (*StreamConn, error) {
-	if sessionId != "" {
-		mu.Lock()
-		defer mu.Unlock()
-		val, ok := connections[sessionId]
-		if ok && val != nil && val.Connection != nil && val.Server != nil {
-			return val, nil
-		}
-	}
-	return nil, errors.New("no stream with that session id")
-}
-
-func addStream(sessionId string, stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer) {
-	if stream != nil && sessionId != "" {
-		mu.Lock()
-		defer mu.Unlock()
-		connections[sessionId] = &StreamConn{
-			Connection: stream,
-			UsedAt:     time.Now(),
-			Server:     server,
-		}
-	}
-}
-
-func removeConnection(ctx context.Context, sessionID string) {
-	if sessionID == "" {
-		return
-	}
-	mu.Lock()
-	defer mu.Unlock()
-	if val, ok := connections[sessionID]; ok {
-		if val != nil {
-			if val.Connection != nil {
-				val.Connection.Close(ctx)
-			}
-		}
-		delete(connections, sessionID)
-	}
-}
-
 func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	g := new(errgroup.Group)
 	for stream.Next(ctx) {
@@ -131,9 +76,6 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 			User:       userResp,
 		}
 		h.zapLog.Debug(fmt.Sprintf("streaming new user info: %s", streamResp.String()))
-		mu.Lock()
-		connections[req.SessionId].UsedAt = time.Now()
-		mu.Unlock()
 		g.Go(func() error {
 			if err := server.Send(streamResp); err != nil {
 				return err
@@ -148,27 +90,13 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 		h.zapLog.Debug(err.Error())
 		return err
 	}
-	// setup new mongo stream
-	h.zapLog.Debug("returning from broken stream...")
-	users, err := h.repository.Users(context.Background(), req.Namespace)
-	if err != nil {
-		return err
-	}
-	newMongoStream, err := users.GetStream(ctx, req.User)
-	if err != nil {
-		return err
-	}
-	return h.handleStream(ctx, newMongoStream, req, server)
+	return nil
 }
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
+	h.zapLog.Debug("initializing stream")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	if conn, err := getStream(req.SessionId); err == nil {
-		h.zapLog.Debug("stream is already running")
-		return h.handleStream(ctx, conn.Connection, req, conn.Server)
-	}
-	h.zapLog.Debug("initializing stream")
 	users, err := h.repository.Users(context.Background(), req.Namespace)
 	if err != nil {
 		return err
@@ -177,10 +105,12 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	if err != nil {
 		return err
 	}
-	// add new connection
-	addStream(req.SessionId, stream, server)
-	defer removeConnection(ctx, req.SessionId)
-	h.zapLog.Debug(fmt.Sprintf("adding new connection with a total count of: %d", len(connections)))
+	// remember to close connections
+	defer func() {
+		if err := stream.Close(ctx); err != nil {
+			h.zapLog.Debug(err.Error())
+		}
+	}()
 	// stream
 	return h.handleStream(ctx, stream, req, server)
 }

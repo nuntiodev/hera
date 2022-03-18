@@ -6,7 +6,6 @@ import (
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository"
 	"go.uber.org/zap"
-	"time"
 )
 
 type Handler interface {
@@ -35,19 +34,6 @@ type defaultHandler struct {
 
 func New(zapLog *zap.Logger, repository repository.Repository, crypto crypto.Crypto) (Handler, error) {
 	zapLog.Info("creating handler")
-	ticker := time.NewTicker(5 * time.Minute)
-	quit := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				cleanupConnections()
-			case <-quit:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
 	handler := &defaultHandler{
 		repository: repository,
 		crypto:     crypto,

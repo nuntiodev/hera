@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
@@ -48,31 +49,35 @@ type ChangeEvent struct {
 type StreamConn struct {
 	ProjectId  string
 	Connection *mongo.ChangeStream
+	Server     go_block.UserService_GetStreamServer
 	UsedAt     time.Time
 }
 
 var (
-	mu           sync.Mutex
-	connections  = map[string]*StreamConn{}
-	lastTimeUsed = time.Minute * 5
+	mu          sync.Mutex
+	connections = map[string]*StreamConn{}
 )
 
-func cleanupConnections() {
-	ctx := context.Background()
-	for k, v := range connections {
-		if v != nil && time.Now().Sub(v.UsedAt) > lastTimeUsed {
-			removeConnection(ctx, k)
+func getStream(sessionId string) (*StreamConn, error) {
+	if sessionId != "" {
+		mu.Lock()
+		defer mu.Unlock()
+		val, ok := connections[sessionId]
+		if ok {
+			return val, nil
 		}
 	}
+	return nil, errors.New("no stream with that session id")
 }
 
-func addStream(sessionId string, stream *mongo.ChangeStream) {
+func addStream(sessionId string, stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer) {
 	if stream != nil && sessionId != "" {
 		mu.Lock()
 		defer mu.Unlock()
 		connections[sessionId] = &StreamConn{
 			Connection: stream,
 			UsedAt:     time.Now(),
+			Server:     server,
 		}
 	}
 }
@@ -94,7 +99,6 @@ func removeConnection(ctx context.Context, sessionID string) {
 }
 
 func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer, encryptionKey, sessionId string) error {
-	defer removeConnection(ctx, sessionId)
 	g := new(errgroup.Group)
 	for stream.Next(ctx) {
 		var changeEvent ChangeEvent
@@ -132,7 +136,6 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 		g.Go(func() error {
 			if err := server.Send(streamResp); err != nil {
 				h.zapLog.Debug(err.Error())
-				stream.Close(ctx)
 				return err
 			}
 			return nil
@@ -146,18 +149,21 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	ctx, _ := context.WithCancel(context.Background())
+	if conn, err := getStream(req.SessionId); err != nil {
+		return h.handleStream(ctx, conn.Connection, conn.Server, req.EncryptionKey, req.SessionId)
+	}
 	users, err := h.repository.Users(context.Background(), req.Namespace)
 	if err != nil {
 		return err
 	}
 	// remove old connection if exist
-	removeConnection(ctx, req.SessionId)
 	stream, err := users.GetStream(context.Background(), req.User)
 	if err != nil {
 		return err
 	}
 	// add new connection
-	addStream(req.SessionId, stream)
+	addStream(req.SessionId, stream, server)
+	defer removeConnection(ctx, req.SessionId)
 	h.zapLog.Debug(fmt.Sprintf("adding new connection with a total count of: %d", len(connections)))
 	// stream
 	return h.handleStream(ctx, stream, server, req.EncryptionKey, req.SessionId)

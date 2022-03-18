@@ -138,6 +138,7 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 			User:       userResp,
 		}
 		h.zapLog.Debug(fmt.Sprintf("streaming new user info: %s", streamResp.String()))
+		connections[req.SessionId].UsedAt = time.Now()
 		go server.Send(streamResp)
 	}
 	return nil

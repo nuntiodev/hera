@@ -63,7 +63,7 @@ func getStream(sessionId string) (*StreamConn, error) {
 		mu.Lock()
 		defer mu.Unlock()
 		val, ok := connections[sessionId]
-		if ok {
+		if ok && val != nil && val.Connection != nil && val.Server != nil {
 			return val, nil
 		}
 	}
@@ -150,8 +150,9 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 }
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
-	ctx := context.Background()
-	if conn, err := getStream(req.SessionId); err != nil {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if conn, err := getStream(req.SessionId); err == nil {
 		return h.handleStream(ctx, conn.Connection, conn.Server, req.EncryptionKey, req.SessionId)
 	}
 	users, err := h.repository.Users(context.Background(), req.Namespace)

@@ -132,7 +132,9 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 			User:       userResp,
 		}
 		h.zapLog.Debug(fmt.Sprintf("streaming new user info: %s", streamResp.String()))
+		mu.Lock()
 		connections[sessionId].UsedAt = time.Now()
+		mu.Unlock()
 		g.Go(func() error {
 			if err := server.Send(streamResp); err != nil {
 				h.zapLog.Debug(err.Error())
@@ -148,8 +150,7 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 }
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := context.Background()
 	if conn, err := getStream(req.SessionId); err != nil {
 		return h.handleStream(ctx, conn.Connection, conn.Server, req.EncryptionKey, req.SessionId)
 	}

@@ -22,9 +22,9 @@ func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserF
 		}
 		switch userFilter.Sort {
 		case go_block.UserFilter_CREATED_AT:
-			sortOptions.SetSort(bson.D{{"created_at", order}, {"_id", order}})
+			sortOptions.SetSort(bson.D{{"created_at", order}})
 		case go_block.UserFilter_UPDATE_AT:
-			sortOptions.SetSort(bson.D{{"updated_at", order}, {"_id", order}})
+			sortOptions.SetSort(bson.D{{"updated_at", order}})
 		default:
 			return nil, errors.New("invalid sorting")
 		}

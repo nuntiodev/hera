@@ -120,7 +120,9 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 				return err
 			}
 		}
+		fmt.Println("ENC KEY")
 		fmt.Println(encryptionKey, userResp.EncryptedAt.IsValid())
+		fmt.Println("ENC KEY")
 		streamResp := &go_block.UserStream{
 			StreamType: streamType,
 			User:       userResp,

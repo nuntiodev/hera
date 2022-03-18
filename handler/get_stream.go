@@ -50,6 +50,7 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	if err != nil {
 		return err
 	}
+	defer stream.Close(context.Background())
 	// stream
 	for stream.Next(context.Background()) {
 		var changeEvent ChangeEvent

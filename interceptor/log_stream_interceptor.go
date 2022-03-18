@@ -5,12 +5,12 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (i *DefaultInterceptor) WithLogStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+func (i *DefaultInterceptor) WithLogStreamInterceptor(req interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	i.zapLog.Info(fmt.Sprintf("New streaming request:%s",
 		info.FullMethod,
 	))
 	// make actual request
-	if err := handler(srv, ss); err != nil {
+	if err := handler(req, ss); err != nil {
 		i.zapLog.Error(err.Error())
 		return err
 	}

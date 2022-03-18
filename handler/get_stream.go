@@ -132,6 +132,7 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 				h.zapLog.Debug(err.Error())
 			}
 		}
+		fmt.Println(req.EncryptionKey, userResp.EncryptedAt.IsValid())
 		streamResp := &go_block.UserStream{
 			StreamType: streamType,
 			User:       userResp,

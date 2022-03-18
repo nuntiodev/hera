@@ -152,9 +152,9 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	if conn, err := getStream(req.SessionId); err == nil {
-		h.zapLog.Debug("stream is already running")
-		return h.handleStream(ctx, conn.Connection, conn.Server, req.EncryptionKey, req.SessionId)
+	if _, err := getStream(req.SessionId); err == nil {
+		h.zapLog.Debug("closing existing stream")
+		removeConnection(ctx, req.SessionId)
 	}
 	h.zapLog.Debug("initializing stream")
 	users, err := h.repository.Users(context.Background(), req.Namespace)
@@ -168,7 +168,6 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	}
 	// add new connection
 	addStream(req.SessionId, stream, server)
-	defer removeConnection(ctx, req.SessionId)
 	h.zapLog.Debug(fmt.Sprintf("adding new connection with a total count of: %d", len(connections)))
 	// stream
 	return h.handleStream(ctx, stream, server, req.EncryptionKey, req.SessionId)

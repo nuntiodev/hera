@@ -148,7 +148,8 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 }
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	if conn, err := getStream(req.SessionId); err != nil {
 		return h.handleStream(ctx, conn.Connection, conn.Server, req.EncryptionKey, req.SessionId)
 	}

@@ -144,8 +144,8 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 		return err
 	}
 	// add new connection
-	h.zapLog.Debug(fmt.Sprintf("adding new connect with a total count of: %d", len(connections)))
 	addStream(req.SessionId, stream)
+	h.zapLog.Debug(fmt.Sprintf("adding new connection with a total count of: %d", len(connections)))
 	// stream
 	go h.handleStream(stream, server, req.EncryptionKey, req.SessionId)
 	return nil

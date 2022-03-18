@@ -12,7 +12,7 @@ require (
 	github.com/mattevans/pwned-passwords v0.5.0
 	github.com/ory/dockertest/v3 v3.8.1
 	github.com/satori/go.uuid v1.2.0
-	github.com/softcorp-io/block-proto v0.1.15
+	github.com/softcorp-io/block-proto v0.1.17
 	github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a
 	github.com/stretchr/testify v1.7.0
 	go.mongodb.org/mongo-driver v1.8.4

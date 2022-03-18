@@ -92,13 +92,13 @@ func removeConnection(ctx context.Context, sessionID string) {
 	}
 }
 
-func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer, encryptionKey, sessionId string) {
+func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer, encryptionKey, sessionId string) error {
 	defer removeConnection(context.Background(), sessionId)
 	for stream.Next(context.Background()) {
 		var changeEvent ChangeEvent
 		var streamType go_block.StreamType
 		if err := stream.Decode(&changeEvent); err != nil {
-			break
+			return err
 		}
 		userResp := &go_block.User{}
 		switch changeEvent.OperationType {
@@ -115,6 +115,7 @@ func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, server go_bloc
 		if encryptionKey != "" && userResp.EncryptedAt.IsValid() {
 			if err := h.crypto.DecryptUser(encryptionKey, userResp); err != nil {
 				h.zapLog.Debug(err.Error())
+				return err
 			}
 		}
 		fmt.Println(encryptionKey, userResp.EncryptedAt.IsValid())
@@ -126,9 +127,10 @@ func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, server go_bloc
 		connections[sessionId].UsedAt = time.Now()
 		if err := server.Send(streamResp); err != nil {
 			h.zapLog.Debug(err.Error())
-			break
+			return err
 		}
 	}
+	return nil
 }
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
@@ -147,6 +149,5 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	addStream(req.SessionId, stream)
 	h.zapLog.Debug(fmt.Sprintf("adding new connection with a total count of: %d", len(connections)))
 	// stream
-	go h.handleStream(stream, server, req.EncryptionKey, req.SessionId)
-	return nil
+	return h.handleStream(stream, server, req.EncryptionKey, req.SessionId)
 }

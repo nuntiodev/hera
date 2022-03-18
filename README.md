@@ -1,6 +1,6 @@
 ## Welcome to the User Block 👋
 
-![User Block - User Management API Block](https://softcorp-io.github.io/website/blocks/user_block_cover.png)
+![User Block - User Management API Block](https://softcorp-io.github.io/website/blocks/blocks.png)
 
 <br/>
 <h4 align="center">

@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/handler"
 	"github.com/softcorp-io/block-user-service/interceptor"
@@ -10,10 +9,6 @@ import (
 	"github.com/softcorp-io/block-user-service/server/grpc_server"
 	"github.com/softcorp-io/softcorp_db_helper"
 	"go.uber.org/zap"
-)
-
-var (
-	METADATA_TYPE = go_block.MetadataType_METADATA_TYPE_JSON
 )
 
 type Server struct {

@@ -153,8 +153,10 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	if conn, err := getStream(req.SessionId); err == nil {
+		h.zapLog.Debug("stream is already running")
 		return h.handleStream(ctx, conn.Connection, conn.Server, req.EncryptionKey, req.SessionId)
 	}
+	h.zapLog.Debug("initializing stream")
 	users, err := h.repository.Users(context.Background(), req.Namespace)
 	if err != nil {
 		return err

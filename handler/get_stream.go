@@ -57,8 +57,7 @@ var (
 )
 
 func cleanupConnections() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+	ctx := context.Background()
 	for k, v := range connections {
 		if v != nil && time.Now().Sub(v.UsedAt) > lastTimeUsed {
 			removeConnection(ctx, k)
@@ -138,8 +137,7 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 		return err
 	}
 	// remove old connection if exist
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+	ctx := context.Background()
 	removeConnection(ctx, req.SessionId)
 	stream, err := users.GetStream(context.Background(), req.User)
 	if err != nil {

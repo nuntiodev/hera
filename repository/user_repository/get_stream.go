@@ -8,15 +8,17 @@ import (
 )
 
 func (r *mongoRepository) GetStream(ctx context.Context, get *go_block.User) (*mongo.ChangeStream, error) {
-	matchPipeline := bson.D{}
+	pipeline := mongo.Pipeline{}
 	if get != nil && get.Id != "" {
-		matchPipeline = bson.D{
-			{"$match",
-				bson.D{{"documentKey._id", get.Id}},
+		pipeline = mongo.Pipeline{
+			bson.D{
+				{"$match",
+					bson.D{{"documentKey._id", get.Id}},
+				},
 			},
 		}
 	}
-	userStream, err := r.collection.Watch(ctx, mongo.Pipeline{matchPipeline})
+	userStream, err := r.collection.Watch(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}

@@ -44,14 +44,15 @@ type ChangeEvent struct {
 	Ns                namespace            `bson:"ns"`
 }
 
-type WebConn struct {
+type StreamConn struct {
+	ProjectId  string
 	Connection *mongo.ChangeStream
 	UsedAt     time.Time
 }
 
 var (
 	mu           sync.Mutex
-	connections  = map[string]*WebConn{}
+	connections  = map[string]*StreamConn{}
 	lastTimeUsed = time.Minute * 5
 )
 
@@ -69,7 +70,7 @@ func addStream(sessionId string, stream *mongo.ChangeStream) {
 	if stream != nil && sessionId != "" {
 		mu.Lock()
 		defer mu.Unlock()
-		connections[sessionId] = &WebConn{
+		connections[sessionId] = &StreamConn{
 			Connection: stream,
 			UsedAt:     time.Now(),
 		}
@@ -92,6 +93,45 @@ func removeConnection(ctx context.Context, sessionID string) {
 	}
 }
 
+func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer, encryptionKey, sessionId string) {
+	defer removeConnection(context.Background(), sessionId)
+	for stream.Next(context.Background()) {
+		var changeEvent ChangeEvent
+		var streamType go_block.StreamType
+		if err := stream.Decode(&changeEvent); err != nil {
+			break
+		}
+		userResp := &go_block.User{}
+		switch changeEvent.OperationType {
+		case mongoInsert:
+			userResp = user_repository.UserToProtoUser(&changeEvent.FullDocument)
+			streamType = go_block.StreamType_CREATE
+		case mongoUpdate:
+			userResp = user_repository.UserToProtoUser(&changeEvent.UpdateDescription.UpdatedFields)
+			streamType = go_block.StreamType_UPDATE
+		case mongoDelete:
+			streamType = go_block.StreamType_DELETE
+		}
+		userResp.Id = changeEvent.DocumentKey.ID
+		if encryptionKey != "" && userResp.EncryptedAt.IsValid() {
+			if err := h.crypto.DecryptUser(encryptionKey, userResp); err != nil {
+				h.zapLog.Debug(err.Error())
+			}
+		}
+		fmt.Println(encryptionKey, userResp.EncryptedAt.IsValid())
+		streamResp := &go_block.UserStream{
+			StreamType: streamType,
+			User:       userResp,
+		}
+		h.zapLog.Debug(fmt.Sprintf("streaming new user info: %s", streamResp.String()))
+		connections[sessionId].UsedAt = time.Now()
+		if err := server.Send(streamResp); err != nil {
+			h.zapLog.Debug(err.Error())
+			break
+		}
+	}
+}
+
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	users, err := h.repository.Users(context.Background(), req.Namespace)
 	if err != nil {
@@ -108,39 +148,7 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	// add new connection
 	h.zapLog.Debug(fmt.Sprintf("adding new connect with a total count of: %d", len(connections)))
 	addStream(req.SessionId, stream)
-	defer removeConnection(context.Background(), req.SessionId)
 	// stream
-	for stream.Next(context.Background()) {
-		var changeEvent ChangeEvent
-		var streamType go_block.StreamType
-		if err := stream.Decode(&changeEvent); err != nil {
-			return err
-		}
-		userResp := &go_block.User{}
-		switch changeEvent.OperationType {
-		case mongoInsert:
-			userResp = user_repository.UserToProtoUser(&changeEvent.FullDocument)
-			streamType = go_block.StreamType_CREATE
-		case mongoUpdate:
-			userResp = user_repository.UserToProtoUser(&changeEvent.UpdateDescription.UpdatedFields)
-			streamType = go_block.StreamType_UPDATE
-		case mongoDelete:
-			streamType = go_block.StreamType_DELETE
-		}
-		userResp.Id = changeEvent.DocumentKey.ID
-		if req.EncryptionKey != "" && userResp.EncryptedAt.IsValid() {
-			if err := h.crypto.DecryptUser(req.EncryptionKey, userResp); err != nil {
-				h.zapLog.Debug(err.Error())
-			}
-		}
-		fmt.Println(req.EncryptionKey, userResp.EncryptedAt.IsValid())
-		streamResp := &go_block.UserStream{
-			StreamType: streamType,
-			User:       userResp,
-		}
-		h.zapLog.Debug(fmt.Sprintf("streaming new user info: %s", streamResp.String()))
-		connections[req.SessionId].UsedAt = time.Now()
-		go server.Send(streamResp)
-	}
+	go h.handleStream(stream, server, req.EncryptionKey, req.SessionId)
 	return nil
 }

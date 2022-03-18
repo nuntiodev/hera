@@ -1,6 +1,6 @@
 ## Welcome to the User Block 👋
 
-<h1 align="center"><img height="100px" src="https://softcorp-io.github.io/website/blocks/user_block_cover.png" alt="Softcorp User Block - simple and efficient user management."></h1>
+<h1 align="center"><img height="100px" width="100%" src="https://softcorp-io.github.io/website/blocks/user_block_cover.png" alt="Softcorp User Block - simple and efficient user management."></h1>
 
 <h4 align="center">
     <a href="https://www.softcorp.io/blocks/user/docs/guide">Guides</a> |

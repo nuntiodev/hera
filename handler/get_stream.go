@@ -7,6 +7,7 @@ import (
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/sync/errgroup"
 	"sync"
 	"time"
 )
@@ -92,9 +93,10 @@ func removeConnection(ctx context.Context, sessionID string) {
 	}
 }
 
-func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer, encryptionKey, sessionId string) error {
-	defer removeConnection(context.Background(), sessionId)
-	for stream.Next(context.Background()) {
+func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, server go_block.UserService_GetStreamServer, encryptionKey, sessionId string) error {
+	defer removeConnection(ctx, sessionId)
+	g := new(errgroup.Group)
+	for stream.Next(ctx) {
 		var changeEvent ChangeEvent
 		var streamType go_block.StreamType
 		if err := stream.Decode(&changeEvent); err != nil {
@@ -125,21 +127,28 @@ func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, server go_bloc
 		}
 		h.zapLog.Debug(fmt.Sprintf("streaming new user info: %s", streamResp.String()))
 		connections[sessionId].UsedAt = time.Now()
-		if err := server.Send(streamResp); err != nil {
-			h.zapLog.Debug(err.Error())
-			return err
-		}
+		g.Go(func() error {
+			if err := server.Send(streamResp); err != nil {
+				h.zapLog.Debug(err.Error())
+				stream.Close(ctx)
+				return err
+			}
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return err
 	}
 	return nil
 }
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
+	ctx, _ := context.WithCancel(context.Background())
 	users, err := h.repository.Users(context.Background(), req.Namespace)
 	if err != nil {
 		return err
 	}
 	// remove old connection if exist
-	ctx := context.Background()
 	removeConnection(ctx, req.SessionId)
 	stream, err := users.GetStream(context.Background(), req.User)
 	if err != nil {
@@ -149,5 +158,5 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	addStream(req.SessionId, stream)
 	h.zapLog.Debug(fmt.Sprintf("adding new connection with a total count of: %d", len(connections)))
 	// stream
-	return h.handleStream(stream, server, req.EncryptionKey, req.SessionId)
+	return h.handleStream(ctx, stream, server, req.EncryptionKey, req.SessionId)
 }

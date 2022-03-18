@@ -6,9 +6,6 @@ import (
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"sync"
-	"time"
 )
 
 const (
@@ -44,69 +41,15 @@ type ChangeEvent struct {
 	Ns                namespace            `bson:"ns"`
 }
 
-type WebConn struct {
-	Connection *mongo.ChangeStream
-	UsedAt     time.Time
-}
-
-var (
-	mu           sync.Mutex
-	connections  = map[string]*WebConn{}
-	lastTimeUsed = time.Minute * 5
-)
-
-func cleanupConnections() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	for k, v := range connections {
-		if v != nil && time.Now().Sub(v.UsedAt) > lastTimeUsed {
-			removeConnection(ctx, k)
-		}
-	}
-}
-
-func addStream(sessionId string, stream *mongo.ChangeStream) {
-	if stream != nil && sessionId != "" {
-		mu.Lock()
-		defer mu.Unlock()
-		connections[sessionId] = &WebConn{
-			Connection: stream,
-			UsedAt:     time.Now(),
-		}
-	}
-}
-
-func removeConnection(ctx context.Context, sessionID string) {
-	if sessionID == "" {
-		return
-	}
-	mu.Lock()
-	defer mu.Unlock()
-	if val, ok := connections[sessionID]; ok {
-		if val != nil {
-			if val.Connection != nil {
-				val.Connection.Close(ctx)
-			}
-		}
-		delete(connections, sessionID)
-	}
-}
-
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	users, err := h.repository.Users(context.Background(), req.Namespace)
 	if err != nil {
 		return err
 	}
-	// remove old connection if exist
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	removeConnection(ctx, req.SessionId)
 	stream, err := users.GetStream(context.Background(), req.User)
 	if err != nil {
 		return err
 	}
-	// add new connection
-	addStream(req.SessionId, stream)
 	// stream
 	for stream.Next(context.Background()) {
 		var changeEvent ChangeEvent

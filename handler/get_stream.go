@@ -19,11 +19,11 @@ const (
 )
 
 var (
-	maxConnectionsPerClient = 15
-	maxStreamAge            = time.Minute * 4
-	clientConnections       = map[string]int{}
-	sessionConnections      = map[string]*mongo.ChangeStream{}
-	mu                      sync.Mutex
+	maxStreamConnections = 5
+	maxStreamAge         = time.Minute * 4
+	clientConnections    = map[string]int{}
+	sessionConnections   = map[string]*mongo.ChangeStream{}
+	mu                   sync.Mutex
 )
 
 type ChangeID struct {
@@ -124,8 +124,8 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 		} else {
 			clientConnections[req.Namespace] = 0
 		}
-		if len(clientConnections) > maxConnectionsPerClient {
-			return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxConnectionsPerClient))
+		if len(clientConnections) > maxStreamConnections {
+			return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxStreamConnections))
 		}
 	}
 	// create stream

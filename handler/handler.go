@@ -7,6 +7,7 @@ import (
 	"github.com/softcorp-io/block-user-service/repository"
 	"go.uber.org/zap"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -42,6 +43,14 @@ func initialize() error {
 	dur, err := time.ParseDuration(maxStreamAgeString)
 	if err == nil {
 		maxStreamAge = dur
+	}
+	maxStreamConnectionsString, ok := os.LookupEnv("MAX_STREAM_CONNECTIONS")
+	if !ok {
+		return nil
+	}
+	count, err := strconv.Atoi(maxStreamConnectionsString)
+	if err == nil {
+		maxStreamConnections = count
 	}
 	return nil
 }

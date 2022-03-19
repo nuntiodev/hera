@@ -8,6 +8,7 @@ import (
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"sync"
 	"time"
 )
 
@@ -23,6 +24,7 @@ var (
 	maxStreamAge         = time.Minute * 4
 	clientConnections    = map[string]int{}
 	sessionConnections   = map[string]*mongo.ChangeStream{}
+	mu                   sync.Mutex
 )
 
 type ChangeID struct {
@@ -101,33 +103,7 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	h.zapLog.Debug("initializing stream")
 	ctx, cancel := context.WithTimeout(context.Background(), maxStreamAge+time.Second*5)
 	defer cancel()
-	// close previous connection if present
-	if val, ok := sessionConnections[req.SessionId]; ok && req.SessionId != "" {
-		if err := val.Close(ctx); err != nil {
-			h.zapLog.Debug(err.Error())
-		}
-		if val, ok := clientConnections[req.Namespace]; ok {
-			if val > 0 {
-				clientConnections[req.Namespace] = val - 1
-			} else {
-				delete(clientConnections, req.Namespace)
-			}
-		}
-		delete(sessionConnections, req.SessionId)
-	}
-	// measure client connections
-	if req.Namespace != "" && req.SessionId != "" {
-		// only allow single connection per session if namespace is set
-		if val, ok := clientConnections[req.Namespace]; ok {
-			clientConnections[req.Namespace] = val + 1
-		} else {
-			clientConnections[req.Namespace] = 0
-		}
-		if len(clientConnections) > maxStreamConnections {
-			return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxStreamConnections))
-		}
-	}
-	if err := validateMaxStreams(); err != nil {
+	if err := h.validateMaxStreams(ctx, req.SessionId, req.Namespace); err != nil {
 		return err
 	}
 	// create stream
@@ -149,11 +125,41 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	return h.handleStream(ctx, stream, req, server)
 }
 
-func validateMaxStreams() error {
+func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns string) error {
+	mu.Unlock()
+	defer mu.Unlock()
+	// close previous connection if present
+	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" {
+		if err := val.Close(ctx); err != nil {
+			h.zapLog.Debug(err.Error())
+		}
+		if val, ok := clientConnections[ns]; ok {
+			if val > 0 {
+				clientConnections[ns] = val - 1
+			} else {
+				delete(clientConnections, ns)
+			}
+		}
+		delete(sessionConnections, sessionId)
+	}
+	// measure client connections
+	if ns != "" && sessionId != "" {
+		// only allow single connection per session if namespace is set
+		if val, ok := clientConnections[ns]; ok {
+			clientConnections[ns] = val + 1
+		} else {
+			clientConnections[ns] = 0
+		}
+		h.zapLog.Debug(fmt.Sprintf("total client connections are: %d", len(clientConnections)))
+		if len(clientConnections) > maxStreamConnections {
+			return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxStreamConnections))
+		}
+	}
 	totalConnections := 0
 	for _, v := range clientConnections {
 		totalConnections += v
 	}
+	h.zapLog.Debug(fmt.Sprintf("total connections are: %d", totalConnections))
 	if totalConnections >= maxStreamConnections {
 		return errors.New("max stream connections for server")
 	}

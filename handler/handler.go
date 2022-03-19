@@ -6,6 +6,8 @@ import (
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository"
 	"go.uber.org/zap"
+	"os"
+	"time"
 )
 
 type Handler interface {
@@ -30,6 +32,18 @@ type defaultHandler struct {
 	repository repository.Repository
 	crypto     crypto.Crypto
 	zapLog     *zap.Logger
+}
+
+func initialize() error {
+	maxStreamAgeString, ok := os.LookupEnv("MAX_STREAM_AGE")
+	if !ok {
+		return nil
+	}
+	dur, err := time.ParseDuration(maxStreamAgeString)
+	if err == nil {
+		maxStreamAge = dur
+	}
+	return nil
 }
 
 func New(zapLog *zap.Logger, repository repository.Repository, crypto crypto.Crypto) (Handler, error) {

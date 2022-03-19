@@ -8,12 +8,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/sync/errgroup"
+	"time"
 )
 
 const (
 	mongoInsert = "insert"
 	mongoUpdate = "update"
 	mongoDelete = "delete"
+)
+
+var (
+	maxStreamAge = time.Minute * 4
 )
 
 type ChangeID struct {
@@ -68,14 +73,11 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 				return err
 			}
 		}
-		fmt.Println("ENC KEY")
-		fmt.Println(req.EncryptionKey, userResp.EncryptedAt.IsValid())
-		fmt.Println("ENC KEY")
 		streamResp := &go_block.UserStream{
 			StreamType: streamType,
 			User:       userResp,
 		}
-		h.zapLog.Debug(fmt.Sprintf("streaming new user info: %s", streamResp.String()))
+		h.zapLog.Debug(fmt.Sprintf("streaming new user info"))
 		g.Go(func() error {
 			if err := server.Send(streamResp); err != nil {
 				return err
@@ -95,13 +97,13 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	h.zapLog.Debug("initializing stream")
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), maxStreamAge)
 	defer cancel()
-	users, err := h.repository.Users(context.Background(), req.Namespace)
+	users, err := h.repository.Users(ctx, req.Namespace)
 	if err != nil {
 		return err
 	}
-	stream, err := users.GetStream(context.Background(), req.User)
+	stream, err := users.GetStream(ctx, req.User)
 	if err != nil {
 		return err
 	}

@@ -102,15 +102,30 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	h.zapLog.Debug("initializing stream")
 	ctx, cancel := context.WithTimeout(context.Background(), maxStreamAge+time.Second*5)
 	defer cancel()
-	// add connection to client list
-	if len(clientConnections) > maxConnectionsPerClient {
-		return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxConnectionsPerClient))
-	}
-	// only allow single connection per session
-	clientConnections[req.Namespace] += 1
+	// close previous connection if present
 	if val, ok := sessionConnections[req.SessionId]; ok && req.SessionId != "" {
 		if err := val.Close(ctx); err != nil {
 			h.zapLog.Debug(err.Error())
+		}
+		if val, ok := clientConnections[req.Namespace]; ok {
+			if val > 0 {
+				clientConnections[req.Namespace] = val - 1
+			} else {
+				delete(clientConnections, req.Namespace)
+			}
+		}
+		delete(sessionConnections, req.SessionId)
+	}
+	// measure client connections
+	if req.Namespace != "" && req.SessionId != "" {
+		// only allow single connection per session if namespace is set
+		if val, ok := clientConnections[req.Namespace]; ok {
+			clientConnections[req.Namespace] = val + 1
+		} else {
+			clientConnections[req.Namespace] = 0
+		}
+		if len(clientConnections) > maxConnectionsPerClient {
+			return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxConnectionsPerClient))
 		}
 	}
 	// create stream

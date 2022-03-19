@@ -8,7 +8,6 @@ import (
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"sync"
 	"time"
 )
 
@@ -19,11 +18,11 @@ const (
 )
 
 var (
+	maxStreams           = 100
 	maxStreamConnections = 5
 	maxStreamAge         = time.Minute * 4
 	clientConnections    = map[string]int{}
 	sessionConnections   = map[string]*mongo.ChangeStream{}
-	mu                   sync.Mutex
 )
 
 type ChangeID struct {
@@ -128,6 +127,9 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 			return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxStreamConnections))
 		}
 	}
+	if err := validateMaxStreams(); err != nil {
+		return err
+	}
 	// create stream
 	users, err := h.repository.Users(ctx, req.Namespace)
 	if err != nil {
@@ -145,4 +147,15 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	}()
 	// stream
 	return h.handleStream(ctx, stream, req, server)
+}
+
+func validateMaxStreams() error {
+	totalConnections := 0
+	for _, v := range clientConnections {
+		totalConnections += v
+	}
+	if totalConnections >= maxStreamConnections {
+		return errors.New("max stream connections for server")
+	}
+	return nil
 }

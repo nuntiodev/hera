@@ -126,7 +126,7 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 }
 
 func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns string) error {
-	mu.Unlock()
+	mu.Lock()
 	defer mu.Unlock()
 	// close previous connection if present
 	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" {

@@ -2,12 +2,13 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/sync/errgroup"
+	"sync"
 	"time"
 )
 
@@ -18,7 +19,11 @@ const (
 )
 
 var (
-	maxStreamAge = time.Minute * 4
+	maxConnectionsPerClient = 15
+	maxStreamAge            = time.Minute * 4
+	clientConnections       = map[string]int{}
+	sessionConnections      = map[string]*mongo.ChangeStream{}
+	mu                      sync.Mutex
 )
 
 type ChangeID struct {
@@ -49,7 +54,7 @@ type ChangeEvent struct {
 }
 
 func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
-	g := new(errgroup.Group)
+	lastUsedAt := time.Now()
 	for stream.Next(ctx) {
 		var changeEvent ChangeEvent
 		var streamType go_block.StreamType
@@ -78,15 +83,13 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 			User:       userResp,
 		}
 		h.zapLog.Debug(fmt.Sprintf("streaming new user info"))
-		g.Go(func() error {
-			if err := server.Send(streamResp); err != nil {
-				return err
-			}
-			return nil
-		})
-	}
-	if err := g.Wait(); err != nil {
-		return err
+		if err := server.Send(streamResp); err != nil {
+			return err
+		}
+		if time.Now().Sub(lastUsedAt) > maxStreamAge {
+			h.zapLog.Debug("breaking out of stream due to inactivity")
+			break
+		}
 	}
 	if err := stream.Err(); err != nil {
 		h.zapLog.Debug(err.Error())
@@ -97,8 +100,20 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	h.zapLog.Debug("initializing stream")
-	ctx, cancel := context.WithTimeout(context.Background(), maxStreamAge)
+	ctx, cancel := context.WithTimeout(context.Background(), maxStreamAge+time.Second*5)
 	defer cancel()
+	// add connection to client list
+	if len(clientConnections) > maxConnectionsPerClient {
+		return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxConnectionsPerClient))
+	}
+	// only allow single connection per session
+	clientConnections[req.Namespace] += 1
+	if val, ok := sessionConnections[req.SessionId]; ok && req.SessionId != "" {
+		if err := val.Close(ctx); err != nil {
+			h.zapLog.Debug(err.Error())
+		}
+	}
+	// create stream
 	users, err := h.repository.Users(ctx, req.Namespace)
 	if err != nil {
 		return err

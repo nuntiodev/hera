@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/sync/errgroup"
+	"strings"
 	"sync"
 	"time"
 )
@@ -133,9 +134,11 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 }
 
 func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns string) {
+	h.zapLog.Debug("closing connection...")
 	mu.Lock()
 	defer mu.Unlock()
-	h.zapLog.Debug("closing connection...")
+	sessionId = strings.TrimSpace(sessionId)
+	ns = strings.TrimSpace(ns)
 	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" && val != nil {
 		if err := val.Close(ctx); err != nil {
 			h.zapLog.Debug(err.Error())
@@ -154,6 +157,8 @@ func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns str
 func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns string) error {
 	mu.Lock()
 	defer mu.Unlock()
+	sessionId = strings.TrimSpace(sessionId)
+	ns = strings.TrimSpace(ns)
 	// close previous connection if present
 	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" {
 		if err := val.Close(ctx); err != nil {

@@ -84,13 +84,9 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 			StreamType: streamType,
 			User:       userResp,
 		}
-		h.zapLog.Debug(fmt.Sprintf("streaming new user info"))
+		h.zapLog.Debug(fmt.Sprintf("streaming new user: %s", streamType.String()))
 		if err := server.Send(streamResp); err != nil {
 			return err
-		}
-		if time.Now().Sub(lastUsedAt) > maxStreamAge {
-			h.zapLog.Debug("breaking out of stream due to inactivity")
-			break
 		}
 	}
 	if err := stream.Err(); err != nil {
@@ -134,6 +130,7 @@ func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns str
 			h.zapLog.Debug(err.Error())
 		}
 		delete(sessionConnections, sessionId)
+		delete(clientConnections, ns)
 	}
 	if val, ok := clientConnections[ns]; ok {
 		if val > 1 {

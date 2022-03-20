@@ -56,6 +56,7 @@ type ChangeEvent struct {
 
 func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	lastUsedAt := time.Now()
+	defer h.removeConnection(context.Background(), req.SessionId, req.Namespace)
 	for stream.TryNext(ctx) {
 		var changeEvent ChangeEvent
 		var streamType go_block.StreamType
@@ -125,6 +126,22 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 	return h.handleStream(ctx, stream, req, server)
 }
 
+func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns string) {
+	mu.Lock()
+	defer mu.Unlock()
+	if val, ok := sessionConnections[sessionId]; ok {
+		if err := val.Close(ctx); err != nil {
+			h.zapLog.Debug(err.Error())
+		}
+		delete(sessionConnections, sessionId)
+	}
+	if val, ok := clientConnections[ns]; ok {
+		if val > 1 {
+			clientConnections[ns] -= 1
+		}
+	}
+}
+
 func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns string) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -150,7 +167,7 @@ func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns s
 		} else {
 			clientConnections[ns] = 1
 		}
-		h.zapLog.Debug(fmt.Sprintf("total client connections are: %d", len(clientConnections)))
+		h.zapLog.Debug(fmt.Sprintf("total project connections are: %d", len(clientConnections)))
 		if len(clientConnections) > maxStreamConnections {
 			return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxStreamConnections))
 		}

@@ -55,7 +55,6 @@ type ChangeEvent struct {
 }
 
 func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
-	lastUsedAt := time.Now()
 	defer h.removeConnection(context.Background(), req.SessionId, req.Namespace)
 	for stream.TryNext(ctx) {
 		var changeEvent ChangeEvent

@@ -136,16 +136,17 @@ func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns str
 	mu.Lock()
 	defer mu.Unlock()
 	h.zapLog.Debug("closing connection...")
-	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" {
+	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" && val != nil {
 		if err := val.Close(ctx); err != nil {
 			h.zapLog.Debug(err.Error())
 		}
 		delete(sessionConnections, sessionId)
-		delete(clientConnections, ns)
 	}
-	if val, ok := clientConnections[ns]; ok && sessionId != "" {
+	if val, ok := clientConnections[ns]; ok && ns != "" {
 		if val > 1 {
 			clientConnections[ns] -= 1
+		} else {
+			delete(clientConnections, ns)
 		}
 	}
 }
@@ -181,7 +182,8 @@ func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns s
 		}
 	}
 	totalConnections := 0
-	for _, v := range clientConnections {
+	for k, v := range clientConnections {
+		h.zapLog.Debug(fmt.Sprintf("k: %s, v: %d", k, v))
 		totalConnections += v
 	}
 	h.zapLog.Debug(fmt.Sprintf("total connections are: %d", totalConnections))

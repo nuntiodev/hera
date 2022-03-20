@@ -8,6 +8,7 @@ import (
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/sync/errgroup"
 	"sync"
 	"time"
 )
@@ -54,9 +55,12 @@ type ChangeEvent struct {
 	Ns                namespace            `bson:"ns"`
 }
 
-func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
+func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
+	ctx, cancel := context.WithTimeout(context.Background(), maxStreamAge+time.Second*5)
+	defer cancel()
 	defer h.removeConnection(context.Background(), req.SessionId, req.Namespace)
-	for stream.TryNext(ctx) {
+	var g errgroup.Group
+	for stream.Next(ctx) {
 		var changeEvent ChangeEvent
 		var streamType go_block.StreamType
 		if err := stream.Decode(&changeEvent); err != nil {
@@ -84,9 +88,16 @@ func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeS
 			User:       userResp,
 		}
 		h.zapLog.Debug(fmt.Sprintf("streaming new user: %s", streamType.String()))
-		if err := server.Send(streamResp); err != nil {
-			return err
-		}
+		g.Go(func() error {
+			if err := server.Send(streamResp); err != nil {
+				cancel()
+				return err
+			}
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return err
 	}
 	if err := stream.Err(); err != nil {
 		h.zapLog.Debug(err.Error())
@@ -118,20 +129,20 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 		}
 	}()
 	// stream
-	return h.handleStream(ctx, stream, req, server)
+	return h.handleStream(stream, req, server)
 }
 
 func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns string) {
 	mu.Lock()
 	defer mu.Unlock()
-	if val, ok := sessionConnections[sessionId]; ok {
+	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" {
 		if err := val.Close(ctx); err != nil {
 			h.zapLog.Debug(err.Error())
 		}
 		delete(sessionConnections, sessionId)
 		delete(clientConnections, ns)
 	}
-	if val, ok := clientConnections[ns]; ok {
+	if val, ok := clientConnections[ns]; ok && sessionId != "" {
 		if val > 1 {
 			clientConnections[ns] -= 1
 		}

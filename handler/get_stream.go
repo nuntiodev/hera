@@ -56,7 +56,7 @@ type ChangeEvent struct {
 
 func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	lastUsedAt := time.Now()
-	for stream.Next(ctx) {
+	for stream.TryNext(ctx) {
 		var changeEvent ChangeEvent
 		var streamType go_block.StreamType
 		if err := stream.Decode(&changeEvent); err != nil {
@@ -148,7 +148,7 @@ func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns s
 		if val, ok := clientConnections[ns]; ok {
 			clientConnections[ns] = val + 1
 		} else {
-			clientConnections[ns] = 0
+			clientConnections[ns] = 1
 		}
 		h.zapLog.Debug(fmt.Sprintf("total client connections are: %d", len(clientConnections)))
 		if len(clientConnections) > maxStreamConnections {

@@ -173,6 +173,20 @@ func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns s
 		}
 		delete(sessionConnections, sessionId)
 	}
+	// check if max connections is reached
+	totalConnections := 0
+	for k, v := range clientConnections {
+		h.zapLog.Debug(fmt.Sprintf("k: %s, v: %d", k, v))
+		totalConnections += v
+	}
+	h.zapLog.Debug(fmt.Sprintf("total project connections are: %d", len(clientConnections)))
+	if len(clientConnections) >= maxStreamConnections {
+		return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxStreamConnections))
+	}
+	h.zapLog.Debug(fmt.Sprintf("total connections are: %d", totalConnections))
+	if totalConnections >= maxStreamConnections {
+		return errors.New("max stream connections for server")
+	}
 	// measure client connections
 	if ns != "" && sessionId != "" {
 		// only allow single connection per session if namespace is set
@@ -181,19 +195,6 @@ func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns s
 		} else {
 			clientConnections[ns] = 1
 		}
-		h.zapLog.Debug(fmt.Sprintf("total project connections are: %d", len(clientConnections)))
-		if len(clientConnections) > maxStreamConnections {
-			return errors.New(fmt.Sprintf("Max stream connections per client reached %d. Streams are expensive so remember to clean the up properly.", maxStreamConnections))
-		}
-	}
-	totalConnections := 0
-	for k, v := range clientConnections {
-		h.zapLog.Debug(fmt.Sprintf("k: %s, v: %d", k, v))
-		totalConnections += v
-	}
-	h.zapLog.Debug(fmt.Sprintf("total connections are: %d", totalConnections))
-	if totalConnections >= maxStreamConnections {
-		return errors.New("max stream connections for server")
 	}
 	return nil
 }

@@ -36,14 +36,6 @@ type defaultHandler struct {
 }
 
 func initialize() error {
-	maxStreamAgeString, ok := os.LookupEnv("MAX_STREAM_AGE")
-	if !ok {
-		return nil
-	}
-	dur, err := time.ParseDuration(maxStreamAgeString)
-	if err == nil {
-		maxStreamAge = dur
-	}
 	maxStreamConnectionsString, ok := os.LookupEnv("MAX_STREAM_CONNECTIONS")
 	if !ok {
 		return nil
@@ -62,5 +54,18 @@ func New(zapLog *zap.Logger, repository repository.Repository, crypto crypto.Cry
 		crypto:     crypto,
 		zapLog:     zapLog,
 	}
+	ticker := time.NewTicker(5 * time.Second)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				handler.cleanupConnections()
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 	return handler, nil
 }

@@ -23,11 +23,17 @@ const (
 var (
 	maxStreams           = 100
 	maxStreamConnections = 5
-	maxStreamAge         = time.Minute * 4
 	clientConnections    = map[string]int{}
-	sessionConnections   = map[string]*mongo.ChangeStream{}
+	sessionConnections   = map[string]*Connection{}
 	mu                   sync.Mutex
 )
+
+type Connection struct {
+	changeStream *mongo.ChangeStream
+	cancel       context.CancelFunc
+	usedAt       time.Time
+	namespace    string
+}
 
 type ChangeID struct {
 	Data string `bson:"_data"`
@@ -56,9 +62,8 @@ type ChangeEvent struct {
 	Ns                namespace            `bson:"ns"`
 }
 
-func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
-	ctx, cancel := context.WithTimeout(context.Background(), maxStreamAge+time.Second*5)
-	defer cancel()
+// todo: automatically delete connections
+func (h *defaultHandler) handleStream(ctx context.Context, stream *mongo.ChangeStream, req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	defer h.removeConnection(context.Background(), req.SessionId, req.Namespace)
 	var g errgroup.Group
 	for stream.Next(ctx) {
@@ -91,7 +96,6 @@ func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, req *go_block.
 		h.zapLog.Debug(fmt.Sprintf("streaming new user: %s", streamType.String()))
 		g.Go(func() error {
 			if err := server.Send(streamResp); err != nil {
-				cancel()
 				return err
 			}
 			return nil
@@ -109,7 +113,7 @@ func (h *defaultHandler) handleStream(stream *mongo.ChangeStream, req *go_block.
 
 func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.UserService_GetStreamServer) error {
 	h.zapLog.Debug("initializing stream")
-	ctx, cancel := context.WithTimeout(context.Background(), maxStreamAge+time.Second*5)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	if err := h.validateMaxStreams(ctx, req.SessionId, req.Namespace); err != nil {
 		return err
@@ -129,8 +133,26 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 			h.zapLog.Debug(err.Error())
 		}
 	}()
+	mu.Lock()
+	sessionConnections[req.SessionId] = &Connection{
+		namespace:    req.Namespace,
+		changeStream: stream,
+		cancel:       cancel,
+		usedAt:       time.Now(),
+	}
+	mu.Unlock()
 	// stream
-	return h.handleStream(stream, req, server)
+	return h.handleStream(ctx, stream, req, server)
+}
+
+func (h *defaultHandler) cleanupConnections() {
+	mu.Lock()
+	defer mu.Unlock()
+	for k, v := range sessionConnections {
+		if time.Now().Sub(v.usedAt) < time.Second*60 {
+			h.removeConnection(context.Background(), k, v.namespace)
+		}
+	}
 }
 
 func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns string) {
@@ -139,8 +161,9 @@ func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns str
 	defer mu.Unlock()
 	sessionId = strings.TrimSpace(sessionId)
 	ns = strings.TrimSpace(ns)
-	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" && val != nil {
-		if err := val.Close(ctx); err != nil {
+	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" && val != nil && val.changeStream != nil {
+		val.cancel()
+		if err := val.changeStream.Close(ctx); err != nil {
 			h.zapLog.Debug(err.Error())
 		}
 		delete(sessionConnections, sessionId)
@@ -160,8 +183,8 @@ func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns s
 	sessionId = strings.TrimSpace(sessionId)
 	ns = strings.TrimSpace(ns)
 	// close previous connection if present
-	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" {
-		if err := val.Close(ctx); err != nil {
+	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" && val != nil && val.changeStream != nil {
+		if err := val.changeStream.Close(ctx); err != nil {
 			h.zapLog.Debug(err.Error())
 		}
 		if val, ok := clientConnections[ns]; ok {

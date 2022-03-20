@@ -135,6 +135,7 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 func (h *defaultHandler) removeConnection(ctx context.Context, sessionId, ns string) {
 	mu.Lock()
 	defer mu.Unlock()
+	h.zapLog.Debug("closing connection...")
 	if val, ok := sessionConnections[sessionId]; ok && sessionId != "" {
 		if err := val.Close(ctx); err != nil {
 			h.zapLog.Debug(err.Error())

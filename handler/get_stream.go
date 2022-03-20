@@ -188,7 +188,7 @@ func (h *defaultHandler) validateMaxStreams(ctx context.Context, sessionId, ns s
 		return errors.New("max stream connections for server")
 	}
 	// measure client connections
-	if ns != "" && sessionId != "" {
+	if ns != "" {
 		// only allow single connection per session if namespace is set
 		if val, ok := clientConnections[ns]; ok {
 			clientConnections[ns] = val + 1

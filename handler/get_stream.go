@@ -148,8 +148,9 @@ func (h *defaultHandler) GetStream(req *go_block.UserRequest, server go_block.Us
 func (h *defaultHandler) cleanupConnections() {
 	mu.Lock()
 	defer mu.Unlock()
+	h.zapLog.Debug("cleaning up connections")
 	for k, v := range sessionConnections {
-		if time.Now().Sub(v.usedAt) < time.Second*60 {
+		if time.Now().Sub(v.usedAt) > time.Second*60 {
 			h.removeConnection(context.Background(), k, v.namespace)
 		}
 	}

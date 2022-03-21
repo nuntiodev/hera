@@ -54,7 +54,7 @@ func New(zapLog *zap.Logger, repository repository.Repository, crypto crypto.Cry
 		crypto:     crypto,
 		zapLog:     zapLog,
 	}
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(5 * time.Minute)
 	quit := make(chan struct{})
 	go func() {
 		for {

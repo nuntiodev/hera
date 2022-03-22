@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/badoux/checkmail"
-	"github.com/go-passwd/validator"
 	"github.com/google/uuid"
-	hibp "github.com/mattevans/pwned-passwords"
 	"github.com/softcorp-io/block-proto/go_block"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"strings"
@@ -96,9 +94,10 @@ func (r *mongoRepository) validate(action int, user *go_block.User) error {
 }
 
 func validatePassword(password string) error {
-	passwordValidator := validator.New(
-		validator.MinLength(10, errors.New("password needs to contain at least 5 chars")),
-		validator.MaxLength(100, errors.New("password needs to contain at below 100 chars")),
+	return nil
+	/*passwordValidator := validator.New(
+	//validator.MinLength(10, errors.New("password needs to contain at least 5 chars")),
+	//validator.MaxLength(100, errors.New("password needs to contain at below 100 chars")),
 	)
 	if err := passwordValidator.Validate(password); err != nil {
 		return err
@@ -112,6 +111,7 @@ func validatePassword(password string) error {
 		return errors.New("this password has been involved in a data breach")
 	}
 	return nil
+	*/
 }
 
 func (r *mongoRepository) handleEncryption(encrypted bool, update *go_block.User, encryptionKey string) error {

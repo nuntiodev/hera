@@ -17,6 +17,7 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 	if err != nil {
 		return nil, err
 	}
+	resp := *get
 	if get.Encrypted == false && encryptionKey != "" {
 		if err := r.crypto.EncryptUser(encryptionKey, get); err != nil {
 			return nil, err
@@ -53,5 +54,5 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 	if updateResult.MatchedCount == 0 {
 		return nil, errors.New("could not find get")
 	}
-	return get, nil
+	return &resp, nil
 }

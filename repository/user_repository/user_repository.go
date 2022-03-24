@@ -57,7 +57,7 @@ type UserRepository interface {
 	UpdateOptionalId(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error)
 	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error)
-	UpdateSecurity(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error)
+	UpdateSecurity(ctx context.Context, get *go_block.User, encryptionKey string) (*go_block.User, error)
 	Get(ctx context.Context, user *go_block.User, encryptionKey string) (*go_block.User, error)
 	GetAll(ctx context.Context, userFilter *go_block.UserFilter, encryptionKey string) ([]*go_block.User, error)
 	GetStream(ctx context.Context, get *go_block.User) (*mongo.ChangeStream, error)

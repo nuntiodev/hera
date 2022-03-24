@@ -8,13 +8,9 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error) {
+func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User, encryptionKey string) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
-		return nil, err
-	}
-	prepare(actionUpdateSecurity, update)
-	if err := r.validate(actionUpdateSecurity, update); err != nil {
 		return nil, err
 	}
 	get, err := r.Get(ctx, get, "") // check if user encryption is turned on
@@ -34,7 +30,7 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 		get.Encrypted = false
 		get.EncryptedAt = &ts.Timestamp{}
 	}
-	get.UpdatedAt = update.UpdatedAt
+	get.UpdatedAt = ts.Now()
 	updateUser := ProtoUserToUser(get)
 	mongoUpdate := bson.M{
 		"$set": bson.M{

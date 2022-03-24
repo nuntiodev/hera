@@ -10,7 +10,7 @@ func (h *defaultHandler) UpdateSecurity(ctx context.Context, req *go_block.UserR
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	updatedUser, err := users.UpdateSecurity(ctx, req.User, req.Update, req.EncryptionKey)
+	updatedUser, err := users.UpdateSecurity(ctx, req.User, req.EncryptionKey)
 	if err != nil {
 		return nil, err
 	}

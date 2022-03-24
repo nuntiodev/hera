@@ -24,7 +24,7 @@ func TestUpdateUnencryptedSecurity(t *testing.T) {
 	createdUser, err := users.Create(ctx, user, "")
 	assert.Nil(t, err)
 	// act
-	updatedUser, err := users.UpdateSecurity(ctx, createdUser, createdUser, encryptionKey)
+	updatedUser, err := users.UpdateSecurity(ctx, createdUser, encryptionKey)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
@@ -51,7 +51,7 @@ func TestUpdateEncryptedSecurity(t *testing.T) {
 	createdUser, err := users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
-	updatedUser, err := users.UpdateSecurity(ctx, createdUser, createdUser, encryptionKey)
+	updatedUser, err := users.UpdateSecurity(ctx, createdUser, encryptionKey)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
@@ -74,7 +74,7 @@ func TestUpdateSecurityWithInvalidEncryptionKey(t *testing.T) {
 	createdUser, err := users.Create(ctx, user, encryptionKey)
 	assert.Nil(t, err)
 	// act
-	_, err = users.UpdateSecurity(ctx, createdUser, createdUser, invalidEncryptionKey)
+	_, err = users.UpdateSecurity(ctx, createdUser, invalidEncryptionKey)
 	// validate
 	assert.Error(t, err)
 }

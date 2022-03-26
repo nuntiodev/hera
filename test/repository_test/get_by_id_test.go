@@ -18,14 +18,14 @@ func TestGetById(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := users.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
 	getUser, err := users.Get(ctx, &go_block.User{
 		Id: createdUser.Id,
-	}, "")
+	})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, createdUser)
@@ -39,14 +39,14 @@ func TestGetByIdDifferentNamespace(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := users.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
-	usersTwo, err := testRepository.Users(ctx, "")
+	usersTwo, err := testRepository.Users(ctx, "", "")
 	assert.NoError(t, err)
-	getUser, err := usersTwo.Get(ctx, createdUser, "")
+	getUser, err := usersTwo.Get(ctx, createdUser)
 	assert.Error(t, err)
 	// validate
 	assert.Nil(t, getUser)

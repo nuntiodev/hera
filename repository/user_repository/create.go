@@ -9,7 +9,7 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongoRepository) Create(ctx context.Context, user *go_block.User, encryptionKey string) (*go_block.User, error) {
+func (r *mongoRepository) Create(ctx context.Context, user *go_block.User) (*go_block.User, error) {
 	prepare(actionCreate, user)
 	if err := r.validate(actionCreate, user); err != nil {
 		return nil, err
@@ -26,8 +26,8 @@ func (r *mongoRepository) Create(ctx context.Context, user *go_block.User, encry
 		user.Password = string(hashedPassword)
 	}
 	resp := *user
-	if encryptionKey != "" {
-		if err := r.crypto.EncryptUser(encryptionKey, user); err != nil {
+	if r.encryptionKey != "" {
+		if err := r.crypto.EncryptUser(r.encryptionKey, user); err != nil {
 			return nil, err
 		}
 		user.Encrypted = true

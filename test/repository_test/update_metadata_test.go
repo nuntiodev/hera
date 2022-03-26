@@ -16,15 +16,15 @@ func TestUpdateMetadata(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := users.Create(ctx, user)
 	initialMetadata := user.Metadata
 	initialUpdatedAt := user.UpdatedAt
 	assert.Nil(t, err)
 	// act
 	createdUser.Metadata = user_mock.GetMetadata(nil)
-	updatedUser, err := users.UpdateMetadata(ctx, createdUser, createdUser, "")
+	updatedUser, err := users.UpdateMetadata(ctx, createdUser, createdUser)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
@@ -32,7 +32,7 @@ func TestUpdateMetadata(t *testing.T) {
 	assert.NotEqual(t, initialMetadata, updatedUser.Metadata)
 	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
 	// validate in database
-	getUser, err := users.Get(ctx, createdUser, "")
+	getUser, err := users.Get(ctx, createdUser)
 	assert.NoError(t, err)
 	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
 }
@@ -42,15 +42,15 @@ func TestUpdateMetadataWithEncryption(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, encryptionKey)
+	createdUser, err := users.Create(ctx, user)
 	initialMetadata := user.Metadata
 	initialUpdatedAt := user.UpdatedAt
 	assert.Nil(t, err)
 	// act
 	createdUser.Metadata = user_mock.GetMetadata(nil)
-	updatedUser, err := users.UpdateMetadata(ctx, createdUser, createdUser, encryptionKey)
+	updatedUser, err := users.UpdateMetadata(ctx, createdUser, createdUser)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
@@ -58,7 +58,7 @@ func TestUpdateMetadataWithEncryption(t *testing.T) {
 	assert.NotEqual(t, initialMetadata, updatedUser.Metadata)
 	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
 	// validate in database
-	getUser, err := users.Get(ctx, createdUser, encryptionKey)
+	getUser, err := users.Get(ctx, createdUser)
 	assert.NoError(t, err)
 	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
 }
@@ -68,13 +68,15 @@ func TestUpdateMetadataWithInvalidEncryptionKey(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, encryptionKey)
+	createdUser, err := usersOne.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
 	createdUser.Metadata = user_mock.GetMetadata(nil)
-	_, err = users.UpdateMetadata(ctx, createdUser, createdUser, invalidEncryptionKey)
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), invalidEncryptionKey)
+	assert.NoError(t, err)
+	_, err = usersTwo.UpdateMetadata(ctx, createdUser, createdUser)
 	// validate
 	assert.Error(t, err)
 }
@@ -86,13 +88,15 @@ func TestUpdateEncryptedMetadataWithoutKey(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, encryptionKey)
+	createdUser, err := usersOne.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
 	createdUser.Metadata = user_mock.GetMetadata(nil)
-	_, err = users.UpdateMetadata(ctx, createdUser, createdUser, "")
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
+	assert.NoError(t, err)
+	_, err = usersTwo.UpdateMetadata(ctx, createdUser, createdUser)
 	// validate
 	assert.Error(t, err)
 }
@@ -104,13 +108,15 @@ func TestUpdateUnencryptedMetadataWithKey(t *testing.T) {
 	user := user_mock.GetRandomUser(&go_block.User{
 		Email: gofakeit.Email(),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := usersOne.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
 	createdUser.Metadata = user_mock.GetMetadata(nil)
-	_, err = users.UpdateMetadata(ctx, createdUser, createdUser, encryptionKey)
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
+	assert.NoError(t, err)
+	_, err = usersTwo.UpdateMetadata(ctx, createdUser, createdUser)
 	// validate
 	assert.Error(t, err)
 }
@@ -120,15 +126,15 @@ func TestUpdateMetadataInvalidNamespace(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := users.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
-	usersTwo, err := testRepository.Users(ctx, "")
+	usersTwo, err := testRepository.Users(ctx, "", "")
 	assert.NoError(t, err)
 	createdUser.Metadata = user_mock.GetMetadata(nil)
-	_, err = usersTwo.UpdateMetadata(ctx, createdUser, createdUser, "")
+	_, err = usersTwo.UpdateMetadata(ctx, createdUser, createdUser)
 	// validate
 	assert.Error(t, err)
 }

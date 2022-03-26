@@ -19,15 +19,15 @@ func TestUpdateImage(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := users.Create(ctx, user)
 	initialImage := user.Image
 	initialUpdatedAt := user.UpdatedAt
 	assert.Nil(t, err)
 	// act
 	createdUser.Image = gofakeit.ImageURL(20, 10)
-	updatedUser, err := users.UpdateImage(ctx, createdUser, createdUser, "")
+	updatedUser, err := users.UpdateImage(ctx, createdUser, createdUser)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
@@ -35,7 +35,7 @@ func TestUpdateImage(t *testing.T) {
 	assert.NotEqual(t, initialImage, updatedUser.Image)
 	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
 	// validate in database
-	getUser, err := users.Get(ctx, createdUser, "")
+	getUser, err := users.Get(ctx, createdUser)
 	assert.NoError(t, err)
 	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
 }
@@ -48,15 +48,15 @@ func TestUpdateImageWithEncryption(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, encryptionKey)
+	createdUser, err := users.Create(ctx, user)
 	initialImage := user.Image
 	initialUpdatedAt := user.UpdatedAt
 	assert.Nil(t, err)
 	// act
 	createdUser.Image = gofakeit.ImageURL(20, 10)
-	updatedUser, err := users.UpdateImage(ctx, createdUser, createdUser, encryptionKey)
+	updatedUser, err := users.UpdateImage(ctx, createdUser, createdUser)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
@@ -64,7 +64,7 @@ func TestUpdateImageWithEncryption(t *testing.T) {
 	assert.NotEqual(t, initialImage, updatedUser.Image)
 	assert.NotEqual(t, initialUpdatedAt.Nanos, updatedUser.UpdatedAt.Nanos)
 	// validate in database
-	getUser, err := users.Get(ctx, createdUser, encryptionKey)
+	getUser, err := users.Get(ctx, createdUser)
 	assert.NoError(t, err)
 	assert.NoError(t, user_mock.CompareUsers(getUser, updatedUser))
 }
@@ -77,13 +77,15 @@ func TestUpdateImageWithInvalidEncryptionKey(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, encryptionKey)
+	createdUser, err := usersOne.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
 	createdUser.Image = gofakeit.ImageURL(20, 10)
-	_, err = users.UpdateImage(ctx, createdUser, createdUser, invalidEncryptionKey)
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), invalidEncryptionKey)
+	assert.NoError(t, err)
+	_, err = usersTwo.UpdateImage(ctx, createdUser, createdUser)
 	// validate
 	assert.Error(t, err)
 }
@@ -96,13 +98,15 @@ func TestUpdateEncryptedImageWithoutKey(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, encryptionKey)
+	createdUser, err := usersOne.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
 	createdUser.Image = gofakeit.ImageURL(20, 10)
-	_, err = users.UpdateImage(ctx, createdUser, createdUser, "")
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
+	assert.NoError(t, err)
+	_, err = usersTwo.UpdateImage(ctx, createdUser, createdUser)
 	// validate
 	assert.Error(t, err)
 }
@@ -115,13 +119,15 @@ func TestUpdateUnencryptedImageWithKey(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := usersOne.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
 	createdUser.Image = gofakeit.ImageURL(20, 10)
-	_, err = users.UpdateImage(ctx, createdUser, createdUser, encryptionKey)
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
+	assert.NoError(t, err)
+	_, err = usersTwo.UpdateImage(ctx, createdUser, createdUser)
 	// validate
 	assert.Error(t, err)
 }
@@ -131,15 +137,15 @@ func TestUpdateImageInvalidNamespace(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
 	user := user_mock.GetRandomUser(nil)
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := users.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
 	createdUser.Image = gofakeit.ImageURL(20, 10)
-	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	_, err = usersTwo.UpdateImage(ctx, createdUser, createdUser, "")
+	_, err = usersTwo.UpdateImage(ctx, createdUser, createdUser)
 	// validate
 	assert.Error(t, err)
 }

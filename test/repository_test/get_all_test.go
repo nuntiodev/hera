@@ -19,14 +19,14 @@ func TestGetAll(t *testing.T) {
 		Image: gofakeit.ImageURL(10, 10),
 	})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUserOne, err := users.Create(ctx, userOne, "")
+	createdUserOne, err := users.Create(ctx, userOne)
 	assert.Nil(t, err)
-	createdUserTwo, err := users.Create(ctx, userTwo, "")
+	createdUserTwo, err := users.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{}, "")
+	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -42,15 +42,18 @@ func TestGetAllWithPartialEncryption(t *testing.T) {
 	userOne := user_mock.GetRandomUser(&go_block.User{
 		Image: gofakeit.ImageURL(10, 10),
 	})
+	namespace := uuid.NewV4().String()
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, namespace, "")
 	assert.NoError(t, err)
-	createdUserOne, err := users.Create(ctx, userOne, "")
+	createdUserOne, err := usersOne.Create(ctx, userOne)
 	assert.Nil(t, err)
-	createdUserTwo, err := users.Create(ctx, userTwo, encryptionKey)
+	usersTwo, err := testRepository.Users(ctx, namespace, encryptionKey)
+	assert.NoError(t, err)
+	createdUserTwo, err := usersTwo.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{}, encryptionKey)
+	getUsers, err := usersTwo.GetAll(ctx, &go_block.UserFilter{})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -66,15 +69,18 @@ func TestGetAllWithInvalidEncryptionKey(t *testing.T) {
 	userOne := user_mock.GetRandomUser(&go_block.User{
 		Image: gofakeit.ImageURL(10, 10),
 	})
+	namespace := uuid.NewV4().String()
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, namespace, encryptionKey)
 	assert.NoError(t, err)
-	_, err = users.Create(ctx, userOne, "")
+	_, err = usersOne.Create(ctx, userOne)
 	assert.Nil(t, err)
-	_, err = users.Create(ctx, userTwo, encryptionKey)
+	_, err = usersOne.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
-	_, err = users.GetAll(ctx, &go_block.UserFilter{}, invalidEncryptionKey)
+	usersTwo, err := testRepository.Users(ctx, namespace, invalidEncryptionKey)
+	assert.NoError(t, err)
+	_, err = usersTwo.GetAll(ctx, &go_block.UserFilter{})
 	// validate
 	assert.Error(t, err)
 }
@@ -89,14 +95,17 @@ func TestGetAllWithPartialEncryptionNoDecryption(t *testing.T) {
 	userTwo := user_mock.GetRandomUser(&go_block.User{
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	namespace := uuid.NewV4().String()
+	usersOne, err := testRepository.Users(ctx, namespace, "")
 	assert.NoError(t, err)
-	createdUserOne, err := users.Create(ctx, userOne, "")
+	createdUserOne, err := usersOne.Create(ctx, userOne)
 	assert.Nil(t, err)
-	createdUserTwo, err := users.Create(ctx, userTwo, encryptionKey)
+	usersTwo, err := testRepository.Users(ctx, namespace, encryptionKey)
+	assert.NoError(t, err)
+	createdUserTwo, err := usersTwo.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{}, "")
+	getUsers, err := usersOne.GetAll(ctx, &go_block.UserFilter{})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -114,17 +123,17 @@ func TestGetAllDifferentSortCreatedAt(t *testing.T) {
 		Image: gofakeit.ImageURL(10, 10),
 	})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUserOne, err := users.Create(ctx, userOne, "")
+	createdUserOne, err := users.Create(ctx, userOne)
 	assert.Nil(t, err)
-	createdUserTwo, err := users.Create(ctx, userTwo, "")
+	createdUserTwo, err := users.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
 	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{
 		Sort:  go_block.UserFilter_CREATED_AT,
 		Order: go_block.UserFilter_DEC,
-	}, "")
+	})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -137,21 +146,21 @@ func TestGetAllDifferentSortUpdatedAt(t *testing.T) {
 	// setup
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
 	defer cancel()
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
 	userOne := user_mock.GetRandomUser(&go_block.User{
 		Image: gofakeit.ImageURL(10, 10),
 	})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	createdUserOne, err := users.Create(ctx, userOne, "")
+	createdUserOne, err := users.Create(ctx, userOne)
 	assert.Nil(t, err)
-	createdUserTwo, err := users.Create(ctx, userTwo, "")
+	createdUserTwo, err := users.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
 	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{
 		Sort:  go_block.UserFilter_UPDATE_AT,
 		Order: go_block.UserFilter_DEC,
-	}, "")
+	})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -168,16 +177,16 @@ func TestGetAllDifferentSortBirthdate(t *testing.T) {
 		Image: gofakeit.ImageURL(10, 10),
 	})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUserOne, err := users.Create(ctx, userOne, "")
+	createdUserOne, err := users.Create(ctx, userOne)
 	assert.Nil(t, err)
-	createdUserTwo, err := users.Create(ctx, userTwo, "")
+	createdUserTwo, err := users.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
 	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{
 		Order: go_block.UserFilter_DEC,
-	}, "")
+	})
 	// validate
 	assert.NoError(t, err)
 	assert.NotNil(t, getUsers)
@@ -195,19 +204,19 @@ func TestGetAllDifferentSortName(t *testing.T) {
 	})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
 	userThree := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUserOne, err := users.Create(ctx, userOne, "")
+	createdUserOne, err := users.Create(ctx, userOne)
 	assert.Nil(t, err)
-	createdUserTwo, err := users.Create(ctx, userTwo, "")
+	createdUserTwo, err := users.Create(ctx, userTwo)
 	assert.Nil(t, err)
-	createdUserThree, err := users.Create(ctx, userThree, "")
+	createdUserThree, err := users.Create(ctx, userThree)
 	assert.Nil(t, err)
 	// act
 	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{
 		Order: go_block.UserFilter_DEC,
 		Sort:  go_block.UserFilter_CREATED_AT,
-	}, "")
+	})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -225,16 +234,16 @@ func TestGetAllDifferentNamespace(t *testing.T) {
 		Image: gofakeit.ImageURL(10, 10),
 	})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUserOne, err := usersOne.Create(ctx, userOne, "")
+	createdUserOne, err := usersOne.Create(ctx, userOne)
 	assert.Nil(t, err)
-	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	_, err = usersTwo.Create(ctx, userTwo, "")
+	_, err = usersTwo.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
-	getUsers, err := usersOne.GetAll(ctx, &go_block.UserFilter{}, "")
+	getUsers, err := usersOne.GetAll(ctx, &go_block.UserFilter{})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -250,17 +259,17 @@ func TestGetAllSetFromTo(t *testing.T) {
 		Image: gofakeit.ImageURL(10, 10),
 	})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	createdUserOne, err := users.Create(ctx, userOne, "")
+	createdUserOne, err := users.Create(ctx, userOne)
 	assert.Nil(t, err)
-	_, err = users.Create(ctx, userTwo, "")
+	_, err = users.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
 	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{
 		From: 0,
 		To:   1,
-	}, "")
+	})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)
@@ -276,17 +285,17 @@ func TestGetAllSetFromToWithSkip(t *testing.T) {
 		Image: gofakeit.ImageURL(10, 10),
 	})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	_, err = users.Create(ctx, userOne, "")
+	_, err = users.Create(ctx, userOne)
 	assert.Nil(t, err)
-	createdUserTwo, err := users.Create(ctx, userTwo, "")
+	createdUserTwo, err := users.Create(ctx, userTwo)
 	assert.Nil(t, err)
 	// act
 	getUsers, err := users.GetAll(ctx, &go_block.UserFilter{
 		From: 1,
 		To:   2,
-	}, "")
+	})
 	assert.Nil(t, err)
 	// validate
 	assert.NotNil(t, getUsers)

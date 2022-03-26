@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error) {
+func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -16,12 +16,12 @@ func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, u
 	if err := r.validate(actionUpdateImage, update); err != nil {
 		return nil, err
 	}
-	getUser, err := r.Get(ctx, get, encryptionKey) // check if user encryption is turned on
+	getUser, err := r.Get(ctx, get) // check if user encryption is turned on
 	if err != nil {
 		return nil, err
 	}
 	resp := *update
-	if err := r.handleEncryption(getUser.Encrypted, update, encryptionKey); err != nil {
+	if err := r.handleEncryption(getUser.Encrypted, update); err != nil {
 		return nil, err
 	}
 	updateUser := ProtoUserToUser(&go_block.User{

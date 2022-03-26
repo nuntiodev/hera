@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, encryptionKey string) (*go_block.User, error) {
+func (r *mongoRepository) Get(ctx context.Context, user *go_block.User) (*go_block.User, error) {
 	prepare(actionGet, user)
 	if err := r.validate(actionGet, user); err != nil {
 		return nil, err
@@ -26,8 +26,8 @@ func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, encrypti
 		return nil, err
 	}
 	protoUser := UserToProtoUser(&resp)
-	if resp.Encrypted == true && encryptionKey != "" {
-		if err := r.crypto.DecryptUser(encryptionKey, protoUser); err != nil {
+	if resp.Encrypted == true && r.encryptionKey != "" {
+		if err := r.crypto.DecryptUser(r.encryptionKey, protoUser); err != nil {
 			return nil, err
 		}
 	}

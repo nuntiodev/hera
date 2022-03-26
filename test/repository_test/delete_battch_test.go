@@ -16,17 +16,17 @@ func TestDeleteBatch(t *testing.T) {
 	defer cancel()
 	userOne := user_mock.GetRandomUser(&go_block.User{})
 	userTwo := user_mock.GetRandomUser(&go_block.User{})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), "")
 	assert.NoError(t, err)
-	_, err = users.Create(ctx, userOne, "")
+	_, err = users.Create(ctx, userOne)
 	assert.NoError(t, err)
-	_, err = users.Create(ctx, userTwo, "")
+	_, err = users.Create(ctx, userTwo)
 	assert.NoError(t, err)
 	// act
 	err = users.DeleteBatch(ctx, []*go_block.User{userOne, userTwo})
 	assert.NoError(t, err)
 	// validate
-	getUsersDeletedNamespace, err := users.GetAll(ctx, nil, "")
+	getUsersDeletedNamespace, err := users.GetAll(ctx, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(getUsersDeletedNamespace))
 }

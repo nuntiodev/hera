@@ -51,16 +51,15 @@ type User struct {
 }
 
 type UserRepository interface {
-	Create(ctx context.Context, user *go_block.User, encryptionKey string) (*go_block.User, error)
+	Create(ctx context.Context, user *go_block.User) (*go_block.User, error)
 	UpdatePassword(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
-	UpdateEmail(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error)
+	UpdateEmail(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateOptionalId(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
-	UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error)
-	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User, encryptionKey string) (*go_block.User, error)
-	UpdateSecurity(ctx context.Context, get *go_block.User, encryptionKey string) (*go_block.User, error)
-	Get(ctx context.Context, user *go_block.User, encryptionKey string) (*go_block.User, error)
-	GetAll(ctx context.Context, userFilter *go_block.UserFilter, encryptionKey string) ([]*go_block.User, error)
-	GetStream(ctx context.Context, get *go_block.User) (*mongo.ChangeStream, error)
+	UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error)
+	Get(ctx context.Context, user *go_block.User) (*go_block.User, error)
+	GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*go_block.User, error)
 	Count(ctx context.Context) (int64, error)
 	Delete(ctx context.Context, user *go_block.User) error
 	DeleteBatch(ctx context.Context, userBatch []*go_block.User) error
@@ -68,12 +67,13 @@ type UserRepository interface {
 }
 
 type mongoRepository struct {
-	collection *mongo.Collection
-	crypto     crypto.Crypto
-	zapLog     *zap.Logger
+	collection    *mongo.Collection
+	crypto        crypto.Crypto
+	zapLog        *zap.Logger
+	encryptionKey string
 }
 
-func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto crypto.Crypto) (UserRepository, error) {
+func New(ctx context.Context, collection *mongo.Collection, crypto crypto.Crypto, encryptionKey string) (UserRepository, error) {
 	emailNamespaceIndexModel := mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "email_hash", Value: 1},
@@ -113,7 +113,8 @@ func NewUserRepository(ctx context.Context, collection *mongo.Collection, crypto
 		return nil, err
 	}
 	return &mongoRepository{
-		collection: collection,
-		crypto:     crypto,
+		collection:    collection,
+		crypto:        crypto,
+		encryptionKey: encryptionKey,
 	}, nil
 }

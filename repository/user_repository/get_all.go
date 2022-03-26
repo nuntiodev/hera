@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter, encryptionKey string) ([]*go_block.User, error) {
+func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*go_block.User, error) {
 	var resp []*go_block.User
 	sortOptions := options.FindOptions{}
 	limitOptions := options.Find()
@@ -46,8 +46,8 @@ func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserF
 			return nil, err
 		}
 		protoUser := UserToProtoUser(&user)
-		if user.Encrypted == true && encryptionKey != "" {
-			if err := r.crypto.DecryptUser(encryptionKey, protoUser); err != nil {
+		if user.Encrypted == true && r.encryptionKey != "" {
+			if err := r.crypto.DecryptUser(r.encryptionKey, protoUser); err != nil {
 				return nil, err
 			}
 		}

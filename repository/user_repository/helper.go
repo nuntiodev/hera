@@ -114,13 +114,13 @@ func validatePassword(password string) error {
 	*/
 }
 
-func (r *mongoRepository) handleEncryption(encrypted bool, update *go_block.User, encryptionKey string) error {
-	if encrypted == false && encryptionKey != "" {
+func (r *mongoRepository) handleEncryption(encrypted bool, update *go_block.User) error {
+	if encrypted == false && r.encryptionKey != "" {
 		return errors.New("you need to update the users security profile (UpdateSecurity) and set encrypted=true if you want to encrypt users data")
-	} else if encrypted == true && encryptionKey == "" {
+	} else if encrypted == true && r.encryptionKey == "" {
 		return errors.New("in order to update an encrypted user, you need to pass the encryption key. If you want to store the user in plaintext, update the users security profile (UpdateSecurity) and turn set encrypted=false")
-	} else if encrypted && encryptionKey != "" {
-		if err := r.crypto.EncryptUser(encryptionKey, update); err != nil {
+	} else if encrypted && r.encryptionKey != "" {
+		if err := r.crypto.EncryptUser(r.encryptionKey, update); err != nil {
 			return err
 		}
 		update.EncryptedAt = ts.Now()

@@ -19,20 +19,23 @@ func TestUpdateUnencryptedSecurity(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	namespace := uuid.NewV4().String()
+	usersOne, err := testRepository.Users(ctx, namespace, "")
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, "")
+	createdUser, err := usersOne.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
-	updatedUser, err := users.UpdateSecurity(ctx, createdUser, encryptionKey)
+	usersTwo, err := testRepository.Users(ctx, namespace, encryptionKey)
+	assert.NoError(t, err)
+	updatedUser, err := usersTwo.UpdateSecurity(ctx, createdUser)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
 	assert.True(t, updatedUser.Encrypted)
 	// validate in database
-	_, err = users.Get(ctx, createdUser, encryptionKey)
+	_, err = usersTwo.Get(ctx, createdUser)
 	assert.NoError(t, err)
-	getUser, err := users.Get(ctx, createdUser, encryptionKey)
+	getUser, err := usersTwo.Get(ctx, createdUser)
 	assert.NoError(t, err)
 	createdUser.Encrypted = true
 	assert.NoError(t, user_mock.CompareUsers(getUser, createdUser))
@@ -46,18 +49,18 @@ func TestUpdateEncryptedSecurity(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	users, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, encryptionKey)
+	createdUser, err := users.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
-	updatedUser, err := users.UpdateSecurity(ctx, createdUser, encryptionKey)
+	updatedUser, err := users.UpdateSecurity(ctx, createdUser)
 	assert.NoError(t, err)
 	// validate
 	assert.NotNil(t, updatedUser)
 	assert.False(t, updatedUser.Encrypted)
 	// validate in database
-	_, err = users.Get(ctx, createdUser, "")
+	_, err = users.Get(ctx, createdUser)
 	assert.NoError(t, err)
 }
 
@@ -69,12 +72,14 @@ func TestUpdateSecurityWithInvalidEncryptionKey(t *testing.T) {
 		Email: gofakeit.Email(),
 		Image: gofakeit.ImageURL(10, 10),
 	})
-	users, err := testRepository.Users(ctx, uuid.NewV4().String())
+	usersOne, err := testRepository.Users(ctx, uuid.NewV4().String(), encryptionKey)
 	assert.NoError(t, err)
-	createdUser, err := users.Create(ctx, user, encryptionKey)
+	createdUser, err := usersOne.Create(ctx, user)
 	assert.Nil(t, err)
 	// act
-	_, err = users.UpdateSecurity(ctx, createdUser, invalidEncryptionKey)
+	usersTwo, err := testRepository.Users(ctx, uuid.NewV4().String(), invalidEncryptionKey)
+	assert.NoError(t, err)
+	_, err = usersTwo.UpdateSecurity(ctx, createdUser)
 	// validate
 	assert.Error(t, err)
 }

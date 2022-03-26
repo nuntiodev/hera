@@ -8,24 +8,23 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User, encryptionKey string) (*go_block.User, error) {
+func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
 	}
-	get, err := r.Get(ctx, get, "") // check if user encryption is turned on
+	get, err := r.Get(ctx, get) // check if user encryption is turned on
 	if err != nil {
 		return nil, err
 	}
-	resp := *get
-	if get.Encrypted == false && encryptionKey != "" {
-		if err := r.crypto.EncryptUser(encryptionKey, get); err != nil {
+	if get.Encrypted == false && r.encryptionKey != "" {
+		if err := r.crypto.EncryptUser(r.encryptionKey, get); err != nil {
 			return nil, err
 		}
 		get.Encrypted = true
 		get.EncryptedAt = ts.Now()
-	} else if get.Encrypted == true && encryptionKey != "" {
-		if err := r.crypto.DecryptUser(encryptionKey, get); err != nil {
+	} else if get.Encrypted == true && r.encryptionKey != "" {
+		if err := r.crypto.DecryptUser(r.encryptionKey, get); err != nil {
 			return nil, err
 		}
 		get.Encrypted = false
@@ -54,5 +53,5 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 	if updateResult.MatchedCount == 0 {
 		return nil, errors.New("could not find get")
 	}
-	return &resp, nil
+	return get, nil
 }

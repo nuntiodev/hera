@@ -12,8 +12,9 @@ const (
 )
 
 type Token struct {
-	Id        string `bson:"_id" json:"id"`
-	ExpiresAt int64  `bson:"expires_at" json:"expires_at"` // unix time
+	AccessTokenId  string `bson:"access_token_id" json:"access_token_id"`
+	RefreshTokenId string `bson:"refresh_token_id" json:"refresh_token_id"`
+	ExpiresAt      int64  `bson:"expires_at" json:"expires_at"` // unix time
 }
 
 type TokenRespository interface {
@@ -33,6 +34,34 @@ func New(ctx context.Context, collection *mongo.Collection) (TokenRespository, e
 		Options: options.Index().SetExpireAfterSeconds(0).SetName(expiresAfterIndex),
 	}
 	if _, err := collection.Indexes().CreateOne(ctx, emailNamespaceIndexModel); err != nil {
+		return nil, err
+	}
+	accessTokenIdIndexModel := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "access_token_id", Value: 1},
+		},
+		Options: options.Index().SetUnique(true).SetPartialFilterExpression(
+			bson.D{
+				{
+					"access_token_id", bson.D{
+						{
+							"$gt", "",
+						},
+					},
+				},
+			},
+		).SetName("access-token-index-model"),
+	}
+	if _, err := collection.Indexes().CreateOne(ctx, accessTokenIdIndexModel); err != nil {
+		return nil, err
+	}
+	refreshTokenIdIndexModel := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "refresh_token_id", Value: 1},
+		},
+		Options: options.Index().SetName("refresh-token-index-model"),
+	}
+	if _, err := collection.Indexes().CreateOne(ctx, refreshTokenIdIndexModel); err != nil {
 		return nil, err
 	}
 	return &mongoRepository{

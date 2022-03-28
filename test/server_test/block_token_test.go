@@ -81,7 +81,7 @@ func TestBlockRefreshToken(t *testing.T) {
 		Namespace: namespace,
 	})
 	assert.NoError(t, err)
-	_, err = testClient.RefreshToken(ctx, &go_block.UserRequest{
+	newRefreshToken, err := testClient.RefreshToken(ctx, &go_block.UserRequest{
 		Token: &go_block.Token{
 			RefreshToken: loginUser.Token.RefreshToken,
 		},
@@ -90,14 +90,14 @@ func TestBlockRefreshToken(t *testing.T) {
 	// act
 	_, err = testClient.BlockToken(ctx, &go_block.UserRequest{
 		Token: &go_block.Token{
-			RefreshToken: loginUser.Token.RefreshToken,
+			RefreshToken: newRefreshToken.Token.RefreshToken,
 		},
 	})
 	assert.NoError(t, err)
 	// validate we cannot use token anymore
 	_, err = testClient.RefreshToken(ctx, &go_block.UserRequest{
 		Token: &go_block.Token{
-			RefreshToken: loginUser.Token.RefreshToken,
+			RefreshToken: newRefreshToken.Token.RefreshToken,
 		},
 	})
 	assert.Error(t, err)

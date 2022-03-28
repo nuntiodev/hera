@@ -19,23 +19,31 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		return nil, err
 	}
 	if err := tokens.IsBlocked(ctx, &token_repository.Token{
-		Id: customClaims.Id,
+		RefreshTokenId: customClaims.Id,
 	}); err != nil {
 		return nil, err
 	}
-	// generate new access token from refresh token
-	newAccessToken, err := h.crypto.GenerateToken(customClaims.UserId, crypto.TokenTypeAccess, h.accessTokenExpiry)
-	if err != nil {
-		return nil, err
-	}
-	// if refresh token is about to expire (in less than 12 hours), create a new one and block the old one
+	// if refresh token is about to expire (in less than 10 hours), create a new one and block the old one
 	refreshToken := req.Token.RefreshToken
 	if time.Unix(customClaims.ExpiresAt, 0).Sub(time.Now()) < time.Hour*10 {
-		newRefreshToken, err := h.crypto.GenerateToken(customClaims.UserId, crypto.TokenTypeRefresh, h.refreshTokenExpiry)
+		if _, err := h.BlockToken(ctx, &go_block.UserRequest{
+			Token: &go_block.Token{
+				RefreshToken: refreshToken,
+			},
+		}); err != nil {
+			return nil, err
+		}
+		newRefreshToken, claims, err := h.crypto.GenerateToken(customClaims.UserId, "", crypto.TokenTypeRefresh, h.refreshTokenExpiry)
 		if err != nil {
 			return nil, err
 		}
 		refreshToken = newRefreshToken
+		customClaims = claims
+	}
+	// generate new access token from refresh token
+	newAccessToken, _, err := h.crypto.GenerateToken(customClaims.UserId, customClaims.Id, crypto.TokenTypeAccess, h.accessTokenExpiry)
+	if err != nil {
+		return nil, err
 	}
 	return &go_block.UserResponse{
 		Token: &go_block.Token{

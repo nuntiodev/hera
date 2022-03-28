@@ -20,11 +20,11 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		return &go_block.UserResponse{}, err
 	}
 	// issue access and refresh token pair
-	accessToken, err := h.crypto.GenerateToken(resp.User.Id, crypto.TokenTypeAccess, h.accessTokenExpiry)
+	refreshToken, claims, err := h.crypto.GenerateToken(resp.User.Id, "", crypto.TokenTypeRefresh, h.refreshTokenExpiry)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	refreshToken, err := h.crypto.GenerateToken(resp.User.Id, crypto.TokenTypeRefresh, h.refreshTokenExpiry)
+	accessToken, _, err := h.crypto.GenerateToken(resp.User.Id, claims.UserId, crypto.TokenTypeAccess, h.accessTokenExpiry)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}

@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/softcorp-io/block-proto/go_block"
+	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository/token_repository"
 )
 
@@ -21,15 +21,23 @@ func (h *defaultHandler) BlockToken(ctx context.Context, req *go_block.UserReque
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	fmt.Println(customClaims)
+	// build ids
+	accessTokenId := ""
+	refreshTokenId := ""
+	if customClaims.Type == crypto.TokenTypeAccess {
+		accessTokenId = customClaims.Id
+	} else if customClaims.Type == crypto.TokenTypeRefresh {
+		refreshTokenId = customClaims.Id
+	}
 	// validate if token is blocked in db
 	tokens, err := h.repository.Tokens(ctx, req.Namespace)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	if err := tokens.BlockToken(ctx, &token_repository.Token{
-		Id:        customClaims.Id,
-		ExpiresAt: customClaims.ExpiresAt,
+		AccessTokenId:  accessTokenId,
+		RefreshTokenId: refreshTokenId,
+		ExpiresAt:      customClaims.ExpiresAt,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

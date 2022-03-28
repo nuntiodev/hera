@@ -17,7 +17,8 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 		return nil, err
 	}
 	if err := tokens.IsBlocked(ctx, &token_repository.Token{
-		Id: customClaims.Id,
+		AccessTokenId:  customClaims.Id,
+		RefreshTokenId: customClaims.RefreshTokenId,
 	}); err != nil {
 		return nil, err
 	}

@@ -13,8 +13,9 @@ const (
 )
 
 type CustomClaims struct {
-	UserId string `json:"user_id"`
-	Type   string `json:"type"`
+	UserId         string `json:"user_id"`
+	Type           string `json:"type"`
+	RefreshTokenId string `json:"refresh_token_id"`
 	jwt.StandardClaims
 }
 
@@ -23,7 +24,7 @@ type Crypto interface {
 	Decrypt(encryptedString string, keyString string) (string, error)
 	EncryptUser(key string, user *go_block.User) error
 	DecryptUser(key string, user *go_block.User) error
-	GenerateToken(userId, tokenType string, expiresAt time.Duration) (string, error)
+	GenerateToken(userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *CustomClaims, error)
 	ValidateToken(jwtToken string) (*CustomClaims, error)
 }
 

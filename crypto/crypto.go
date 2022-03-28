@@ -29,8 +29,8 @@ type Crypto interface {
 }
 
 type defaultCrypto struct {
-	jwtPrivateKey []byte `json:"jwt_private_key"`
-	jwtPublicKey  []byte `json:"jwt_public_key"`
+	jwtPrivateKey []byte
+	jwtPublicKey  []byte
 }
 
 func New(jwtPrivateKey, jwtPublicKey []byte) (Crypto, error) {

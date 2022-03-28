@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/handler"
@@ -23,6 +25,24 @@ var (
 
 type Server struct {
 	GrpcServer *grpc_server.Server
+}
+
+func verifyKeyPair(rsaPrivateKey, rsaPublicKey string) error {
+	// Handle errors here
+	block, _ := pem.Decode([]byte(rsaPrivateKey))
+	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return err
+	}
+	pubBlock, _ := pem.Decode([]byte(rsaPublicKey))
+	pubKey, err := x509.ParsePKIXPublicKey(pubBlock.Bytes)
+	if err != nil {
+		return err
+	}
+	if key.PublicKey.Equal(pubKey) == false {
+		return errors.New("keys do not match")
+	}
+	return nil
 }
 
 func initialize() error {
@@ -47,6 +67,9 @@ func initialize() error {
 	jwtPrivateKey, ok = os.LookupEnv("JWT_PRIVATE_KEY")
 	if !ok || jwtPrivateKey == "" {
 		return errors.New("missing required JWT_PRIVATE_KEY")
+	}
+	if err := verifyKeyPair(jwtPrivateKey, jwtPublicKey); err != nil {
+		return err
 	}
 	return nil
 }

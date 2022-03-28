@@ -1,7 +1,6 @@
 package crypto
 
 import (
-	"github.com/golang-jwt/jwt"
 	"github.com/softcorp-io/block-proto/go_block"
 	"time"
 )
@@ -12,20 +11,13 @@ const (
 	Issuer           = "Block User Service"
 )
 
-type CustomClaims struct {
-	UserId         string `json:"user_id"`
-	Type           string `json:"type"`
-	RefreshTokenId string `json:"refresh_token_id"`
-	jwt.StandardClaims
-}
-
 type Crypto interface {
 	Encrypt(stringToEncrypt string, keyString string) (string, error)
 	Decrypt(encryptedString string, keyString string) (string, error)
 	EncryptUser(key string, user *go_block.User) error
 	DecryptUser(key string, user *go_block.User) error
-	GenerateToken(userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *CustomClaims, error)
-	ValidateToken(jwtToken string) (*CustomClaims, error)
+	GenerateToken(userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_block.CustomClaims, error)
+	ValidateToken(jwtToken string) (*go_block.CustomClaims, error)
 }
 
 type defaultCrypto struct {

@@ -4,10 +4,11 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt"
 	uuid "github.com/satori/go.uuid"
+	"github.com/softcorp-io/block-proto/go_block"
 	"time"
 )
 
-func (c *defaultCrypto) GenerateToken(userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *CustomClaims, error) {
+func (c *defaultCrypto) GenerateToken(userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_block.CustomClaims, error) {
 	expiresAtInt64 := int64(0)
 	if expiresAt.Seconds() != 0 {
 		expiresAtInt64 = time.Now().UTC().Add(expiresAt).Unix()
@@ -18,7 +19,7 @@ func (c *defaultCrypto) GenerateToken(userId, refreshTokenId, tokenType string, 
 	if tokenType == TokenTypeAccess && refreshTokenId == "" {
 		return "", nil, errors.New("missing required refreshTokenId")
 	}
-	claims := CustomClaims{
+	claims := go_block.CustomClaims{
 		UserId:         userId,
 		Type:           tokenType,
 		RefreshTokenId: refreshTokenId,

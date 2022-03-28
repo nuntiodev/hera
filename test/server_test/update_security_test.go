@@ -27,9 +27,10 @@ func TestSecurityProfile(t *testing.T) {
 	assert.NoError(t, err)
 	// act
 	updateUser, err := testClient.UpdateSecurity(ctx, &go_block.UserRequest{
-		Update:    createUser.User,
-		User:      createUser.User,
-		Namespace: namespace,
+		Update:        createUser.User,
+		User:          createUser.User,
+		Namespace:     namespace,
+		EncryptionKey: encryptionKey,
 	})
 	assert.NoError(t, err)
 	// validate

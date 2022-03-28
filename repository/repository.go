@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"os"
-	"time"
 )
 
 var (
@@ -22,10 +21,9 @@ type Repository interface {
 }
 
 type defaultRepository struct {
-	namespace            string
-	mongoClient          *mongo.Client
-	crypto               crypto.Crypto
-	accessTokenExpiresAt time.Duration
+	namespace   string
+	mongoClient *mongo.Client
+	crypto      crypto.Crypto
 }
 
 func initialize() error {
@@ -60,22 +58,21 @@ func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token
 		namespace = "blocks-db"
 	}
 	collection := r.mongoClient.Database(namespace).Collection("user_tokens")
-	tokenRepository, err := token_repository.New(ctx, collection, r.accessTokenExpiresAt)
+	tokenRepository, err := token_repository.New(ctx, collection)
 	if err != nil {
 		return nil, err
 	}
 	return tokenRepository, nil
 }
 
-func New(mongoClient *mongo.Client, crypto crypto.Crypto, accessTokenExpiresAt time.Duration, zapLog *zap.Logger) (Repository, error) {
+func New(mongoClient *mongo.Client, crypto crypto.Crypto, zapLog *zap.Logger) (Repository, error) {
 	zapLog.Info("creating repository_mock...")
 	if err := initialize(); err != nil {
 		return nil, err
 	}
 	repository := &defaultRepository{
-		accessTokenExpiresAt: accessTokenExpiresAt,
-		mongoClient:          mongoClient,
-		crypto:               crypto,
+		mongoClient: mongoClient,
+		crypto:      crypto,
 	}
 	return repository, nil
 }

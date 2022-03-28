@@ -67,7 +67,7 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myRepository, err := repository.New(mongoClient, myCrypto, accessTokenExpiry, zapLog)
+	myRepository, err := repository.New(mongoClient, myCrypto, zapLog)
 	if err != nil {
 		return nil, err
 	}

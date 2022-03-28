@@ -22,13 +22,18 @@ const (
 	Get                 = "Get"
 	GetAll              = "GetAll"
 	ValidateCredentials = "ValidateCredentials"
+	Login               = "Login"
+	ValidateToken       = "ValidateToken"
+	BlockToken          = "BlockToken"
+	RefreshToken        = "RefreshToken"
+	PublicKeys          = "PublicKeys"
 	Delete              = "Delete"
 	DeleteNamespace     = "DeleteNamespace"
 	DeleteBatch         = "DeleteBatch"
 )
 
 var (
-	ErrorReqIsNil    = errors.New("req is nil")
+	TokenIsNil       = errors.New("token is nil")
 	UpdateIsNil      = errors.New("update is nil")
 	UserIsNil        = errors.New("user is nil")
 	NamespaceIsEmpty = errors.New("namespace is empty")
@@ -48,7 +53,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		return nil, errors.New(fmt.Sprintf("invalid method call: %s", info.FullMethod))
 	}
 	switch method[1] {
-	case Heartbeat, GetAll:
+	case Heartbeat, GetAll, PublicKeys:
 		break
 	case Create, Get:
 		if translatedReq.User == nil {
@@ -61,9 +66,13 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		} else if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UpdateIsNil
 		}
-	case ValidateCredentials, Delete, UpdateSecurity:
+	case ValidateCredentials, Delete, UpdateSecurity, Login:
 		if translatedReq.User == nil {
 			return nil, UserIsNil
+		}
+	case ValidateToken, RefreshToken, BlockToken:
+		if translatedReq.Token == nil {
+			return nil, TokenIsNil
 		}
 	case DeleteNamespace:
 		if translatedReq.Namespace == "" {

@@ -2,6 +2,10 @@ package repository_mock
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -83,7 +87,29 @@ func NewRepositoryMock(ctx context.Context, zapLog *zap.Logger, containerName st
 		return nil, pool, container, err
 	}
 	// create the repository_mock
-	myCrypto, err := crypto.New()
+	// generate private and public keys
+	privatekey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, pool, container, err
+	}
+	privateKeyBlock := &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(privatekey),
+	}
+	publickey := &privatekey.PublicKey
+	marshalPublicKey, err := x509.MarshalPKIXPublicKey(publickey)
+	if err != nil {
+		return nil, pool, container, err
+	}
+	publicKeyBlock := &pem.Block{
+		Type:  "RSA PUBLIC KEY",
+		Bytes: marshalPublicKey,
+	}
+	privateKeyBytes := pem.EncodeToMemory(privateKeyBlock)
+	publicKeyBytes := pem.EncodeToMemory(publicKeyBlock)
+	myCrypto, err := crypto.New(privateKeyBytes, publicKeyBytes)
+	os.Setenv("JWT_PRIVATE_KEY", string(privateKeyBytes))
+	os.Setenv("JWT_PUBLIC_KEY", string(publicKeyBytes))
 	repo, err := repository.New(mongoClient, myCrypto, zapLog)
 	if err != nil {
 		if err := pool.Purge(container); err != nil {

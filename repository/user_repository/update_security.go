@@ -9,6 +9,9 @@ import (
 )
 
 func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error) {
+	if r.encryptionKey == "" {
+		return nil, errors.New("missing required encryption key")
+	}
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -17,16 +20,13 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 	if err != nil {
 		return nil, err
 	}
-	if get.Encrypted == false && r.encryptionKey != "" {
+	if get.Encrypted == false {
 		if err := r.crypto.EncryptUser(r.encryptionKey, get); err != nil {
 			return nil, err
 		}
 		get.Encrypted = true
 		get.EncryptedAt = ts.Now()
-	} else if get.Encrypted == true && r.encryptionKey != "" {
-		if err := r.crypto.DecryptUser(r.encryptionKey, get); err != nil {
-			return nil, err
-		}
+	} else if get.Encrypted == true {
 		get.Encrypted = false
 		get.EncryptedAt = &ts.Timestamp{}
 	}

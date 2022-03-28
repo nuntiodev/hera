@@ -43,11 +43,12 @@ type defaultHandler struct {
 func New(zapLog *zap.Logger, repository repository.Repository, crypto crypto.Crypto, accessTokenExpiry time.Duration, refreshTokenExpiry time.Duration, jwtPublicKey []byte) (Handler, error) {
 	zapLog.Info("creating handler")
 	handler := &defaultHandler{
-		repository:        repository,
-		accessTokenExpiry: accessTokenExpiry,
-		crypto:            crypto,
-		zapLog:            zapLog,
-		jwtPublicKey:      jwtPublicKey,
+		repository:         repository,
+		accessTokenExpiry:  accessTokenExpiry,
+		refreshTokenExpiry: refreshTokenExpiry,
+		crypto:             crypto,
+		zapLog:             zapLog,
+		jwtPublicKey:       jwtPublicKey,
 	}
 	return handler, nil
 }

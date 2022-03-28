@@ -32,14 +32,15 @@ type Handler interface {
 }
 
 type defaultHandler struct {
-	repository        repository.Repository
-	accessTokenExpiry time.Duration
-	crypto            crypto.Crypto
-	zapLog            *zap.Logger
-	jwtPublicKey      []byte
+	repository         repository.Repository
+	accessTokenExpiry  time.Duration
+	refreshTokenExpiry time.Duration
+	crypto             crypto.Crypto
+	zapLog             *zap.Logger
+	jwtPublicKey       []byte
 }
 
-func New(zapLog *zap.Logger, repository repository.Repository, crypto crypto.Crypto, accessTokenExpiry time.Duration, jwtPublicKey []byte) (Handler, error) {
+func New(zapLog *zap.Logger, repository repository.Repository, crypto crypto.Crypto, accessTokenExpiry time.Duration, refreshTokenExpiry time.Duration, jwtPublicKey []byte) (Handler, error) {
 	zapLog.Info("creating handler")
 	handler := &defaultHandler{
 		repository:        repository,

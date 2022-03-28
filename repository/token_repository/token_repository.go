@@ -18,7 +18,7 @@ type Token struct {
 }
 
 type TokenRespository interface {
-	BlockToken(ctx context.Context, token *Token) (*Token, error)
+	BlockToken(ctx context.Context, token *Token) error
 	IsBlocked(ctx context.Context, token *Token) error
 }
 

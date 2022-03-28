@@ -5,14 +5,14 @@ import (
 	"errors"
 )
 
-func (r *mongoRepository) BlockToken(ctx context.Context, token *Token) (*Token, error) {
+func (r *mongoRepository) BlockToken(ctx context.Context, token *Token) error {
 	if token == nil {
-		return nil, errors.New("token is nil")
+		return errors.New("token is nil")
 	} else if token.ExpiresAt == 0 {
-		return nil, errors.New("token expired at is empty")
+		return errors.New("token expired at is empty")
 	}
 	if _, err := r.collection.InsertOne(ctx, token); err != nil {
-		return nil, err
+		return err
 	}
-	return token, nil
+	return nil
 }

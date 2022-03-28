@@ -24,7 +24,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	refreshToken, err := h.crypto.GenerateToken(resp.User.Id, crypto.TokenTypeAccess, 0)
+	refreshToken, err := h.crypto.GenerateToken(resp.User.Id, crypto.TokenTypeAccess, h.refreshTokenExpiry)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}

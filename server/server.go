@@ -15,9 +15,10 @@ import (
 )
 
 var (
-	accessTokenExpiry = time.Minute * 30
-	jwtPublicKey      = ""
-	jwtPrivateKey     = ""
+	accessTokenExpiry  = time.Minute * 30
+	refreshTokenExpiry = time.Hour * 24 * 30
+	jwtPublicKey       = ""
+	jwtPrivateKey      = ""
 )
 
 type Server struct {
@@ -30,6 +31,13 @@ func initialize() error {
 		dur, err := time.ParseDuration(accessTokenExpiryString)
 		if err == nil {
 			accessTokenExpiry = dur
+		}
+	}
+	refreshTokenExpiryString, ok := os.LookupEnv("REFRESH_TOKEN_EXPIRY")
+	if ok {
+		dur, err := time.ParseDuration(refreshTokenExpiryString)
+		if err == nil {
+			refreshTokenExpiry = dur
 		}
 	}
 	jwtPublicKey, ok = os.LookupEnv("JWT_PUBLIC_KEY")
@@ -63,7 +71,7 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myHandler, err := handler.New(zapLog, myRepository, myCrypto, accessTokenExpiry, []byte(jwtPublicKey))
+	myHandler, err := handler.New(zapLog, myRepository, myCrypto, accessTokenExpiry, refreshTokenExpiry, []byte(jwtPublicKey))
 	if err != nil {
 		return nil, err
 	}

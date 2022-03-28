@@ -3,10 +3,12 @@ package repository
 import (
 	"context"
 	"github.com/softcorp-io/block-user-service/crypto"
+	"github.com/softcorp-io/block-user-service/repository/token_repository"
 	"github.com/softcorp-io/block-user-service/repository/user_repository"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"os"
+	"time"
 )
 
 var (
@@ -16,12 +18,14 @@ var (
 type Repository interface {
 	Liveness(ctx context.Context) error
 	Users(ctx context.Context, namespace, encryptionKey string) (user_repository.UserRepository, error)
+	Tokens(ctx context.Context, namespace string) (token_repository.TokenRespository, error)
 }
 
 type defaultRepository struct {
-	namespace   string
-	mongoClient *mongo.Client
-	crypto      crypto.Crypto
+	namespace            string
+	mongoClient          *mongo.Client
+	crypto               crypto.Crypto
+	accessTokenExpiresAt time.Duration
 }
 
 func initialize() error {
@@ -51,14 +55,27 @@ func (r *defaultRepository) Users(ctx context.Context, namespace, encryptionKey 
 	return userRepository, nil
 }
 
-func New(mongoClient *mongo.Client, crypto crypto.Crypto, zapLog *zap.Logger) (Repository, error) {
+func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token_repository.TokenRespository, error) {
+	if namespace == "" {
+		namespace = "blocks-db"
+	}
+	collection := r.mongoClient.Database(namespace).Collection("user_tokens")
+	tokenRepository, err := token_repository.New(ctx, collection, r.accessTokenExpiresAt)
+	if err != nil {
+		return nil, err
+	}
+	return tokenRepository, nil
+}
+
+func New(mongoClient *mongo.Client, crypto crypto.Crypto, accessTokenExpiresAt time.Duration, zapLog *zap.Logger) (Repository, error) {
 	zapLog.Info("creating repository_mock...")
 	if err := initialize(); err != nil {
 		return nil, err
 	}
 	repository := &defaultRepository{
-		mongoClient: mongoClient,
-		crypto:      crypto,
+		accessTokenExpiresAt: accessTokenExpiresAt,
+		mongoClient:          mongoClient,
+		crypto:               crypto,
 	}
 	return repository, nil
 }

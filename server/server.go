@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/handler"
 	"github.com/softcorp-io/block-user-service/interceptor"
@@ -9,13 +10,43 @@ import (
 	"github.com/softcorp-io/block-user-service/server/grpc_server"
 	"github.com/softcorp-io/softcorp_db_helper"
 	"go.uber.org/zap"
+	"os"
+	"time"
+)
+
+var (
+	accessTokenExpiry = time.Minute * 30
+	jwtPublicKey      = ""
+	jwtPrivateKey     = ""
 )
 
 type Server struct {
 	GrpcServer *grpc_server.Server
 }
 
+func initialize() error {
+	accessTokenExpiryString, ok := os.LookupEnv("ACCESS_TOKEN_EXPIRY")
+	if ok {
+		dur, err := time.ParseDuration(accessTokenExpiryString)
+		if err == nil {
+			accessTokenExpiry = dur
+		}
+	}
+	jwtPublicKey, ok = os.LookupEnv("JWT_PUBLIC_KEY")
+	if !ok || jwtPublicKey == "" {
+		return errors.New("missing required JWT_PUBLIC_KEY")
+	}
+	jwtPrivateKey, ok = os.LookupEnv("JWT_PRIVATE_KEY")
+	if !ok || jwtPrivateKey == "" {
+		return errors.New("missing required JWT_PRIVATE_KEY")
+	}
+	return nil
+}
+
 func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
+	if err := initialize(); err != nil {
+		return nil, err
+	}
 	myDatabase, err := database.CreateDatabase(zapLog)
 	if err != nil {
 		return nil, err
@@ -24,15 +55,15 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myCrypto, err := crypto.New()
+	myCrypto, err := crypto.New([]byte(jwtPrivateKey), []byte(jwtPublicKey))
 	if err != nil {
 		return nil, err
 	}
-	myRepository, err := repository.New(mongoClient, myCrypto, zapLog)
+	myRepository, err := repository.New(mongoClient, myCrypto, accessTokenExpiry, zapLog)
 	if err != nil {
 		return nil, err
 	}
-	myHandler, err := handler.New(zapLog, myRepository, myCrypto)
+	myHandler, err := handler.New(zapLog, myRepository, myCrypto, accessTokenExpiry, []byte(jwtPublicKey))
 	if err != nil {
 		return nil, err
 	}

@@ -3,12 +3,12 @@ entries:
   block-user-service:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-03-18T07:46:18.547757227Z"
+    created: "2022-03-28T08:40:11.212886292Z"
     description: A Helm chart for the block-user-service
-    digest: 0dda72285cc85bdde2d0f95256f76bc4a32e79cec7b61b1a0b45f0e5b9ca5cff
+    digest: c055afc0ac8fd5d58e7bd5d01b3e023cd10da64a781a1388133ae07d18f840d9
     name: block-user-service
     type: application
     urls:
-    - charts/block-user-service-0.0.23.tgz
-    version: 0.0.23
-generated: "2022-03-18T07:46:18.54713379Z"
+    - charts/block-user-service-0.0.24.tgz
+    version: 0.0.24
+generated: "2022-03-28T08:40:11.212442891Z"

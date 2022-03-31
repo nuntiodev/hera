@@ -29,6 +29,10 @@ spec:
           - name: {{ $v.name }}
             value: "{{ $v.value }}"
           {{- end }}
+          - name: {{ .Values.jwtPublicKey.name }}
+            value: "{{ .Values.jwtPublicKey.value }}"
+          - name: {{ .Values.jwtPrivateKey.name }}
+            value: "{{ .Values.jwtPrivateKey.value | indent 12 }}"
           envFrom:
             {{- range $secret := .Values.deployment.secretEnv }}
             - secretRef:

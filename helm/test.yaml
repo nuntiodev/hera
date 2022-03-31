@@ -1,0 +1,111 @@
+---
+# Source: block-user-service/charts/block-user-service/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  selector:
+    app: test
+---
+# Source: block-user-service/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  selector:
+    app: test
+---
+# Source: block-user-service/charts/block-user-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: test
+    namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: test
+  template:
+    metadata:
+      name: test
+      labels:
+        app: test
+    spec:
+      containers:
+        - name: test
+          image: "softcorpdev/block-user-service:main"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+          env:
+          - name: MONGO_USER_COLLECTION
+            value: "users"
+          - name: GRPC_PORT
+            value: "9000"
+          envFrom:
+            - secretRef:
+                name: cloud-mongo-secret
+            - secretRef:
+                name: mongo-secret
+---
+# Source: block-user-service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: test
+    namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: test
+  template:
+    metadata:
+      name: test
+      labels:
+        app: test
+    spec:
+      containers:
+        - name: test
+          image: "softcorpdev/block-user-service:main"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+          env:
+          - name: MONGO_USER_COLLECTION
+            value: "users"
+          - name: GRPC_PORT
+            value: "9000"
+          - name: JWT_PUBLIC_KEY
+            value: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZaUm6waVt+vLhmyv10K5HtpYT5YFT8LfWB/NqOnb3tdWm+CYNCKtrErjO6FIFpshFCm0r1SdyJIay8IlAZ42LR3mxExOvghRU5W1aqzIJ9vEOic/I/mL9Xl9ezDdrOe9HSIS9itHGZxCs3sHVCtAbyPTxbhm5uEEFWqMje1uLJjcvks+3JOQ8BZT6yjJ4V+47hZMs+we+E66NimHY/gOP3gzyoCnb8Sig5vNxUcy5VXLnrRVfS7szVQyYR3UTgtvZ6970Q5Nx0+hZAtSh0QGl/tSLE8Xwi45Up6eSJjzdLCRtSCJEtPGUgewdPSzkUXTPVg05HUAkcz4FVjGqBj6l1UALwmAKaCoCrbgAucow5GMrEEgPe868rtQ5hDW9qoPgCzimvbTHxdOSUPGLqquZk9zRfl/Hjr1rba0Hy2+n0KEj73qjifgyFnYXRhq67ami3fIkNFKVna5ay9hdI7iIzbRxTOWZEJSRc0nt67Y0hrDGv0tJt7TJGTI1+h7iWVc= oscarorellana@oscarorellana"
+          - name: JWT_PRIVATE_KEY
+            value: "            -----BEGIN CERTIFICATE-----
+            MIICyTCCAbTCEF+F3G/7tLCJj9mZ/RiaPQEwDQYJKoZIhvcNAQELBQAwIzEhMB8G
+            A1UEAxMYc2FjLWh2bTAwODc5LnN3aW5mcmEubmV0MB4XDTE5MDkyMDEwMDk1NloX
+            DTQ0MDkxMzEwMDk1NlowIzEhMB8GA1UEAxMYc2FjLWh2bTAwODc5LnN3aW5mcmEu
+            bmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtmBCXjv7/8pjzUyq
+            O52/NAVgOpVAj+i4d1bMdFvfonUzZVzvTfmTxLoHVXAAYrivYq5Y9hpTVIxM0rWj
+            AsomYfH3AEgGYax8YGSdF0LW0USEeXZiaMf+Z5+N43d8BoCdGOkPZZQEIMaQwnxM
+            ouLisTV113x0vzHZR7b1JzZyMF5zYw88Lsul+TEOfkpY0zjmoptFM26pYSkx8J87
+            n0aTe1ZN7TFDZ3zu629BHYfcwvy2F/m0E6rnFRa7o4o6qXJSfZIe1kqqvbRc
+            -----END CERTIFICATE-----"
+          envFrom:
+            - secretRef:
+                name: cloud-mongo-secret
+            - secretRef:
+                name: mongo-secret

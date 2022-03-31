@@ -13,6 +13,7 @@ import (
 	"github.com/softcorp-io/softcorp_db_helper"
 	"go.uber.org/zap"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -68,6 +69,7 @@ func initialize() error {
 	if !ok || jwtPrivateKey == "" {
 		return errors.New("missing required JWT_PRIVATE_KEY")
 	}
+	jwtPrivateKey = strings.TrimSpace(jwtPrivateKey)
 	if err := verifyKeyPair(jwtPrivateKey, jwtPublicKey); err != nil {
 		return err
 	}

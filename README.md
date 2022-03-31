@@ -12,16 +12,11 @@
 
 ![example workflow](https://github.com/softcorp-io/block-user-service/actions/workflows/build.yaml/badge.svg)
 
-Are you tired of wasting your time writing the same service over and over again?
-We are, and that's why we have created Softcorp Blocks. These are modular and simple API building blocks that run on
-any Linux-based environment and that you can connect to through our simple SDK.
-Our blocks are simple and are meant for your applications to build upon. The blocks are all stateless, scales horizontally and comes with a large set of tests.
-Furthermore, each block supports encryption and (un)marshaling metadata such that you can customize them to handle almost any task!
+Building Softcorp Blocks: secure, efficient & open-source API blocks that run on any Linux-based environment and scales massively. Softcorp Cloud is the commercial offering of the above technologies and help companies go from idea to production faster, without losing control over their data or services. Our goal with Softcorp Cloud is to provide social API-blocks that are secure, easy to set up, scales worldwide and that you can move from Softcorp Cloud to your private data center whenever you want.
 
 ## Block User Service
 
-The User Service Block is an API block written in Golang that communicates over gRPC. The user-block is responsible for handling
-your organization's user management.
+The User Service Block is an API block written in Golang that communicates over gRPC and can be used with the standard Softcorp Block SDKs. The user-block is responsible for handling your organization's user management and authentication - similar to Firebase authenticate.
 
 ## Softcorp Cloud
 Softcorp Cloud enables your organization to build an MVP fast, and when you have a battle-tested idea, you can
@@ -29,15 +24,6 @@ easily move the open-source building blocks from Softcorp Cloud to your own data
 Go to <a href="https://cloud.softcorp.io"> https://cloud.softcorp.io <a/> and get started right away! 
 
 If you need help building a new product or want to get started with Softcorp Cloud, [contact us](https://softcorp.io/contact) - we are experts in Cloud Native infrastructure and building scalable, secure and aesthetic software.
-
-## Get Started
-If you're looking to jump straight into it, go ahead:
-
-- [Run Block User Service locally and connect your client](): A guide to set up Block User Service on your local machine and connect to the service through our SDK. 
-- [Run Block User Service in Docker](): Set up and use Block User Service using Docker Compose.
-- [Run Block User Service in Kubernetes using Helm](): An advanced guide to deploy a fully functional set up in Kubernetes.
-- [Connect your application to Block User Service](): Connect to Softcorp Cloud or your private environment through our SDK.
-
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

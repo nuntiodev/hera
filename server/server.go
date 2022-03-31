@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/handler"
 	"github.com/softcorp-io/block-user-service/interceptor"
@@ -35,7 +36,10 @@ func verifyKeyPair(rsaPrivateKey, rsaPublicKey string) error {
 	if err != nil {
 		return err
 	}
-	pubBlock, _ := pem.Decode([]byte(rsaPublicKey))
+	pubBlock, rest := pem.Decode([]byte(rsaPublicKey))
+	if pubBlock == nil {
+		return fmt.Errorf("pub block is nil with rest: %s", string(rest))
+	}
 	pubKey, err := x509.ParsePKIXPublicKey(pubBlock.Bytes)
 	if err != nil {
 		return err

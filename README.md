@@ -3,11 +3,9 @@
 <h1 align="center"><img width="100%" src="https://softcorp-io.github.io/website/blocks/user_block_cover.png" alt="Softcorp User Block - simple and efficient user management."></h1>
 
 <h4 align="center">
-    <a href="https://www.softcorp.io/blocks/user/docs/guide">Guides</a> |
-    <a href="https://www.softcorp.io/blocks/user/docs/api">API Docs</a> |
-    <a href="https://www.softcorp.io/blocks/user/docs/code">Code Docs</a> <br/>
-    <a href="https://www.softcorp.io">About Softcorp</a> |
-    <a href="https://www.blocks.softcorp.io">About Blocks</a>
+    <a href="https://docs.softcorp.io/blocks/user/guides">Guides</a> |
+    <a href="https://docs.softcorp.io/blocks/user">Documentation</a> |
+    <a href="https://www.softcorp.io">Softcorp Cloud</a> |
 </h4>
 
 ![example workflow](https://github.com/softcorp-io/block-user-service/actions/workflows/build.yaml/badge.svg)

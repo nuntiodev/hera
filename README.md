@@ -5,7 +5,7 @@
 <h4 align="center">
     <a href="https://docs.softcorp.io/blocks/user/guides">Guides</a> |
     <a href="https://docs.softcorp.io/blocks/user">Documentation</a> |
-    <a href="https://www.softcorp.io">Softcorp Cloud</a> |
+    <a href="https://www.softcorp.io">Softcorp Cloud</a>
 </h4>
 
 ![example workflow](https://github.com/softcorp-io/block-user-service/actions/workflows/build.yaml/badge.svg)

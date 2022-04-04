@@ -16,7 +16,7 @@ Building Softcorp Blocks: secure, efficient & open-source API blocks that run on
 
 ## Block User Service
 
-The User Service Block is an API block written in Golang that communicates over gRPC and can be used with the standard Softcorp Block SDKs. The user-block is responsible for handling your organization's user management and authentication - similar to Firebase authenticate.
+The User Service Block is an API block written in Golang that communicates over gRPC and can be used with the standard Softcorp Block SDKs. The User Block is responsible for handling your organization's user management and authentication - in a very simple and similar solution to Firebase Authenticate. 
 
 ## Softcorp Cloud
 Softcorp Cloud enables your organization to build an MVP fast, and when you have a battle-tested idea, you can

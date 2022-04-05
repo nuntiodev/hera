@@ -2,80 +2,31 @@ package server
 
 import (
 	"context"
-	"crypto/x509"
-	"encoding/pem"
-	"errors"
-	"fmt"
-	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/handler"
 	"github.com/softcorp-io/block-user-service/interceptor"
 	"github.com/softcorp-io/block-user-service/repository"
 	"github.com/softcorp-io/block-user-service/server/grpc_server"
+	"github.com/softcorp-io/block-user-service/token"
 	"github.com/softcorp-io/softcorp_db_helper"
+	"github.com/softcorp-io/x/cryptox"
 	"go.uber.org/zap"
 	"os"
 	"strings"
-	"time"
-)
-
-var (
-	accessTokenExpiry  = time.Minute * 30
-	refreshTokenExpiry = time.Hour * 24 * 30
-	jwtPublicKey       = ""
-	jwtPrivateKey      = ""
 )
 
 type Server struct {
 	GrpcServer *grpc_server.Server
 }
 
-func verifyKeyPair(rsaPrivateKey, rsaPublicKey string) error {
-	// Handle errors here
-	block, _ := pem.Decode([]byte(rsaPrivateKey))
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return err
-	}
-	pubBlock, rest := pem.Decode([]byte(rsaPublicKey))
-	if pubBlock == nil {
-		return fmt.Errorf("pub block is nil with rest: %s", string(rest))
-	}
-	pubKey, err := x509.ParsePKIXPublicKey(pubBlock.Bytes)
-	if err != nil {
-		return err
-	}
-	if key.PublicKey.Equal(pubKey) == false {
-		return errors.New("keys do not match")
-	}
-	return nil
-}
+var (
+	encryptionKeys []string
+)
 
 func initialize() error {
-	accessTokenExpiryString, ok := os.LookupEnv("ACCESS_TOKEN_EXPIRY")
-	if ok {
-		dur, err := time.ParseDuration(accessTokenExpiryString)
-		if err == nil {
-			accessTokenExpiry = dur
-		}
-	}
-	refreshTokenExpiryString, ok := os.LookupEnv("REFRESH_TOKEN_EXPIRY")
-	if ok {
-		dur, err := time.ParseDuration(refreshTokenExpiryString)
-		if err == nil {
-			refreshTokenExpiry = dur
-		}
-	}
-	jwtPublicKey, ok = os.LookupEnv("JWT_PUBLIC_KEY")
-	if !ok || jwtPublicKey == "" {
-		return errors.New("missing required JWT_PUBLIC_KEY")
-	}
-	jwtPrivateKey, ok = os.LookupEnv("JWT_PRIVATE_KEY")
-	if !ok || jwtPrivateKey == "" {
-		return errors.New("missing required JWT_PRIVATE_KEY")
-	}
-	jwtPrivateKey = strings.TrimSpace(jwtPrivateKey)
-	if err := verifyKeyPair(jwtPrivateKey, jwtPublicKey); err != nil {
-		return err
+	encryptionKeysString, _ := os.LookupEnv("ENCRYPTION_KEYS")
+	encryptionKeys = strings.Fields(encryptionKeysString)
+	for i, key := range encryptionKeys {
+		encryptionKeys[i] = strings.TrimSpace(key)
 	}
 	return nil
 }
@@ -92,15 +43,19 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myCrypto, err := crypto.New([]byte(jwtPrivateKey), []byte(jwtPublicKey))
+	myCrypto, err := cryptox.New()
 	if err != nil {
 		return nil, err
 	}
-	myRepository, err := repository.New(mongoClient, myCrypto, zapLog)
+	myToken, err := token.New()
 	if err != nil {
 		return nil, err
 	}
-	myHandler, err := handler.New(zapLog, myRepository, myCrypto, accessTokenExpiry, refreshTokenExpiry, []byte(jwtPublicKey))
+	myRepository, err := repository.New(mongoClient, myCrypto, encryptionKeys, zapLog)
+	if err != nil {
+		return nil, err
+	}
+	myHandler, err := handler.New(zapLog, myRepository, myCrypto, myToken)
 	if err != nil {
 		return nil, err
 	}

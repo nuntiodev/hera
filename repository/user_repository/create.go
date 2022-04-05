@@ -25,21 +25,19 @@ func (r *mongoRepository) Create(ctx context.Context, user *go_block.User) (*go_
 		}
 		user.Password = string(hashedPassword)
 	}
-	resp := *user
-	if r.encryptionKey != "" {
-		if err := r.crypto.EncryptUser(r.encryptionKey, user); err != nil {
-			return nil, err
-		}
-		user.Encrypted = true
-		user.EncryptedAt = ts.Now()
-		resp.Encrypted = true
-	} else {
-		user.Encrypted = false
-	}
-	createUser := ProtoUserToUser(user)
-	createUser.EmailHash = emailHash
-	if _, err := r.collection.InsertOne(ctx, createUser); err != nil {
+	create := ProtoUserToUser(user)
+	create.EmailHash = emailHash
+	if err := r.encryptUser(ctx, actionCreate, create); err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	if _, err := r.collection.InsertOne(ctx, create); err != nil {
+		return nil, err
+	}
+	// set new data for user created
+	user.EncryptedAt = ts.New(create.EncryptedAt)
+	user.ExternalEncrypted = create.ExternalEncrypted
+	user.InternalEncrypted = create.InternalEncrypted
+	user.ExternalEncryptionLevel = int32(create.ExternalEncryptionLevel)
+	user.InternalEncryptionLevel = int32(create.InternalEncryptionLevel)
+	return user, nil
 }

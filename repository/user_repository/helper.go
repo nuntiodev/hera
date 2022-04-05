@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/badoux/checkmail"
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/block-proto/go_block"
+	passwordvalidator "github.com/wagslane/go-password-validator"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"strings"
 )
@@ -21,7 +22,7 @@ func prepare(action int, user *go_block.User) {
 		user.CreatedAt = ts.Now()
 		user.UpdatedAt = ts.Now()
 		if strings.TrimSpace(user.Id) == "" {
-			user.Id = uuid.NewString()
+			user.Id = uuid.NewV4().String()
 		}
 	case actionUpdatePassword, actionUpdateImage, actionUpdateMetadata,
 		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,
@@ -49,7 +50,7 @@ func (r *mongoRepository) validate(action int, user *go_block.User) error {
 			return errors.New("invalid user id")
 		} else if err := checkmail.ValidateFormat(user.Email); user.Email != "" && err != nil {
 			return err
-		} else if err := validatePassword(user.Password); err != nil && user.Password != "" {
+		} else if err := validatePassword(user.Password); err != nil && r.validatePassword {
 			return err
 		} else if !user.CreatedAt.IsValid() {
 			return errors.New("invalid created at date")
@@ -59,7 +60,7 @@ func (r *mongoRepository) validate(action int, user *go_block.User) error {
 			return errors.New("invalid json type")
 		}
 	case actionUpdatePassword:
-		if err := validatePassword(user.Password); user.Password != "" && err != nil {
+		if err := validatePassword(user.Password); err != nil && r.validatePassword {
 			return err
 		} else if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at")
@@ -94,36 +95,8 @@ func (r *mongoRepository) validate(action int, user *go_block.User) error {
 }
 
 func validatePassword(password string) error {
-	return nil
-	/*passwordValidator := validator.New(
-	//validator.MinLength(10, errors.New("password needs to contain at least 5 chars")),
-	//validator.MaxLength(100, errors.New("password needs to contain at below 100 chars")),
-	)
-	if err := passwordValidator.Validate(password); err != nil {
+	if err := passwordvalidator.Validate(password, minEntropy); err != nil {
 		return err
-	}
-	client := hibp.NewClient()
-	pwned, err := client.Compromised(password)
-	if err != nil {
-		return err
-	}
-	if pwned {
-		return errors.New("this password has been involved in a data breach")
-	}
-	return nil
-	*/
-}
-
-func (r *mongoRepository) handleEncryption(encrypted bool, update *go_block.User) error {
-	if encrypted == false && r.encryptionKey != "" {
-		return errors.New("you need to update the users security profile (UpdateSecurity) and set encrypted=true if you want to encrypt users data")
-	} else if encrypted == true && r.encryptionKey == "" {
-		return errors.New("in order to update an encrypted user, you need to pass the encryption key. If you want to store the user in plaintext, update the users security profile (UpdateSecurity) and turn set encrypted=false")
-	} else if encrypted && r.encryptionKey != "" {
-		if err := r.crypto.EncryptUser(r.encryptionKey, update); err != nil {
-			return err
-		}
-		update.EncryptedAt = ts.Now()
 	}
 	return nil
 }
@@ -133,16 +106,19 @@ func UserToProtoUser(user *User) *go_block.User {
 		return nil
 	}
 	return &go_block.User{
-		Id:          user.Id,
-		OptionalId:  user.OptionalId,
-		Email:       user.Email,
-		Password:    user.Password,
-		Image:       user.Image,
-		Encrypted:   user.Encrypted,
-		Metadata:    user.Metadata,
-		CreatedAt:   ts.New(user.CreatedAt),
-		UpdatedAt:   ts.New(user.UpdatedAt),
-		EncryptedAt: ts.New(user.EncryptedAt),
+		Id:                      user.Id,
+		OptionalId:              user.OptionalId,
+		Email:                   user.Email,
+		Password:                user.Password,
+		Image:                   user.Image,
+		ExternalEncrypted:       user.ExternalEncrypted,
+		InternalEncrypted:       user.InternalEncrypted,
+		Metadata:                user.Metadata,
+		CreatedAt:               ts.New(user.CreatedAt),
+		UpdatedAt:               ts.New(user.UpdatedAt),
+		EncryptedAt:             ts.New(user.EncryptedAt),
+		ExternalEncryptionLevel: int32(user.ExternalEncryptionLevel),
+		InternalEncryptionLevel: int32(user.InternalEncryptionLevel),
 	}
 }
 
@@ -151,15 +127,18 @@ func ProtoUserToUser(user *go_block.User) *User {
 		return nil
 	}
 	return &User{
-		Id:          user.Id,
-		OptionalId:  user.OptionalId,
-		Email:       user.Email,
-		Password:    user.Password,
-		Image:       user.Image,
-		Encrypted:   user.Encrypted,
-		Metadata:    user.Metadata,
-		CreatedAt:   user.CreatedAt.AsTime(),
-		UpdatedAt:   user.UpdatedAt.AsTime(),
-		EncryptedAt: user.EncryptedAt.AsTime(),
+		Id:                      user.Id,
+		OptionalId:              user.OptionalId,
+		Email:                   user.Email,
+		Password:                user.Password,
+		Image:                   user.Image,
+		ExternalEncrypted:       user.ExternalEncrypted,
+		InternalEncrypted:       user.InternalEncrypted,
+		Metadata:                user.Metadata,
+		CreatedAt:               user.CreatedAt.AsTime(),
+		UpdatedAt:               user.UpdatedAt.AsTime(),
+		EncryptedAt:             user.EncryptedAt.AsTime(),
+		ExternalEncryptionLevel: int(user.ExternalEncryptionLevel),
+		InternalEncryptionLevel: int(user.InternalEncryptionLevel),
 	}
 }

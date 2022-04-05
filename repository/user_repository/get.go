@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongoRepository) Get(ctx context.Context, user *go_block.User) (*go_block.User, error) {
+func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, upgrade bool) (*go_block.User, error) {
 	prepare(actionGet, user)
 	if err := r.validate(actionGet, user); err != nil {
 		return nil, err
@@ -25,11 +25,19 @@ func (r *mongoRepository) Get(ctx context.Context, user *go_block.User) (*go_blo
 	if err := r.collection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err
 	}
-	protoUser := UserToProtoUser(&resp)
-	if resp.Encrypted == true && r.encryptionKey != "" {
-		if err := r.crypto.DecryptUser(r.encryptionKey, protoUser); err != nil {
+	if resp.InternalEncrypted || resp.ExternalEncrypted {
+		if err := r.decryptUser(ctx, &resp, upgrade); err != nil {
 			return nil, err
 		}
 	}
-	return protoUser, nil
+	// check if we should upgrade the encryption level
+	validExternalEncConfig := !resp.ExternalEncrypted || (resp.ExternalEncrypted && r.externalEncryptionKey != "")
+	userNeedsInternalUpgrading := len(r.internalEncryptionKeys) > int(resp.InternalEncryptionLevel)
+	userIsLevelZero := resp.InternalEncryptionLevel == 0 && len(r.internalEncryptionKeys) > 0
+	if upgrade && ((validExternalEncConfig && userNeedsInternalUpgrading) || userIsLevelZero) {
+		if err := r.upgradeInternalEncryptionLevel(ctx, &resp); err != nil {
+			return nil, err
+		}
+	}
+	return UserToProtoUser(&resp), nil
 }

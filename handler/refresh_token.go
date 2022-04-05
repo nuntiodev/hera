@@ -3,13 +3,13 @@ package handler
 import (
 	"context"
 	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository/token_repository"
+	"github.com/softcorp-io/block-user-service/token"
 	"time"
 )
 
 func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	customClaims, err := h.crypto.ValidateToken(req.Token.RefreshToken)
+	customClaims, err := h.token.ValidateToken(publicKey, req.Token.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		}); err != nil {
 			return nil, err
 		}
-		newRefreshToken, claims, err := h.crypto.GenerateToken(customClaims.UserId, "", crypto.TokenTypeRefresh, h.refreshTokenExpiry)
+		newRefreshToken, claims, err := h.token.GenerateToken(privateKey, customClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
 		if err != nil {
 			return nil, err
 		}
@@ -41,7 +41,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		customClaims = claims
 	}
 	// generate new access token from refresh token
-	newAccessToken, _, err := h.crypto.GenerateToken(customClaims.UserId, customClaims.Id, crypto.TokenTypeAccess, h.accessTokenExpiry)
+	newAccessToken, _, err := h.token.GenerateToken(privateKey, customClaims.UserId, customClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
 	if err != nil {
 		return nil, err
 	}

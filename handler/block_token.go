@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/crypto"
 	"github.com/softcorp-io/block-user-service/repository/token_repository"
+	"github.com/softcorp-io/x/cryptox"
 )
 
 func (h *defaultHandler) BlockToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
@@ -17,16 +17,16 @@ func (h *defaultHandler) BlockToken(ctx context.Context, req *go_block.UserReque
 	} else {
 		return &go_block.UserResponse{}, errors.New("no token in request")
 	}
-	customClaims, err := h.crypto.ValidateToken(token)
+	customClaims, err := h.token.ValidateToken(publicKey, token)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	// build ids
 	accessTokenId := ""
 	refreshTokenId := ""
-	if customClaims.Type == crypto.TokenTypeAccess {
+	if customClaims.Type == cryptox.TokenTypeAccess {
 		accessTokenId = customClaims.Id
-	} else if customClaims.Type == crypto.TokenTypeRefresh {
+	} else if customClaims.Type == cryptox.TokenTypeRefresh {
 		refreshTokenId = customClaims.Id
 	}
 	// validate if token is blocked in db

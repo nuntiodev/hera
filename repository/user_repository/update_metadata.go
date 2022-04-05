@@ -16,18 +16,25 @@ func (r *mongoRepository) UpdateMetadata(ctx context.Context, get *go_block.User
 	if err := r.validate(actionUpdateMetadata, update); err != nil {
 		return nil, err
 	}
-	getUser, err := r.Get(ctx, get) // check if user encryption is turned on
+	get, err := r.Get(ctx, get, true) // check if user encryption is turned on
 	if err != nil {
-		return nil, err
-	}
-	resp := *update
-	if err := r.handleEncryption(getUser.Encrypted, update); err != nil {
 		return nil, err
 	}
 	updateUser := ProtoUserToUser(&go_block.User{
 		Metadata:  update.Metadata,
 		UpdatedAt: update.UpdatedAt,
 	})
+	// transfer data from get to update
+	updateUser.ExternalEncrypted = get.ExternalEncrypted
+	updateUser.ExternalEncryptionLevel = int(get.ExternalEncryptionLevel)
+	updateUser.InternalEncrypted = get.InternalEncrypted
+	updateUser.InternalEncryptionLevel = int(get.InternalEncryptionLevel)
+	// encrypt user if user has previously been encrypted
+	if updateUser.ExternalEncrypted || updateUser.InternalEncrypted {
+		if err := r.encryptUser(ctx, actionUpdateMetadata, updateUser); err != nil {
+			return nil, err
+		}
+	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"metadata":     updateUser.Metadata,
@@ -37,7 +44,7 @@ func (r *mongoRepository) UpdateMetadata(ctx context.Context, get *go_block.User
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"_id": getUser.Id},
+		bson.M{"_id": get.Id},
 		mongoUpdate,
 	)
 	if err != nil {
@@ -46,5 +53,8 @@ func (r *mongoRepository) UpdateMetadata(ctx context.Context, get *go_block.User
 	if updateResult.MatchedCount == 0 {
 		return nil, errors.New("could not find get")
 	}
-	return &resp, nil
+	// set updated fields
+	get.Metadata = update.Metadata
+	get.UpdatedAt = update.UpdatedAt
+	return get, nil
 }

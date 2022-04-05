@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/softcorp-io/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
+	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
@@ -16,18 +17,25 @@ func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, u
 	if err := r.validate(actionUpdateImage, update); err != nil {
 		return nil, err
 	}
-	getUser, err := r.Get(ctx, get) // check if user encryption is turned on
+	get, err := r.Get(ctx, get, true) // check if user encryption is turned on
 	if err != nil {
-		return nil, err
-	}
-	resp := *update
-	if err := r.handleEncryption(getUser.Encrypted, update); err != nil {
 		return nil, err
 	}
 	updateUser := ProtoUserToUser(&go_block.User{
 		Image:     update.Image,
 		UpdatedAt: update.UpdatedAt,
 	})
+	// transfer data from get to update
+	updateUser.ExternalEncrypted = get.ExternalEncrypted
+	updateUser.ExternalEncryptionLevel = int(get.ExternalEncryptionLevel)
+	updateUser.InternalEncrypted = get.InternalEncrypted
+	updateUser.InternalEncryptionLevel = int(get.InternalEncryptionLevel)
+	// encrypt user if user has previously been encrypted
+	if updateUser.ExternalEncrypted || updateUser.InternalEncrypted {
+		if err := r.encryptUser(ctx, actionUpdateImage, updateUser); err != nil {
+			return nil, err
+		}
+	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"image":        updateUser.Image,
@@ -37,7 +45,7 @@ func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, u
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,
-		bson.M{"_id": getUser.Id},
+		bson.M{"_id": get.Id},
 		mongoUpdate,
 	)
 	if err != nil {
@@ -46,5 +54,8 @@ func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, u
 	if updateResult.MatchedCount == 0 {
 		return nil, errors.New("could not find get")
 	}
-	return &resp, nil
+	// set updated fields
+	get.Image = update.Image
+	get.UpdatedAt = ts.New(updateUser.UpdatedAt)
+	return get, nil
 }

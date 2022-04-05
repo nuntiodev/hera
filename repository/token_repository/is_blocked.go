@@ -3,7 +3,6 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strings"
@@ -30,7 +29,6 @@ func (r *mongoRepository) IsBlocked(ctx context.Context, token *Token) error {
 		filter = bson.M{"refresh_token_id": token.RefreshTokenId}
 	}
 	if err := r.collection.FindOne(ctx, filter).Err(); err == nil {
-		fmt.Println(token.RefreshTokenId, "test", token.AccessTokenId)
 		return errors.New("found blocked token")
 	}
 	return nil

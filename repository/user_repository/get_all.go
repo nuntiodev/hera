@@ -45,13 +45,13 @@ func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserF
 		if err := cursor.Decode(&user); err != nil {
 			return nil, err
 		}
-		protoUser := UserToProtoUser(&user)
-		if user.Encrypted == true && r.encryptionKey != "" {
-			if err := r.crypto.DecryptUser(r.encryptionKey, protoUser); err != nil {
+		// check if external encryption has been applied
+		if user.InternalEncrypted || user.ExternalEncrypted {
+			if err := r.decryptUser(ctx, &user, true); err != nil {
 				return nil, err
 			}
 		}
-		resp = append(resp, protoUser)
+		resp = append(resp, UserToProtoUser(&user))
 	}
 
 	return resp, nil

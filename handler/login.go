@@ -7,6 +7,7 @@ import (
 	"github.com/softcorp-io/block-user-service/repository/token_repository"
 	"github.com/softcorp-io/block-user-service/token"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
@@ -38,7 +39,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	if _, err := tokens.Create(ctx, &token_repository.Token{
 		Id:        refreshClaims.Id,
 		UserId:    refreshClaims.UserId,
-		ExpiresAt: refreshTokenExpiry.Milliseconds() * 1000,
+		ExpiresAt: time.Unix(refreshClaims.ExpiresAt, 0),
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}
@@ -46,7 +47,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	if _, err := tokens.Create(ctx, &token_repository.Token{
 		Id:        accessClaims.Id,
 		UserId:    accessClaims.UserId,
-		ExpiresAt: accessTokenExpiry.Milliseconds() * 1000,
+		ExpiresAt: time.Unix(refreshClaims.ExpiresAt, 0),
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

@@ -22,7 +22,7 @@ func TestCreateIEncrypted(t *testing.T) {
 			Id:        uuid.NewV4().String(),
 			UserId:    uuid.NewV4().String(),
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 1000,
+			ExpiresAt: time.Now().Add(time.Second * 2),
 		}
 		// act
 		createdToken, err := tokenRepository.Create(context.Background(), token)
@@ -51,7 +51,7 @@ func TestCreateNoId(t *testing.T) {
 	user := &Token{
 		UserId:    uuid.NewV4().String(),
 		Device:    gofakeit.Phone(),
-		ExpiresAt: time.Second.Milliseconds() * 1000,
+		ExpiresAt: time.Now().Add(time.Second * 2),
 	}
 	// act
 	token, err := tokenRepository.Create(context.Background(), user)
@@ -66,7 +66,7 @@ func TestCreateNoUserId(t *testing.T) {
 	user := &Token{
 		Id:        uuid.NewV4().String(),
 		Device:    gofakeit.Phone(),
-		ExpiresAt: time.Second.Milliseconds() * 1000,
+		ExpiresAt: time.Now().Add(time.Second * 2),
 	}
 	// act
 	token, err := tokenRepository.Create(context.Background(), user)

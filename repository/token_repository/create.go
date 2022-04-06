@@ -15,8 +15,10 @@ func (r *mongodbRepository) Create(ctx context.Context, token *Token) (*Token, e
 		return nil, errors.New("missing required token id")
 	} else if token.UserId == "" {
 		return nil, errors.New("missing required user id")
-	} else if token.ExpiresAt == 0 {
+	} else if token.ExpiresAt.IsZero() {
 		return nil, errors.New("missing required token expires at")
+	} else if token.ExpiresAt.Sub(time.Now()).Seconds() < 0 {
+		return nil, errors.New("expires at cannot be in the past")
 	}
 	// prepare fields
 	token.Id = strings.TrimSpace(token.Id)

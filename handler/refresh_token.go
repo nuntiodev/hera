@@ -44,17 +44,17 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		}); err != nil {
 			return nil, err
 		}
-		newRefreshToken, claims, err := h.token.GenerateToken(privateKey, customClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
+		newRefreshToken, newRefreshclaims, err := h.token.GenerateToken(privateKey, customClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
 		if err != nil {
 			return nil, err
 		}
 		refreshToken = newRefreshToken
-		customClaims = claims
+		customClaims = newRefreshclaims
 		// create refresh token in database
 		if _, err := tokens.Create(ctx, &token_repository.Token{
-			Id:        claims.Id,
-			UserId:    claims.UserId,
-			ExpiresAt: refreshTokenExpiry.Milliseconds() * 1000,
+			Id:        newRefreshclaims.Id,
+			UserId:    newRefreshclaims.UserId,
+			ExpiresAt: time.Unix(newRefreshclaims.ExpiresAt, 0),
 		}); err != nil {
 			return &go_block.UserResponse{}, err
 		}
@@ -68,7 +68,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 	if _, err := tokens.Create(ctx, &token_repository.Token{
 		Id:        newAccessClaims.Id,
 		UserId:    newAccessClaims.UserId,
-		ExpiresAt: accessTokenExpiry.Milliseconds() * 1000,
+		ExpiresAt: time.Unix(newAccessClaims.ExpiresAt, 0),
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

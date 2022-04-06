@@ -17,6 +17,7 @@ func TestGetUserTokensIEncrypted(t *testing.T) {
 	tokenRepositoryNoEncryption, err := getTestTokenRepository(context.Background(), false, "")
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
+	expiresAfter := time.Second * 1
 	for _, tokenRepository := range clients {
 		userId := uuid.NewV4().String()
 		device := gofakeit.Phone()
@@ -24,19 +25,19 @@ func TestGetUserTokensIEncrypted(t *testing.T) {
 			Id:        uuid.NewV4().String(),
 			UserId:    userId,
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().UTC().Add(expiresAfter),
 		}
 		tokenTwo := &Token{
 			Id:        uuid.NewV4().String(),
 			UserId:    userId,
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().UTC().Add(expiresAfter),
 		}
 		tokenThree := &Token{
 			Id:        uuid.NewV4().String(),
 			UserId:    uuid.NewV4().String(),
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().UTC().Add(expiresAfter),
 		}
 		// create tokens
 		createdTokenOne, err := tokenRepository.Create(context.Background(), tokenOne)
@@ -70,7 +71,7 @@ func TestCannotGetUserTokensExpired(t *testing.T) {
 	tokenRepositoryNoEncryption, err := getTestTokenRepository(context.Background(), false, "")
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
-	expiresAfter := time.Second * 1
+	expiresAfter := time.Second * 3
 	for _, tokenRepository := range clients {
 		userId := uuid.NewV4().String()
 		device := gofakeit.Phone()
@@ -78,19 +79,19 @@ func TestCannotGetUserTokensExpired(t *testing.T) {
 			Id:        uuid.NewV4().String(),
 			UserId:    userId,
 			Device:    device,
-			ExpiresAt: expiresAfter.Milliseconds() * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		tokenTwo := &Token{
 			Id:        uuid.NewV4().String(),
 			UserId:    userId,
 			Device:    device,
-			ExpiresAt: expiresAfter.Milliseconds() * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		tokenThree := &Token{
 			Id:        uuid.NewV4().String(),
 			UserId:    uuid.NewV4().String(),
 			Device:    device,
-			ExpiresAt: expiresAfter.Milliseconds() * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		// create tokens
 		createdTokenOne, err := tokenRepository.Create(context.Background(), tokenOne)
@@ -107,14 +108,14 @@ func TestCannotGetUserTokensExpired(t *testing.T) {
 		assert.NoError(t, err)
 		tokenRepository.internalEncryptionKeys = append(tokenRepository.internalEncryptionKeys, newKey)
 		// act
-		time.Sleep(expiresAfter + time.Second)
+		time.Sleep(time.Second * 60) //mongodb background task that deletes documents runs every 60s
 		userTokens, err := tokenRepository.GetUserTokens(context.Background(), &Token{
 			UserId: userId,
 		})
 		// validate response
 		// token should expire
-		assert.Error(t, err)
-		assert.Nil(t, userTokens)
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(userTokens))
 	}
 }
 
@@ -125,6 +126,7 @@ func TestGetUserTokensNoUserId(t *testing.T) {
 	tokenRepositoryNoEncryption, err := getTestTokenRepository(context.Background(), false, "")
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
+	expiresAfter := time.Second * 1
 	for _, tokenRepository := range clients {
 		userId := uuid.NewV4().String()
 		device := gofakeit.Phone()
@@ -132,19 +134,19 @@ func TestGetUserTokensNoUserId(t *testing.T) {
 			Id:        uuid.NewV4().String(),
 			UserId:    userId,
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		tokenTwo := &Token{
 			Id:        uuid.NewV4().String(),
 			UserId:    userId,
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		tokenThree := &Token{
 			Id:        uuid.NewV4().String(),
 			UserId:    uuid.NewV4().String(),
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		// create tokens
 		createdTokenOne, err := tokenRepository.Create(context.Background(), tokenOne)
@@ -175,6 +177,7 @@ func TestGetUserTokensNil(t *testing.T) {
 	tokenRepositoryNoEncryption, err := getTestTokenRepository(context.Background(), false, "")
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
+	expiresAfter := time.Second * 1
 	for _, tokenRepository := range clients {
 		userId := uuid.NewV4().String()
 		device := gofakeit.Phone()
@@ -182,19 +185,19 @@ func TestGetUserTokensNil(t *testing.T) {
 			Id:        uuid.NewV4().String(),
 			UserId:    userId,
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		tokenTwo := &Token{
 			Id:        uuid.NewV4().String(),
 			UserId:    userId,
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		tokenThree := &Token{
 			Id:        uuid.NewV4().String(),
 			UserId:    uuid.NewV4().String(),
 			Device:    device,
-			ExpiresAt: time.Second.Milliseconds() * 3 * 1000,
+			ExpiresAt: time.Now().Add(expiresAfter),
 		}
 		// create tokens
 		createdTokenOne, err := tokenRepository.Create(context.Background(), tokenOne)

@@ -25,7 +25,7 @@ type Token struct {
 	BlockedAt               time.Time `bson:"blocked_at" json:"blocked_at"`
 	CreatedAt               time.Time `bson:"created_at" json:"created_at"`
 	UsedAt                  time.Time `bson:"used_at" json:"used_at"`
-	ExpiresAt               int64     `bson:"expires_at" json:"expires_at"` // unix time
+	ExpiresAt               time.Time `bson:"expires_at" json:"expires_at"` // unix time
 	Encrypted               bool      `bson:"encrypted" json:"encrypted"`
 	InternalEncryptionLevel int       `bson:"internal_encryption_level" json:"internal_encryption_level"`
 }

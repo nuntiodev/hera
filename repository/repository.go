@@ -11,29 +11,29 @@ import (
 type Repository interface {
 	Liveness(ctx context.Context) error
 	Users() UsersBuilder
-	Tokens(ctx context.Context, namespace string) (token_repository.TokenRespository, error)
+	Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error)
 }
 
 type defaultRepository struct {
-	namespace      string
-	mongoClient    *mongo.Client
-	crypto         cryptox.Crypto
-	encryptionKeys []string
+	namespace              string
+	mongodbClient          *mongo.Client
+	crypto                 cryptox.Crypto
+	internalEncryptionKeys []string
 }
 
 func (r *defaultRepository) Liveness(ctx context.Context) error {
-	if err := r.mongoClient.Ping(ctx, nil); err != nil {
+	if err := r.mongodbClient.Ping(ctx, nil); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token_repository.TokenRespository, error) {
+func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error) {
 	if namespace == "" {
 		namespace = "blocks-db"
 	}
-	collection := r.mongoClient.Database(namespace).Collection("user_tokens")
-	tokenRepository, err := token_repository.New(ctx, collection)
+	collection := r.mongodbClient.Database(namespace).Collection("user_tokens")
+	tokenRepository, err := token_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
 	if err != nil {
 		return nil, err
 	}
@@ -43,9 +43,9 @@ func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token
 func New(mongoClient *mongo.Client, crypto cryptox.Crypto, encryptionKeys []string, zapLog *zap.Logger) (Repository, error) {
 	zapLog.Info("creating repository...")
 	repository := &defaultRepository{
-		mongoClient:    mongoClient,
-		crypto:         crypto,
-		encryptionKeys: encryptionKeys,
+		mongodbClient:          mongoClient,
+		crypto:                 crypto,
+		internalEncryptionKeys: encryptionKeys,
 	}
 	return repository, nil
 }

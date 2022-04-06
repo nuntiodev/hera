@@ -72,7 +72,7 @@ type UserRepository interface {
 	DeleteAll(ctx context.Context) error
 }
 
-type mongoRepository struct {
+type mongodbRepository struct {
 	collection             *mongo.Collection
 	crypto                 cryptox.Crypto
 	zapLog                 *zap.Logger
@@ -81,7 +81,7 @@ type mongoRepository struct {
 	validatePassword       bool
 }
 
-func newMongoUserRepository(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, internalEncryptionKeys []string, externalEncryptionKey string, validatePassword bool) (*mongoRepository, error) {
+func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, internalEncryptionKeys []string, externalEncryptionKey string, validatePassword bool) (*mongodbRepository, error) {
 	emailNamespaceIndexModel := mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "email_hash", Value: 1},
@@ -120,7 +120,7 @@ func newMongoUserRepository(ctx context.Context, collection *mongo.Collection, c
 	if _, err := collection.Indexes().CreateOne(ctx, optionalIdIndexModel); err != nil {
 		return nil, err
 	}
-	return &mongoRepository{
+	return &mongodbRepository{
 		collection:             collection,
 		crypto:                 crypto,
 		internalEncryptionKeys: internalEncryptionKeys,
@@ -130,5 +130,5 @@ func newMongoUserRepository(ctx context.Context, collection *mongo.Collection, c
 }
 
 func New(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, internalEncryptionKeys []string, externalEncryptionKey string, validatePassword bool) (UserRepository, error) {
-	return newMongoUserRepository(ctx, collection, crypto, internalEncryptionKeys, externalEncryptionKey, validatePassword)
+	return newMongodbUserRepository(ctx, collection, crypto, internalEncryptionKeys, externalEncryptionKey, validatePassword)
 }

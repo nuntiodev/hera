@@ -11,8 +11,6 @@ import (
 	"strings"
 )
 
-var PwnedError = errors.New("this password has been involved in a data breach")
-
 func prepare(action int, user *go_block.User) {
 	if user == nil {
 		return
@@ -36,7 +34,7 @@ func prepare(action int, user *go_block.User) {
 	user.Metadata = strings.TrimSpace(user.Metadata)
 }
 
-func (r *mongoRepository) validate(action int, user *go_block.User) error {
+func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 	if user == nil {
 		return errors.New("user is nil")
 	}

@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongoRepository) DeleteBatch(ctx context.Context, userBatch []*go_block.User) error {
+func (r *mongodbRepository) DeleteBatch(ctx context.Context, userBatch []*go_block.User) error {
 	var ids []string
 	var emails []string
 	var optionalIds []string

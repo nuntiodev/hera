@@ -8,7 +8,7 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongoRepository) UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err

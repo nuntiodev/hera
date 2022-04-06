@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongoRepository) Delete(ctx context.Context, user *go_block.User) error {
+func (r *mongodbRepository) Delete(ctx context.Context, user *go_block.User) error {
 	prepare(actionGet, user)
 	if err := r.validate(actionGet, user); err != nil {
 		return err

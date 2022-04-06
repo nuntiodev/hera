@@ -13,12 +13,12 @@ import (
 
 func TestUpdateSecurityIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryExternalEncryption, err := getTestUserRepository(context.Background(), false, true, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryExternalEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryExternalEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -46,6 +46,10 @@ func TestUpdateSecurityIEEncrypted(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, updatedUser)
 		assert.False(t, updatedUser.ExternalEncrypted)
+		// assert that update has been propagated correctly to database
+		getUser, err := userRepository.Get(context.Background(), updatedUser, true)
+		assert.NoError(t, err)
+		assert.NotNil(t, getUser)
 	}
 }
 
@@ -84,7 +88,7 @@ func TestUpdateSecurityUnencryptedUser(t *testing.T) {
 
 func TestUpdateSecurityNilUpdate(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -93,7 +97,7 @@ func TestUpdateSecurityNilUpdate(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{

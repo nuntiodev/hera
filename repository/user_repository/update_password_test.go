@@ -13,7 +13,7 @@ import (
 
 func TestUpdatePasswordIEEncryptedById(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -22,7 +22,7 @@ func TestUpdatePasswordIEEncryptedById(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -51,12 +51,17 @@ func TestUpdatePasswordIEEncryptedById(t *testing.T) {
 		assert.NotNil(t, updatedUser)
 		// validate updated fields
 		assert.NoError(t, bcrypt.CompareHashAndPassword([]byte(updatedUser.Password), []byte(newPassword)))
+		// validate change has been updated in db
+		getUser, err := userRepository.Get(context.Background(), updatedUser, true)
+		assert.NoError(t, err)
+		assert.Equal(t, updatedUser.Password, getUser.Password)
+		// assert.NoError(t, compareUsers(getUser, updatedUser, true)) todo: return a valid new state of user
 	}
 }
 
 func TestUpdatePasswordIEEncryptedByEmail(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -65,7 +70,7 @@ func TestUpdatePasswordIEEncryptedByEmail(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -99,7 +104,7 @@ func TestUpdatePasswordIEEncryptedByEmail(t *testing.T) {
 
 func TestUpdatePasswordIEEncryptedByOptionalId(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -108,7 +113,7 @@ func TestUpdatePasswordIEEncryptedByOptionalId(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -142,7 +147,7 @@ func TestUpdatePasswordIEEncryptedByOptionalId(t *testing.T) {
 
 func TestUpdatePasswordWeakPassword(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -151,7 +156,7 @@ func TestUpdatePasswordWeakPassword(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -181,7 +186,7 @@ func TestUpdatePasswordWeakPassword(t *testing.T) {
 
 func TestUpdatePasswordNoUpdate(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -190,7 +195,7 @@ func TestUpdatePasswordNoUpdate(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -221,7 +226,7 @@ func TestUpdatePasswordNoUpdate(t *testing.T) {
 
 func TestUpdatePasswordNilUpdate(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -230,7 +235,7 @@ func TestUpdatePasswordNilUpdate(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -258,7 +263,7 @@ func TestUpdatePasswordNilUpdate(t *testing.T) {
 
 func TestUpdatePasswordNilGet(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -267,7 +272,7 @@ func TestUpdatePasswordNilGet(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{

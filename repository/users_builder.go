@@ -40,7 +40,7 @@ func (ub *usersBuilder) WithPasswordValidation(validatePassword bool) UsersBuild
 
 func (ub *usersBuilder) Build(ctx context.Context) (user_repository.UserRepository, error) {
 	if ub.namespace == "" {
-		ub.namespace = "blocks-db"
+		ub.namespace = "softcorp-blocks-db"
 	}
 	collection := ub.client.Database(ub.namespace).Collection("users")
 	userRepository, err := user_repository.New(ctx, collection, ub.crypto, ub.internalEncryptionKeys, ub.externalEncryptionKey, ub.validatePassword)
@@ -53,7 +53,7 @@ func (ub *usersBuilder) Build(ctx context.Context) (user_repository.UserReposito
 func (r *defaultRepository) Users() UsersBuilder {
 	return &usersBuilder{
 		crypto:                 r.crypto,
-		client:                 r.mongoClient,
-		internalEncryptionKeys: r.encryptionKeys,
+		client:                 r.mongodbClient,
+		internalEncryptionKeys: r.internalEncryptionKeys,
 	}
 }

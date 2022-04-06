@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (r *mongoRepository) encryptUser(ctx context.Context, action int, user *User) error {
+func (r *mongodbRepository) encryptUser(ctx context.Context, action int, user *User) error {
 	if user == nil {
 		return errors.New("user is nil")
 	}
@@ -58,7 +58,7 @@ func (r *mongoRepository) encryptUser(ctx context.Context, action int, user *Use
 	return nil
 }
 
-func (r *mongoRepository) encrypt(user *User, encryptionKey string) error {
+func (r *mongodbRepository) encrypt(user *User, encryptionKey string) error {
 	if user == nil {
 		return errors.New("user is nil")
 	} else if encryptionKey == "" {

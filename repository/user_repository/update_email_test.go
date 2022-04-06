@@ -13,18 +13,16 @@ import (
 
 func TestUpdateEmailIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
-	/*
-		userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true)
-		assert.NoError(t, err)
-		userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false)
-		assert.NoError(t, err)
-		userRepositoryExternalEncryption, err := getTestUserRepository(context.Background(), false, true)
-		assert.NoError(t, err)
-	*/
+	var clients []*mongodbRepository
+	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
+	assert.NoError(t, err)
+	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
+	assert.NoError(t, err)
+	userRepositoryExternalEncryption, err := getTestUserRepository(context.Background(), false, true, "")
+	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for index, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -59,12 +57,13 @@ func TestUpdateEmailIEEncrypted(t *testing.T) {
 		getUser, err := userRepository.Get(context.Background(), updatedUser, true)
 		assert.NoError(t, err, index)
 		assert.Equal(t, newEmail, getUser.Email)
+		assert.NoError(t, compareUsers(getUser, updatedUser, true))
 	}
 }
 
 func TestUpdateEmailInvalidEmail(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -73,7 +72,7 @@ func TestUpdateEmailInvalidEmail(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -108,7 +107,7 @@ func TestUpdateEmailInvalidEmail(t *testing.T) {
 
 func TestUpdateEmailNilUpdate(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -117,7 +116,7 @@ func TestUpdateEmailNilUpdate(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -149,7 +148,7 @@ func TestUpdateEmailNilUpdate(t *testing.T) {
 
 func TestUpdateEmailNilGet(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -158,7 +157,7 @@ func TestUpdateEmailNilGet(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{

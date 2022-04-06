@@ -5,7 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongoRepository) Count(ctx context.Context) (int64, error) {
+func (r *mongodbRepository) Count(ctx context.Context) (int64, error) {
 	count, err := r.collection.CountDocuments(ctx, bson.D{})
 	if err != nil {
 		return 0, err

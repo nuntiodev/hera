@@ -9,7 +9,7 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongoRepository) Create(ctx context.Context, user *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) Create(ctx context.Context, user *go_block.User) (*go_block.User, error) {
 	prepare(actionCreate, user)
 	if err := r.validate(actionCreate, user); err != nil {
 		return nil, err

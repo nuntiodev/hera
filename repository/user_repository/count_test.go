@@ -12,7 +12,7 @@ import (
 
 func TestCountIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	ns := uuid.NewV4().String()
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, ns)
 	assert.NoError(t, err)
@@ -22,7 +22,7 @@ func TestCountIEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, ns)
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for index, userRepository := range clients {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 30)

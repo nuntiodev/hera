@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, upgrade bool) (*go_block.User, error) {
+func (r *mongodbRepository) Get(ctx context.Context, user *go_block.User, upgrade bool) (*go_block.User, error) {
 	prepare(actionGet, user)
 	if err := r.validate(actionGet, user); err != nil {
 		return nil, err
@@ -31,10 +31,7 @@ func (r *mongoRepository) Get(ctx context.Context, user *go_block.User, upgrade 
 		}
 	}
 	// check if we should upgrade the encryption level
-	validExternalEncConfig := !resp.ExternalEncrypted || (resp.ExternalEncrypted && r.externalEncryptionKey != "")
-	userNeedsInternalUpgrading := len(r.internalEncryptionKeys) > int(resp.InternalEncryptionLevel)
-	userIsLevelZero := resp.InternalEncryptionLevel == 0 && len(r.internalEncryptionKeys) > 0
-	if upgrade && ((validExternalEncConfig && userNeedsInternalUpgrading) || userIsLevelZero) {
+	if upgrade && r.isEncryptionLevelUpgradable(&resp) {
 		if err := r.upgradeInternalEncryptionLevel(ctx, &resp); err != nil {
 			return nil, err
 		}

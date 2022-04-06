@@ -31,10 +31,6 @@ func (c *defaultToken) GenerateToken(privateKey *rsa.PrivateKey, userId, refresh
 			Issuer:    Issuer,
 		},
 	}
-	/*signingKey, err := jwt.ParseRSAPrivateKeyFromPEM(c.jwtPrivateKey)
-	if err != nil {
-		return "", nil, err
-	}*/
 	signedToken, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(privateKey)
 	if err != nil {
 		return "", nil, err

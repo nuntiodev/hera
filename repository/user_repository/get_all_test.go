@@ -11,7 +11,7 @@ import (
 
 func TestGetAllIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -20,7 +20,7 @@ func TestGetAllIEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	// delete all users from other tests (we use the same collection)
 	err = userRepositoryExternalEncryption.DeleteAll(context.Background())
 	assert.NoError(t, err)
@@ -46,12 +46,22 @@ func TestGetAllIEEncrypted(t *testing.T) {
 		encryptionKey, err := userRepository.crypto.GenerateSymmetricKey(32, cryptox.AlphaNum)
 		assert.NoError(t, err)
 		userRepository.internalEncryptionKeys = append(userRepository.internalEncryptionKeys, encryptionKey)
-		// act
-		getUsers, err := userRepository.GetAll(context.Background(), nil)
-		// validate
-		assert.NoError(t, err)
-		assert.NotNil(t, getUsers)
-		assert.Equal(t, 3, len(getUsers), index)
+		// act - get all users a couple of times
+		for i := 0; i < 3; i++ {
+			getUsers, err := userRepository.GetAll(context.Background(), nil)
+			// validate
+			assert.NoError(t, err)
+			assert.NotNil(t, getUsers)
+			assert.Equal(t, 3, len(getUsers), index)
+			// validate order and user values
+			assert.NoError(t, compareUsers(createdUserOne, getUsers[0], false))
+			assert.NoError(t, compareUsers(createdUserTwo, getUsers[1], false))
+			assert.NoError(t, compareUsers(createdUserThree, getUsers[2], false))
+			assert.NotEqual(t, createdUserOne.InternalEncryptionLevel, getUsers[0].InternalEncryptionLevel)
+			assert.NotEqual(t, createdUserTwo.InternalEncryptionLevel, getUsers[1].InternalEncryptionLevel)
+			assert.NotEqual(t, createdUserThree.InternalEncryptionLevel, getUsers[2].InternalEncryptionLevel)
+
+		}
 		// delete all at the end
 		assert.NoError(t, userRepository.DeleteBatch(context.Background(), []*go_block.User{
 			createdUserOne,
@@ -63,7 +73,7 @@ func TestGetAllIEEncrypted(t *testing.T) {
 
 func TestGetAllIEEncryptedWithFilters(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -72,7 +82,7 @@ func TestGetAllIEEncryptedWithFilters(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	// delete all users from other tests (we use the same collection)
 	err = userRepositoryExternalEncryption.DeleteAll(context.Background())
 	assert.NoError(t, err)
@@ -108,6 +118,9 @@ func TestGetAllIEEncryptedWithFilters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, getUsers)
 		assert.Equal(t, 2, len(getUsers), index)
+		// validate order and user values
+		assert.NoError(t, compareUsers(createdUserTwo, getUsers[1], false))
+		assert.NoError(t, compareUsers(createdUserThree, getUsers[0], false))
 		// delete all at the end
 		assert.NoError(t, userRepository.DeleteBatch(context.Background(), []*go_block.User{
 			createdUserOne,

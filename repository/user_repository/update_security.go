@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error) {
 	prepare(actionGet, get)
 	if r.externalEncryptionKey == "" {
 		return nil, errors.New("cannot update security profile without an external key")
@@ -20,11 +20,26 @@ func (r *mongoRepository) UpdateSecurity(ctx context.Context, get *go_block.User
 	if err != nil {
 		return nil, err
 	}
+	// validate all keys are present at specific level
+	if get.InternalEncryptionLevel > int32(len(r.internalEncryptionKeys)) {
+		return nil, errors.New("not enough valid internal encryption keys to upgrade security")
+	}
 	update := ProtoUserToUser(get)
 	// check if we need to encrypt the user
 	if get.ExternalEncrypted {
 		// user is already encrypted - disable external encryption
 		update.ExternalEncrypted = false
+		update.ExternalEncryptionLevel = 0
+		// we still want to encrypt user under internal encryption keys
+		encryptionKey, err := r.crypto.CombineSymmetricKeys(r.internalEncryptionKeys, len(r.internalEncryptionKeys))
+		if err != nil {
+			return nil, err
+		}
+		if err := r.encrypt(update, encryptionKey); err != nil {
+			return nil, err
+		}
+		// also update to the newest internal encryption level
+		update.InternalEncryptionLevel = len(r.internalEncryptionKeys)
 	} else {
 		update.ExternalEncrypted = true
 		update.InternalEncrypted = len(r.internalEncryptionKeys) > 0

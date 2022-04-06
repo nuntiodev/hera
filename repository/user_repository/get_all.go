@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*go_block.User, error) {
+func (r *mongodbRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*go_block.User, error) {
 	var resp []*go_block.User
 	sortOptions := options.FindOptions{}
 	limitOptions := options.Find()
@@ -48,6 +48,12 @@ func (r *mongoRepository) GetAll(ctx context.Context, userFilter *go_block.UserF
 		// check if external encryption has been applied
 		if user.InternalEncrypted || user.ExternalEncrypted {
 			if err := r.decryptUser(ctx, &user, true); err != nil {
+				return nil, err
+			}
+		}
+		// check if we should upgrade the encryption level
+		if r.isEncryptionLevelUpgradable(&user) {
+			if err := r.upgradeInternalEncryptionLevel(ctx, &user); err != nil {
 				return nil, err
 			}
 		}

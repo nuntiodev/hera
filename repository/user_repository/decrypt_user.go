@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-func (r *mongoRepository) decryptUser(ctx context.Context, user *User, upgrade bool) error {
+func (r *mongodbRepository) decryptUser(ctx context.Context, user *User, upgrade bool) error {
 	if user == nil {
 		return errors.New("user is nil")
 	}
@@ -31,7 +31,7 @@ func (r *mongoRepository) decryptUser(ctx context.Context, user *User, upgrade b
 	return nil
 }
 
-func (r *mongoRepository) decrypt(user *User, encryptionKey string) error {
+func (r *mongodbRepository) decrypt(user *User, encryptionKey string) error {
 	if user == nil {
 		return errors.New("user is nil")
 	}

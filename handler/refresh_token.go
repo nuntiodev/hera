@@ -18,8 +18,19 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 	if err != nil {
 		return nil, err
 	}
+	// for access tokens we also validate if refresh token is blocked
+	if customClaims.Type == token.TokenTypeAccess {
+		if err := tokens.IsBlocked(ctx, &token_repository.Token{
+			Id:     customClaims.RefreshTokenId,
+			UserId: customClaims.UserId,
+		}); err != nil {
+			return nil, err
+		}
+	}
+	// else we always validate if id of token is blocked
 	if err := tokens.IsBlocked(ctx, &token_repository.Token{
-		RefreshTokenId: customClaims.Id,
+		Id:     customClaims.Id,
+		UserId: customClaims.UserId,
 	}); err != nil {
 		return nil, err
 	}
@@ -39,11 +50,32 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		}
 		refreshToken = newRefreshToken
 		customClaims = claims
+		// create refresh token in database
+		if _, err := tokens.Create(ctx, &token_repository.Token{
+			Id:        claims.Id,
+			UserId:    claims.UserId,
+			ExpiresAt: refreshTokenExpiry.Milliseconds() * 1000,
+		}); err != nil {
+			return &go_block.UserResponse{}, err
+		}
 	}
 	// generate new access token from refresh token
-	newAccessToken, _, err := h.token.GenerateToken(privateKey, customClaims.UserId, customClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
+	newAccessToken, newAccessClaims, err := h.token.GenerateToken(privateKey, customClaims.UserId, customClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
 	if err != nil {
 		return nil, err
+	}
+	// add new access token to database
+	if _, err := tokens.Create(ctx, &token_repository.Token{
+		Id:        newAccessClaims.Id,
+		UserId:    newAccessClaims.UserId,
+		ExpiresAt: accessTokenExpiry.Milliseconds() * 1000,
+	}); err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	if _, err := tokens.UpdateUsedAt(ctx, &token_repository.Token{
+		Id: customClaims.Id,
+	}); err != nil {
+		return &go_block.UserResponse{}, err
 	}
 	return &go_block.UserResponse{
 		Token: &go_block.Token{

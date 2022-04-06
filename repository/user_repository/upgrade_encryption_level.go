@@ -7,7 +7,17 @@ import (
 	"time"
 )
 
-func (r *mongoRepository) upgradeInternalEncryptionLevel(ctx context.Context, user *User) error {
+func (r *mongodbRepository) isEncryptionLevelUpgradable(user *User) bool {
+	if user == nil {
+		return false
+	}
+	validExternalEncConfig := !user.ExternalEncrypted || (user.ExternalEncrypted && r.externalEncryptionKey != "")
+	userNeedsInternalUpgrading := len(r.internalEncryptionKeys) > int(user.InternalEncryptionLevel)
+	userIsLevelZero := user.InternalEncryptionLevel == 0 && len(r.internalEncryptionKeys) > 0
+	return (validExternalEncConfig && userNeedsInternalUpgrading) || userIsLevelZero
+}
+
+func (r *mongodbRepository) upgradeInternalEncryptionLevel(ctx context.Context, user *User) error {
 	if user == nil {
 		return UserIsNilErr
 	}

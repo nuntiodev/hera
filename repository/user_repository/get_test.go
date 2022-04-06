@@ -13,7 +13,7 @@ import (
 
 func TestGetByIdIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -22,7 +22,7 @@ func TestGetByIdIEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for index, userRepository := range clients {
 		internalLevel := len(userRepository.internalEncryptionKeys)
 		// create some metadata
@@ -53,13 +53,7 @@ func TestGetByIdIEEncrypted(t *testing.T) {
 		// validate
 		assert.NoError(t, err)
 		assert.NotNil(t, getUser)
-		assert.Equal(t, getUser.Id, createdUser.Id)
-		assert.Equal(t, getUser.ExternalEncrypted, createdUser.ExternalEncrypted)
-		assert.Equal(t, getUser.InternalEncrypted, true)
-		assert.Equal(t, getUser.Image, createdUser.Image)
-		assert.Equal(t, getUser.OptionalId, createdUser.OptionalId)
-		assert.Equal(t, getUser.Metadata, createdUser.Metadata)
-		assert.Equal(t, getUser.Password, createdUser.Password)
+		assert.NoError(t, compareUsers(createdUser, getUser, false))
 		// validate we are at level 3
 		getUser, err = userRepository.Get(context.Background(), &go_block.User{
 			Id: createdUser.Id,
@@ -71,7 +65,7 @@ func TestGetByIdIEEncrypted(t *testing.T) {
 
 func TestGetByEmailIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -80,7 +74,7 @@ func TestGetByEmailIEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -109,19 +103,13 @@ func TestGetByEmailIEEncrypted(t *testing.T) {
 		}, true)
 		assert.NoError(t, err)
 		assert.NotNil(t, getUser)
-		assert.Equal(t, getUser.Id, createdUser.Id)
-		assert.Equal(t, getUser.ExternalEncrypted, createdUser.ExternalEncrypted)
-		assert.Equal(t, getUser.InternalEncrypted, true)
-		assert.Equal(t, getUser.Image, createdUser.Image)
-		assert.Equal(t, getUser.OptionalId, createdUser.OptionalId)
-		assert.Equal(t, getUser.Metadata, createdUser.Metadata)
-		assert.Equal(t, getUser.Password, createdUser.Password)
+		assert.NoError(t, compareUsers(createdUser, getUser, false))
 	}
 }
 
 func TestGetByOptionalIdIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongoRepository
+	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
@@ -130,7 +118,7 @@ func TestGetByOptionalIdIEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
 	assert.NoError(t, err)
-	clients = []*mongoRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for _, userRepository := range clients {
 		// create some metadata
 		metadata, err := json.Marshal(&CustomMetadata{
@@ -159,12 +147,6 @@ func TestGetByOptionalIdIEEncrypted(t *testing.T) {
 		}, true)
 		assert.NoError(t, err)
 		assert.NotNil(t, getUser)
-		assert.Equal(t, getUser.Id, createdUser.Id)
-		assert.Equal(t, getUser.ExternalEncrypted, createdUser.ExternalEncrypted)
-		assert.Equal(t, getUser.InternalEncrypted, true)
-		assert.Equal(t, getUser.Image, createdUser.Image)
-		assert.Equal(t, getUser.OptionalId, createdUser.OptionalId)
-		assert.Equal(t, getUser.Metadata, createdUser.Metadata)
-		assert.Equal(t, getUser.Password, createdUser.Password)
+		assert.NoError(t, compareUsers(createdUser, getUser, false))
 	}
 }

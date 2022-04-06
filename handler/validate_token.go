@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/token_repository"
 	"github.com/softcorp-io/block-user-service/token"
@@ -19,19 +20,27 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 	}
 	// for access tokens we also validate if refresh token is blocked
 	if customClaims.Type == token.TokenTypeAccess {
-		if err := tokens.IsBlocked(ctx, &token_repository.Token{
+		isBlocked, err := tokens.IsBlocked(ctx, &token_repository.Token{
 			Id:     customClaims.RefreshTokenId,
 			UserId: customClaims.UserId,
-		}); err != nil {
+		})
+		if err != nil {
 			return nil, err
+		}
+		if isBlocked {
+			return nil, errors.New("token is blocked")
 		}
 	}
 	// else we always validate if id of token is blocked
-	if err := tokens.IsBlocked(ctx, &token_repository.Token{
+	isBlocked, err := tokens.IsBlocked(ctx, &token_repository.Token{
 		Id:     customClaims.Id,
 		UserId: customClaims.UserId,
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, err
+	}
+	if isBlocked {
+		return nil, errors.New("token is blocked")
 	}
 	if _, err := tokens.UpdateUsedAt(ctx, &token_repository.Token{
 		Id: customClaims.Id,

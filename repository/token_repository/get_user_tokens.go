@@ -6,24 +6,29 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongodbRepository) GetUserTokens(ctx context.Context, token *Token) ([]*Token, error) {
+func (t *mongodbRepository) GetUserTokens(ctx context.Context, token *Token) ([]*Token, error) {
 	if token == nil {
 		return nil, errors.New("token is nil")
 	} else if token.UserId == "" {
 		return nil, errors.New("missing required user id")
 	}
 	filter := bson.M{"user_id": token.UserId}
-	cursor, err := r.collection.Find(ctx, filter)
+	cursor, err := t.collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 	var resp []*Token
 	for cursor.Next(ctx) {
-		token := Token{}
-		if err := cursor.Decode(&token); err != nil {
+		tempToken := Token{}
+		if err := cursor.Decode(&tempToken); err != nil {
 			return nil, err
 		}
-		resp = append(resp, &token)
+		if token.Encrypted {
+			if err := t.DecryptToken(&tempToken); err != nil {
+				return nil, err
+			}
+		}
+		resp = append(resp, &tempToken)
 	}
 	return resp, nil
 }

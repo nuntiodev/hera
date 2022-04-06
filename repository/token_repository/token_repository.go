@@ -33,9 +33,10 @@ type Token struct {
 type TokenRepository interface {
 	Create(ctx context.Context, token *Token) (*Token, error)
 	Block(ctx context.Context, token *Token) (*Token, error)
-	IsBlocked(ctx context.Context, token *Token) error
+	IsBlocked(ctx context.Context, token *Token) (bool, error)
 	UpdateUsedAt(ctx context.Context, token *Token) (*Token, error)
 	GetUserTokens(ctx context.Context, token *Token) ([]*Token, error)
+	Get(ctx context.Context, token *Token) (*Token, error)
 }
 
 type mongodbRepository struct {

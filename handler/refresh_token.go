@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/repository/token_repository"
 	"github.com/softcorp-io/block-user-service/token"
@@ -20,19 +21,27 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 	}
 	// for access tokens we also validate if refresh token is blocked
 	if customClaims.Type == token.TokenTypeAccess {
-		if err := tokens.IsBlocked(ctx, &token_repository.Token{
+		isBlocked, err := tokens.IsBlocked(ctx, &token_repository.Token{
 			Id:     customClaims.RefreshTokenId,
 			UserId: customClaims.UserId,
-		}); err != nil {
+		})
+		if err != nil {
 			return nil, err
+		}
+		if isBlocked {
+			return nil, errors.New("token is blocked")
 		}
 	}
 	// else we always validate if id of token is blocked
-	if err := tokens.IsBlocked(ctx, &token_repository.Token{
+	isBlocked, err := tokens.IsBlocked(ctx, &token_repository.Token{
 		Id:     customClaims.Id,
 		UserId: customClaims.UserId,
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, err
+	}
+	if isBlocked {
+		return nil, errors.New("token is blocked")
 	}
 	// if refresh token is about to expire (in less than 10 hours), create a new one and block the old one
 	refreshToken := req.Token.RefreshToken

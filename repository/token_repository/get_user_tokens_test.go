@@ -61,6 +61,14 @@ func TestGetUserTokensIEncrypted(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, userTokens)
 		assert.Equal(t, 2, len(userTokens))
+		for _, token := range userTokens {
+			assert.False(t, token.Blocked)
+			assert.NotEmpty(t, token.Id)
+			assert.NotEmpty(t, token.UserId)
+			assert.NotEmpty(t, token.Device)
+			assert.NotEmpty(t, token.CreatedAt.String())
+			assert.NotEmpty(t, token.UsedAt.String())
+		}
 	}
 }
 

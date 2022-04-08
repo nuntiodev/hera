@@ -3,11 +3,13 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"github.com/softcorp-io/block-proto/go_block"
+	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"strings"
 	"time"
 )
 
-func (r *mongodbRepository) Create(ctx context.Context, token *Token) (*Token, error) {
+func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (*go_block.Token, error) {
 	// validate fields
 	if token == nil {
 		return nil, errors.New("token is nil")
@@ -15,31 +17,36 @@ func (r *mongodbRepository) Create(ctx context.Context, token *Token) (*Token, e
 		return nil, errors.New("missing required token id")
 	} else if token.UserId == "" {
 		return nil, errors.New("missing required user id")
-	} else if token.ExpiresAt.IsZero() {
+	} else if token.ExpiresAt == nil || token.ExpiresAt.IsValid() == false {
 		return nil, errors.New("missing required token expires at")
-	} else if token.ExpiresAt.Sub(time.Now()).Seconds() < 0 {
+	} else if token.ExpiresAt.AsTime().Sub(time.Now()).Seconds() < 0 {
 		return nil, errors.New("expires at cannot be in the past")
 	}
 	// prepare fields
+	token.DeviceInfo = strings.TrimSpace(token.DeviceInfo)
 	token.Id = strings.TrimSpace(token.Id)
 	token.UserId = strings.TrimSpace(token.UserId)
-	token.Device = strings.TrimSpace(token.Device)
-	if token.Device == "" {
-		token.Device = "Unknown"
+	if token.DeviceInfo == "" {
+		token.DeviceInfo = "Unknown"
 	}
 	token.Blocked = false
-	token.CreatedAt = time.Now()
-	token.UsedAt = time.Now()
+	token.CreatedAt = ts.Now()
+	token.UsedAt = ts.Now()
+	// convert
+	create := ProtoTokenToToken(token)
 	if len(r.internalEncryptionKeys) > 0 {
-		if err := r.EncryptToken(actionCreate, token); err != nil {
+		if err := r.EncryptToken(actionCreate, create); err != nil {
 			return nil, err
 		}
-		token.Encrypted = true
-		token.InternalEncryptionLevel = len(r.internalEncryptionKeys)
+		create.Encrypted = true
+		create.InternalEncryptionLevel = len(r.internalEncryptionKeys)
 	}
-	_, err := r.collection.InsertOne(ctx, token)
+	_, err := r.collection.InsertOne(ctx, create)
 	if err != nil {
 		return nil, err
 	}
+	// set updated fields
+	token.Encrypted = create.Encrypted
+	token.InternalEncryptionLevel = int32(create.InternalEncryptionLevel)
 	return token, nil
 }

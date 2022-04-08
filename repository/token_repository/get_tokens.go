@@ -3,10 +3,11 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"github.com/softcorp-io/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (t *mongodbRepository) GetUserTokens(ctx context.Context, token *Token) ([]*Token, error) {
+func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token) ([]*go_block.Token, error) {
 	if token == nil {
 		return nil, errors.New("token is nil")
 	} else if token.UserId == "" {
@@ -17,7 +18,7 @@ func (t *mongodbRepository) GetUserTokens(ctx context.Context, token *Token) ([]
 	if err != nil {
 		return nil, err
 	}
-	var resp []*Token
+	var resp []*go_block.Token
 	for cursor.Next(ctx) {
 		tempToken := Token{}
 		if err := cursor.Decode(&tempToken); err != nil {
@@ -28,7 +29,7 @@ func (t *mongodbRepository) GetUserTokens(ctx context.Context, token *Token) ([]
 				return nil, err
 			}
 		}
-		resp = append(resp, &tempToken)
+		resp = append(resp, TokenToProtoToken(&tempToken))
 	}
 	return resp, nil
 }

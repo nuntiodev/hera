@@ -2,17 +2,27 @@ package token_repository
 
 import (
 	"context"
+	"github.com/brianvoe/gofakeit/v6"
+	uuid "github.com/satori/go.uuid"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/block-user-service/mockx/mongo_mock"
 	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
+	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"os"
+	"strings"
 	"testing"
+	"time"
 )
 
 var (
 	mongodbTestClient *mongo.Client
+)
+
+const (
+	expiresAfter = time.Second * 1
 )
 
 func getTestTokenRepository(ctx context.Context, internal bool, dbName string) (*mongodbRepository, error) {
@@ -41,6 +51,25 @@ func getTestTokenRepository(ctx context.Context, internal bool, dbName string) (
 		return nil, err
 	}
 	return tokenRepository, nil
+}
+
+func getToken(token *go_block.Token) *go_block.Token {
+	if token == nil {
+		token = &go_block.Token{}
+	}
+	if strings.TrimSpace(token.Id) == "" {
+		token.Id = uuid.NewV4().String()
+	}
+	if strings.TrimSpace(token.UserId) == "" {
+		token.UserId = uuid.NewV4().String()
+	}
+	if strings.TrimSpace(token.DeviceInfo) == "" {
+		token.DeviceInfo = gofakeit.Phone()
+	}
+	if token.ExpiresAt == nil || token.ExpiresAt.IsValid() == false {
+		token.ExpiresAt = ts.New(time.Now().Add(expiresAfter))
+	}
+	return token
 }
 
 func TestMain(m *testing.M) {

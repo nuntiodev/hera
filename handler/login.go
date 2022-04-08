@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/repository/token_repository"
 	"github.com/softcorp-io/block-user-service/token"
 	"golang.org/x/crypto/bcrypt"
+	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
@@ -36,18 +36,18 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		return &go_block.UserResponse{}, err
 	}
 	// create refresh token in database
-	if _, err := tokens.Create(ctx, &token_repository.Token{
+	if _, err := tokens.Create(ctx, &go_block.Token{
 		Id:        refreshClaims.Id,
 		UserId:    refreshClaims.UserId,
-		ExpiresAt: time.Unix(refreshClaims.ExpiresAt, 0),
+		ExpiresAt: ts.New(time.Unix(refreshClaims.ExpiresAt, 0)),
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	// create access token in database
-	if _, err := tokens.Create(ctx, &token_repository.Token{
+	if _, err := tokens.Create(ctx, &go_block.Token{
 		Id:        accessClaims.Id,
 		UserId:    accessClaims.UserId,
-		ExpiresAt: time.Unix(refreshClaims.ExpiresAt, 0),
+		ExpiresAt: ts.New(time.Unix(accessClaims.ExpiresAt, 0)),
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

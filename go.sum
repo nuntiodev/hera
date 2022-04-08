@@ -155,6 +155,8 @@ github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/softcorp-io/block-proto v0.1.43 h1:Z0EdjHuvCkqyEfox2C9u8KCqBRXnKZpbxovptpo2THI=
 github.com/softcorp-io/block-proto v0.1.43/go.mod h1:llMRfOdxCqyrB8gYWQafAkK4BzDZXhmsm9rHw54nbOs=
+github.com/softcorp-io/block-proto v0.1.49 h1:JdWUgEtv4kADSBAqxkK26v/zuxIg4v7dl7pOcb1qbCI=
+github.com/softcorp-io/block-proto v0.1.49/go.mod h1:llMRfOdxCqyrB8gYWQafAkK4BzDZXhmsm9rHw54nbOs=
 github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a h1:evTji97kx/gx/0kkZ658HZuq4zaDTtyH7u85lKU2pdA=
 github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a/go.mod h1:J1skCALeSXr6x79LHwm1/tTyKT8XI0zBMY28b5vl0vQ=
 github.com/softcorp-io/x v0.0.7 h1:KezQOcpMmO2Uu111lIQ0fcIH7Byi8+Rj0DeTvW5R7dU=

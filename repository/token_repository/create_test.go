@@ -3,10 +3,9 @@ package token_repository
 import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
-	uuid "github.com/satori/go.uuid"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
 )
 
 func TestCreateIEncrypted(t *testing.T) {
@@ -18,12 +17,9 @@ func TestCreateIEncrypted(t *testing.T) {
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
 		device := gofakeit.Phone()
-		token := &Token{
-			Id:        uuid.NewV4().String(),
-			UserId:    uuid.NewV4().String(),
-			Device:    device,
-			ExpiresAt: time.Now().Add(time.Second * 2),
-		}
+		token := getToken(&go_block.Token{
+			DeviceInfo: device,
+		})
 		// act
 		createdToken, err := tokenRepository.Create(context.Background(), token)
 		assert.NoError(t, err)
@@ -31,16 +27,12 @@ func TestCreateIEncrypted(t *testing.T) {
 		// assert new fields are present
 		assert.NotEmpty(t, token.CreatedAt.String())
 		assert.NotEmpty(t, token.UsedAt.String())
-		assert.Equal(t, len(tokenRepository.internalEncryptionKeys), token.InternalEncryptionLevel)
+		assert.Equal(t, len(tokenRepository.internalEncryptionKeys), int(token.InternalEncryptionLevel))
 		assert.Equal(t, token.Id, createdToken.Id)
 		assert.Equal(t, token.UserId, createdToken.UserId)
 		assert.Equal(t, token.ExpiresAt, createdToken.ExpiresAt)
-		assert.NotEmpty(t, createdToken.Device)
-		if token.Encrypted {
-			assert.NotEqual(t, device, createdToken.Device)
-		} else {
-			assert.Equal(t, device, createdToken.Device)
-		}
+		assert.NotEmpty(t, createdToken.DeviceInfo)
+		assert.Equal(t, device, createdToken.DeviceInfo)
 	}
 }
 
@@ -48,43 +40,34 @@ func TestCreateNoId(t *testing.T) {
 	// setup user client
 	tokenRepository, err := getTestTokenRepository(context.Background(), true, "")
 	assert.NoError(t, err)
-	user := &Token{
-		UserId:    uuid.NewV4().String(),
-		Device:    gofakeit.Phone(),
-		ExpiresAt: time.Now().Add(time.Second * 2),
-	}
+	token := getToken(nil)
+	token.Id = ""
 	// act
-	token, err := tokenRepository.Create(context.Background(), user)
+	createdToken, err := tokenRepository.Create(context.Background(), token)
 	assert.Error(t, err)
-	assert.Nil(t, token)
+	assert.Nil(t, createdToken)
 }
 
 func TestCreateNoUserId(t *testing.T) {
 	// setup user client
 	tokenRepository, err := getTestTokenRepository(context.Background(), true, "")
 	assert.NoError(t, err)
-	user := &Token{
-		Id:        uuid.NewV4().String(),
-		Device:    gofakeit.Phone(),
-		ExpiresAt: time.Now().Add(time.Second * 2),
-	}
+	token := getToken(nil)
+	token.UserId = ""
 	// act
-	token, err := tokenRepository.Create(context.Background(), user)
+	createdToken, err := tokenRepository.Create(context.Background(), token)
 	assert.Error(t, err)
-	assert.Nil(t, token)
+	assert.Nil(t, createdToken)
 }
 
 func TestCreateNoUserExpiresAt(t *testing.T) {
 	// setup user client
 	tokenRepository, err := getTestTokenRepository(context.Background(), true, "")
 	assert.NoError(t, err)
-	user := &Token{
-		Id:     uuid.NewV4().String(),
-		UserId: uuid.NewV4().String(),
-		Device: gofakeit.Phone(),
-	}
+	token := getToken(nil)
+	token.ExpiresAt = nil
 	// act
-	token, err := tokenRepository.Create(context.Background(), user)
+	createdToken, err := tokenRepository.Create(context.Background(), token)
 	assert.Error(t, err)
-	assert.Nil(t, token)
+	assert.Nil(t, createdToken)
 }

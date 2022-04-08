@@ -3,22 +3,22 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"github.com/softcorp-io/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
+	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
-func (r *mongodbRepository) Block(ctx context.Context, token *Token) (*Token, error) {
+func (r *mongodbRepository) Block(ctx context.Context, token *go_block.Token) (*go_block.Token, error) {
 	if token == nil {
 		return nil, errors.New("token is nil")
 	} else if token.Id == "" {
 		return nil, errors.New("missing required token id")
 	}
-	token.Blocked = true
-	token.BlockedAt = time.Now()
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"blocked":    token.Blocked,
-			"blocked_at": token.BlockedAt,
+			"blocked":    true,
+			"blocked_at": time.Now(),
 		},
 	}
 	updateResult, err := r.collection.UpdateOne(
@@ -32,5 +32,8 @@ func (r *mongodbRepository) Block(ctx context.Context, token *Token) (*Token, er
 	if updateResult.MatchedCount == 0 {
 		return nil, errors.New("could not find token")
 	}
+	// set updated fields
+	token.Blocked = true
+	token.BlockedAt = ts.Now()
 	return token, nil
 }

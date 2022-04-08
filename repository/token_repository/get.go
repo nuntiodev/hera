@@ -3,10 +3,11 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"github.com/softcorp-io/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (t *mongodbRepository) Get(ctx context.Context, token *Token) (*Token, error) {
+func (t *mongodbRepository) Get(ctx context.Context, token *go_block.Token) (*go_block.Token, error) {
 	if token == nil {
 		return nil, errors.New("token is nil")
 	} else if token.Id == "" {
@@ -22,5 +23,5 @@ func (t *mongodbRepository) Get(ctx context.Context, token *Token) (*Token, erro
 			return nil, err
 		}
 	}
-	return &resp, nil
+	return TokenToProtoToken(&resp), nil
 }

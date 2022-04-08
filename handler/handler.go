@@ -40,6 +40,7 @@ type Handler interface {
 	ValidateToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	BlockToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	RefreshToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	GetTokens(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	PublicKeys(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteBatch(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)

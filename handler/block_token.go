@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/repository/token_repository"
 )
 
 func (h *defaultHandler) BlockToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
@@ -25,7 +24,7 @@ func (h *defaultHandler) BlockToken(ctx context.Context, req *go_block.UserReque
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	if _, err := tokens.Block(ctx, &token_repository.Token{
+	if _, err := tokens.Block(ctx, &go_block.Token{
 		Id:     customClaims.Id,
 		UserId: customClaims.UserId,
 	}); err != nil {

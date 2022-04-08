@@ -3,10 +3,11 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"github.com/softcorp-io/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongodbRepository) IsBlocked(ctx context.Context, token *Token) (bool, error) {
+func (r *mongodbRepository) IsBlocked(ctx context.Context, token *go_block.Token) (bool, error) {
 	if token == nil {
 		return false, errors.New("token is nil")
 	} else if token.Id == "" {

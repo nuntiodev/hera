@@ -4,10 +4,10 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
+	"github.com/softcorp-io/block-proto/go_block"
 	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
 )
 
 func TestBlockTokenIEncrypted(t *testing.T) {
@@ -17,16 +17,13 @@ func TestBlockTokenIEncrypted(t *testing.T) {
 	tokenRepositoryNoEncryption, err := getTestTokenRepository(context.Background(), false, "")
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
-	expiresAfter := time.Second * 1
 	for _, tokenRepository := range clients {
 		userId := uuid.NewV4().String()
 		device := gofakeit.Phone()
-		token := &Token{
-			Id:        uuid.NewV4().String(),
-			UserId:    userId,
-			Device:    device,
-			ExpiresAt: time.Now().UTC().Add(expiresAfter),
-		}
+		token := getToken(&go_block.Token{
+			UserId:     userId,
+			DeviceInfo: device,
+		})
 		// create tokens
 		createdToken, err := tokenRepository.Create(context.Background(), token)
 		assert.NoError(t, err)
@@ -36,8 +33,8 @@ func TestBlockTokenIEncrypted(t *testing.T) {
 		assert.NoError(t, err)
 		tokenRepository.internalEncryptionKeys = append(tokenRepository.internalEncryptionKeys, newKey)
 		// act
-		blockedToken, err := tokenRepository.Block(context.Background(), &Token{
-			Id:     token.Id,
+		blockedToken, err := tokenRepository.Block(context.Background(), &go_block.Token{
+			Id:     createdToken.Id,
 			UserId: token.UserId,
 		})
 		// validate response
@@ -45,7 +42,7 @@ func TestBlockTokenIEncrypted(t *testing.T) {
 		assert.NotNil(t, blockedToken)
 		assert.True(t, blockedToken.Blocked)
 		// validate in database
-		getToken, err := tokenRepository.Get(context.Background(), &Token{
+		getToken, err := tokenRepository.Get(context.Background(), &go_block.Token{
 			Id: token.Id,
 		})
 		assert.NoError(t, err)
@@ -61,16 +58,14 @@ func TestBlockTokenNoId(t *testing.T) {
 	tokenRepositoryNoEncryption, err := getTestTokenRepository(context.Background(), false, "")
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
-	expiresAfter := time.Second * 1
 	for _, tokenRepository := range clients {
 		userId := uuid.NewV4().String()
 		device := gofakeit.Phone()
-		token := &Token{
-			Id:        uuid.NewV4().String(),
-			UserId:    userId,
-			Device:    device,
-			ExpiresAt: time.Now().UTC().Add(expiresAfter),
-		}
+		token := getToken(&go_block.Token{
+			Id:         uuid.NewV4().String(),
+			UserId:     userId,
+			DeviceInfo: device,
+		})
 		// create tokens
 		createdToken, err := tokenRepository.Create(context.Background(), token)
 		assert.NoError(t, err)
@@ -80,7 +75,7 @@ func TestBlockTokenNoId(t *testing.T) {
 		assert.NoError(t, err)
 		tokenRepository.internalEncryptionKeys = append(tokenRepository.internalEncryptionKeys, newKey)
 		// act
-		blockedToken, err := tokenRepository.Block(context.Background(), &Token{})
+		blockedToken, err := tokenRepository.Block(context.Background(), &go_block.Token{})
 		// validate response
 		assert.Error(t, err)
 		assert.Nil(t, blockedToken)
@@ -94,16 +89,14 @@ func TestBlockTokenNil(t *testing.T) {
 	tokenRepositoryNoEncryption, err := getTestTokenRepository(context.Background(), false, "")
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
-	expiresAfter := time.Second * 1
 	for _, tokenRepository := range clients {
 		userId := uuid.NewV4().String()
 		device := gofakeit.Phone()
-		token := &Token{
-			Id:        uuid.NewV4().String(),
-			UserId:    userId,
-			Device:    device,
-			ExpiresAt: time.Now().UTC().Add(expiresAfter),
-		}
+		token := getToken(&go_block.Token{
+			Id:         uuid.NewV4().String(),
+			UserId:     userId,
+			DeviceInfo: device,
+		})
 		// create tokens
 		createdToken, err := tokenRepository.Create(context.Background(), token)
 		assert.NoError(t, err)

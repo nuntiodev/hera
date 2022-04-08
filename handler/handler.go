@@ -13,6 +13,7 @@ import (
 	"github.com/softcorp-io/x/cryptox"
 	"go.uber.org/zap"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -22,6 +23,7 @@ var (
 	publicKey          *rsa.PublicKey
 	publicKeyString    = ""
 	privateKey         *rsa.PrivateKey
+	validatePassword   = false
 )
 
 type Handler interface {
@@ -102,6 +104,11 @@ func initialize() error {
 	privateKey, publicKey, err = decodeKeyPair(privateKeyString, publicKeyString)
 	if err != nil {
 		return err
+	}
+	validatePasswordString, ok := os.LookupEnv("VALIDATE_PASSWORD")
+	if ok && validatePasswordString != "" {
+		// on error it returns false
+		validatePassword, _ = strconv.ParseBool(validatePasswordString)
 	}
 	return nil
 }

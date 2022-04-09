@@ -26,6 +26,7 @@ const (
 	ValidateToken       = "ValidateToken"
 	BlockToken          = "BlockToken"
 	RefreshToken        = "RefreshToken"
+	GetTokens           = "GetTokens"
 	PublicKeys          = "PublicKeys"
 	Delete              = "Delete"
 	DeleteNamespace     = "DeleteNamespace"
@@ -55,7 +56,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 	switch method[1] {
 	case Heartbeat, GetAll, PublicKeys:
 		break
-	case Create, Get:
+	case Create, Get, GetTokens:
 		if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UserIsNil
 		}

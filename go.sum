@@ -159,6 +159,8 @@ github.com/softcorp-io/block-proto v0.1.49 h1:JdWUgEtv4kADSBAqxkK26v/zuxIg4v7dl7
 github.com/softcorp-io/block-proto v0.1.49/go.mod h1:llMRfOdxCqyrB8gYWQafAkK4BzDZXhmsm9rHw54nbOs=
 github.com/softcorp-io/block-proto v0.1.51 h1:zqDtmDq4N4dGWtbEWU0kpv0ji9rSpCbos5L31Dac8K8=
 github.com/softcorp-io/block-proto v0.1.51/go.mod h1:llMRfOdxCqyrB8gYWQafAkK4BzDZXhmsm9rHw54nbOs=
+github.com/softcorp-io/block-proto v0.1.54 h1:Ex95c1iT50VvFT3n3908zANpHK/p+VqcrQCA/+9duHM=
+github.com/softcorp-io/block-proto v0.1.54/go.mod h1:llMRfOdxCqyrB8gYWQafAkK4BzDZXhmsm9rHw54nbOs=
 github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a h1:evTji97kx/gx/0kkZ658HZuq4zaDTtyH7u85lKU2pdA=
 github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a/go.mod h1:J1skCALeSXr6x79LHwm1/tTyKT8XI0zBMY28b5vl0vQ=
 github.com/softcorp-io/x v0.0.7 h1:KezQOcpMmO2Uu111lIQ0fcIH7Byi8+Rj0DeTvW5R7dU=

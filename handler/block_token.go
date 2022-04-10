@@ -6,7 +6,7 @@ import (
 )
 
 func (h *defaultHandler) BlockToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	customClaims, err := h.token.ValidateToken(publicKey, req.Token.TokenPointer)
+	customClaims, err := h.token.ValidateToken(publicKey, req.TokenPointer)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}

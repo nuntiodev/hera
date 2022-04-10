@@ -92,7 +92,7 @@ func initialize() error {
 			refreshTokenExpiry = dur
 		}
 	}
-	publicKeyString, ok := os.LookupEnv("PUBLIC_KEY")
+	publicKeyString, ok = os.LookupEnv("PUBLIC_KEY")
 	if !ok || publicKeyString == "" {
 		return errors.New("missing required PUBLIC_KEY")
 	}

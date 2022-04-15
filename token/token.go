@@ -2,8 +2,9 @@ package token
 
 import (
 	"crypto/rsa"
-	"github.com/softcorp-io/block-proto/go_block"
 	"time"
+
+	"github.com/io-nuntio/block-proto/go_block"
 )
 
 const (

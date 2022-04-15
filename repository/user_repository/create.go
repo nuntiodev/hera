@@ -4,7 +4,8 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"github.com/softcorp-io/block-proto/go_block"
+
+	"github.com/io-nuntio/block-proto/go_block"
 	"golang.org/x/crypto/bcrypt"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )

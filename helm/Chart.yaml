@@ -1,6 +1,6 @@
 apiVersion: v2
-name: block-user-service
-description: A Helm chart for the block-user-service
+name: nuntio-user-block
+description: A Helm chart for the nuntio-user-block
 
 # A chart can be either an 'application' or a 'library' chart.
 #

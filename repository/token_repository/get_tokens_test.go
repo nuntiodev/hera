@@ -2,13 +2,14 @@ package token_repository
 
 import (
 	"context"
-	"github.com/brianvoe/gofakeit/v6"
-	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/x/cryptox"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/io-nuntio/block-proto/go_block"
+	uuid "github.com/satori/go.uuid"
+	"github.com/softcorp-io/x/cryptox"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetTokensIEncrypted(t *testing.T) {

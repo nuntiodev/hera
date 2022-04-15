@@ -3,15 +3,16 @@ package grpc_server
 import (
 	"errors"
 	"fmt"
+	"net"
+	"os"
+
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/handler"
-	"github.com/softcorp-io/block-user-service/interceptor"
+	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntio-dev/nuntio-user-block/handler"
+	"github.com/nuntio-dev/nuntio-user-block/interceptor"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"net"
-	"os"
 )
 
 var (

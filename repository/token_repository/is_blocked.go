@@ -3,7 +3,8 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
+
+	"github.com/io-nuntio/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

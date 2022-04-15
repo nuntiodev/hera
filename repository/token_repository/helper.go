@@ -1,7 +1,7 @@
 package token_repository
 
 import (
-	"github.com/softcorp-io/block-proto/go_block"
+	"github.com/io-nuntio/block-proto/go_block"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 

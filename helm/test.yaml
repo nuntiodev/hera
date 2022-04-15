@@ -1,5 +1,5 @@
 ---
-# Source: block-user-service/charts/block-user-service/templates/service.yaml
+# Source: nuntio-user-block/charts/nuntio-user-block/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -14,7 +14,7 @@ spec:
   selector:
     app: test
 ---
-# Source: block-user-service/templates/service.yaml
+# Source: nuntio-user-block/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -29,7 +29,7 @@ spec:
   selector:
     app: test
 ---
-# Source: block-user-service/charts/block-user-service/templates/deployment.yaml
+# Source: nuntio-user-block/charts/nuntio-user-block/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
         - name: test
-          image: "softcorpdev/block-user-service:main"
+          image: "softcorpdev/nuntio-user-block:main"
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
@@ -63,7 +63,7 @@ spec:
             - secretRef:
                 name: mongo-secret
 ---
-# Source: block-user-service/templates/deployment.yaml
+# Source: nuntio-user-block/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -82,7 +82,7 @@ spec:
     spec:
       containers:
         - name: test
-          image: "softcorpdev/block-user-service:main"
+          image: "softcorpdev/nuntio-user-block:main"
           imagePullPolicy: Always
           ports:
             - containerPort: 9000

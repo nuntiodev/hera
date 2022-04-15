@@ -7,14 +7,15 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/repository"
-	"github.com/softcorp-io/block-user-service/token"
-	"github.com/softcorp-io/x/cryptox"
-	"go.uber.org/zap"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntio-dev/nuntio-user-block/repository"
+	"github.com/nuntio-dev/nuntio-user-block/token"
+	"github.com/softcorp-io/x/cryptox"
+	"go.uber.org/zap"
 )
 
 var (

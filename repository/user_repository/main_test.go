@@ -3,14 +3,15 @@ package user_repository
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/mockx/mongo_mock"
+	"os"
+	"testing"
+
+	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntio-dev/nuntio-user-block/mockx/mongo_mock"
 	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
-	"os"
-	"testing"
 )
 
 type CustomMetadata struct {

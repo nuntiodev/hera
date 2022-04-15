@@ -3,10 +3,11 @@ package handler
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/token"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
+
+	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntio-dev/nuntio-user-block/token"
+	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {

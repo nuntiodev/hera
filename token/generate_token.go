@@ -3,10 +3,11 @@ package token
 import (
 	"crypto/rsa"
 	"errors"
-	"github.com/golang-jwt/jwt"
-	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/io-nuntio/block-proto/go_block"
+	uuid "github.com/satori/go.uuid"
 )
 
 func (c *defaultToken) GenerateToken(privateKey *rsa.PrivateKey, userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_block.CustomClaims, error) {

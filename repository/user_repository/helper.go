@@ -3,12 +3,13 @@ package user_repository
 import (
 	"encoding/json"
 	"errors"
+	"strings"
+
 	"github.com/badoux/checkmail"
+	"github.com/io-nuntio/block-proto/go_block"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/block-proto/go_block"
 	passwordvalidator "github.com/wagslane/go-password-validator"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
-	"strings"
 )
 
 func prepare(action int, user *go_block.User) {

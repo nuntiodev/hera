@@ -1,4 +1,4 @@
-module github.com/softcorp-io/block-user-service
+module github.com/nuntio-dev/nuntio-user-block
 
 go 1.17
 
@@ -10,7 +10,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/ory/dockertest/v3 v3.8.1
 	github.com/satori/go.uuid v1.2.0
-	github.com/softcorp-io/block-proto v0.1.55
+	github.com/io-nuntio/block-proto v0.1.56
 	github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a
 	github.com/stretchr/testify v1.7.1
 	go.mongodb.org/mongo-driver v1.8.4

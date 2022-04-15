@@ -14,7 +14,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o block-user-service
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o nuntio-user-block
 
 # Run container
 FROM alpine:latest

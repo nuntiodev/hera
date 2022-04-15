@@ -29,7 +29,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: softcorpdev/block-user-service
+          images: softcorpdev/nuntio-user-block
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -61,10 +61,10 @@ jobs:
         run: git status
 
       - name: Set github name and email
-        run: git config --global user.email "dev@softcorp.io" && git config --global user.name "Softcorp Automation"
+        run: git config --global user.email "dev@nuntio.io" && git config --global user.name "Nuntio Automation"
 
       - name: Add git credentials
-        run: git remote set-url --push origin https://oscarsoftcorp:$GITHUB_TOKEN@github.com/softcorp-io/block-user-service
+        run: git remote set-url --push origin https://sinbad-io:$GITHUB_TOKEN@github.com/nuntio-dev/nuntio-user-block
 
       - name: Git commit
         run: git commit -am "add helm package"

@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/softcorp-io/block-proto/go_block"
-	"google.golang.org/grpc"
 	"strings"
+
+	"github.com/io-nuntio/block-proto/go_block"
+	"google.golang.org/grpc"
 )
 
 const (

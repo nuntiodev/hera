@@ -2,7 +2,8 @@ package handler
 
 import (
 	"context"
-	"github.com/softcorp-io/block-proto/go_block"
+
+	"github.com/io-nuntio/block-proto/go_block"
 )
 
 func (h *defaultHandler) UpdateMetadata(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {

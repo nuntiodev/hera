@@ -3,7 +3,8 @@ package handler
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
+
+	"github.com/io-nuntio/block-proto/go_block"
 	"golang.org/x/crypto/bcrypt"
 )
 

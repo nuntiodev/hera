@@ -3,13 +3,14 @@ package user_repository
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
+	"time"
+
+	"github.com/io-nuntio/block-proto/go_block"
 	"github.com/softcorp-io/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
-	"time"
 )
 
 const (

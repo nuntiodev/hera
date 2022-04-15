@@ -2,11 +2,11 @@ package server
 
 import (
 	"context"
-	"github.com/softcorp-io/block-user-service/handler"
-	"github.com/softcorp-io/block-user-service/interceptor"
-	"github.com/softcorp-io/block-user-service/repository"
-	"github.com/softcorp-io/block-user-service/server/grpc_server"
-	"github.com/softcorp-io/block-user-service/token"
+	"github.com/nuntio-dev/nuntio-user-block/handler"
+	"github.com/nuntio-dev/nuntio-user-block/interceptor"
+	"github.com/nuntio-dev/nuntio-user-block/repository"
+	"github.com/nuntio-dev/nuntio-user-block/server/grpc_server"
+	"github.com/nuntio-dev/nuntio-user-block/token"
 	"github.com/softcorp-io/softcorp_db_helper"
 	"github.com/softcorp-io/x/cryptox"
 	"go.uber.org/zap"

@@ -3,9 +3,10 @@ package user_repository
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
-	"go.mongodb.org/mongo-driver/bson"
 	"time"
+
+	"github.com/io-nuntio/block-proto/go_block"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error) {

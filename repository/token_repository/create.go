@@ -3,10 +3,11 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"strings"
 	"time"
+
+	"github.com/io-nuntio/block-proto/go_block"
+	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (*go_block.Token, error) {

@@ -3,10 +3,11 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
+	"time"
+
+	"github.com/io-nuntio/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 )
 
 func (r *mongodbRepository) UpdateUsedAt(ctx context.Context, token *go_block.Token) (*go_block.Token, error) {

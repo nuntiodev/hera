@@ -3,11 +3,12 @@ package handler
 import (
 	"context"
 	"errors"
-	"github.com/softcorp-io/block-proto/go_block"
-	"github.com/softcorp-io/block-user-service/token"
+	"time"
+
+	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntio-dev/nuntio-user-block/token"
 	"golang.org/x/crypto/bcrypt"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 )
 
 func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {

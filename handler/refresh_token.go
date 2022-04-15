@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/io-nuntio/block-proto/go_block"
-	"github.com/nuntio-dev/nuntio-user-block/token"
+	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/token"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 

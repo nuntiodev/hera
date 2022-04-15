@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/softcorp-io/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

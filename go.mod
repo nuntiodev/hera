@@ -1,4 +1,4 @@
-module github.com/nuntio-dev/nuntio-user-block
+module github.com/nuntiodev/nuntio-user-block
 
 go 1.17
 
@@ -8,17 +8,19 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
-	github.com/ory/dockertest/v3 v3.8.1
+	github.com/nuntiodev/block-proto v0.1.58
+	github.com/nuntiodev/x v0.2.0
 	github.com/satori/go.uuid v1.2.0
-	github.com/io-nuntio/block-proto v0.1.56
-	github.com/softcorp-io/softcorp_db_helper v0.0.0-20211207130030-d219c641b26a
+	github.com/softcorp-io/x v0.0.10
 	github.com/stretchr/testify v1.7.1
-	go.mongodb.org/mongo-driver v1.8.4
+	go.mongodb.org/mongo-driver v1.9.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 )
+
+require github.com/ory/dockertest/v3 v3.8.1 // indirect
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
@@ -46,7 +48,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
-	github.com/softcorp-io/x v0.0.7
 	github.com/wagslane/go-password-validator v0.3.0
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.1 // indirect

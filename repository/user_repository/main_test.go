@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/io-nuntio/block-proto/go_block"
-	"github.com/nuntio-dev/nuntio-user-block/mockx/mongo_mock"
+	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/x/mockx/mongo_mock"
 	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"

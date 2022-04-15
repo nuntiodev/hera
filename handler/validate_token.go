@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/io-nuntio/block-proto/go_block"
-	"github.com/nuntio-dev/nuntio-user-block/token"
+	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/token"
 )
 
 func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {

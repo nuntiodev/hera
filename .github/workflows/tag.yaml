@@ -64,7 +64,7 @@ jobs:
         run: git config --global user.email "dev@nuntio.io" && git config --global user.name "Nuntio Automation"
 
       - name: Add git credentials
-        run: git remote set-url --push origin https://sinbad-io:$GITHUB_TOKEN@github.com/nuntio-dev/nuntio-user-block
+        run: git remote set-url --push origin https://sinbad-io:$GITHUB_TOKEN@github.com/nuntiodev/nuntio-user-block
 
       - name: Git commit
         run: git commit -am "add helm package"

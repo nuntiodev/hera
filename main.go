@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/nuntio-dev/nuntio-user-block/runner"
+	"github.com/nuntiodev/nuntio-user-block/runner"
 	"go.uber.org/zap"
 )
 

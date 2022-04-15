@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/io-nuntio/block-proto/go_block"
-	"github.com/nuntio-dev/nuntio-user-block/mockx/mongo_mock"
+	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/x/mockx/mongo_mock"
 	uuid "github.com/satori/go.uuid"
 	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"

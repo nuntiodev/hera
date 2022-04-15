@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"
 )

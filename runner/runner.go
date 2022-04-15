@@ -3,7 +3,7 @@ package runner
 import (
 	"context"
 	"github.com/joho/godotenv"
-	"github.com/nuntio-dev/nuntio-user-block/server"
+	"github.com/nuntiodev/nuntio-user-block/server"
 	"go.uber.org/zap"
 )
 

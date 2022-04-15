@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntiodev/block-proto/go_block"
 	"google.golang.org/grpc"
 )
 

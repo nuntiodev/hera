@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/io-nuntio/block-proto/go_block"
-	"github.com/nuntio-dev/nuntio-user-block/repository"
-	"github.com/nuntio-dev/nuntio-user-block/token"
+	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/repository"
+	"github.com/nuntiodev/nuntio-user-block/token"
 	"github.com/softcorp-io/x/cryptox"
 	"go.uber.org/zap"
 )

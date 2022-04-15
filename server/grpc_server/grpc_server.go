@@ -7,9 +7,9 @@ import (
 	"os"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/io-nuntio/block-proto/go_block"
-	"github.com/nuntio-dev/nuntio-user-block/handler"
-	"github.com/nuntio-dev/nuntio-user-block/interceptor"
+	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/handler"
+	"github.com/nuntiodev/nuntio-user-block/interceptor"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

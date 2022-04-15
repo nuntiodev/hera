@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/io-nuntio/block-proto/go_block"
+	"github.com/nuntiodev/block-proto/go_block"
 	uuid "github.com/satori/go.uuid"
 )
 

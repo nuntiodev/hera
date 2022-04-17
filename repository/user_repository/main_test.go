@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/x/cryptox"
 	"github.com/nuntiodev/x/mockx/mongo_mock"
-	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
@@ -49,7 +49,7 @@ func getTestUserRepository(ctx context.Context, internal, external bool, dbName 
 		}
 	}
 	if dbName == "" {
-		dbName = "softcorp-testdb"
+		dbName = "nuntio-testdb"
 	}
 	userRepository, err := newMongodbUserRepository(ctx, mongoTestClient.Database(dbName).Collection("users"), myCrypto, internalKeys, externalKey, true)
 	if err != nil {

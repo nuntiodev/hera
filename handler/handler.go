@@ -14,7 +14,7 @@ import (
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/nuntio-user-block/repository"
 	"github.com/nuntiodev/nuntio-user-block/token"
-	"github.com/softcorp-io/x/cryptox"
+	"github.com/nuntiodev/x/cryptox"
 	"go.uber.org/zap"
 )
 

@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
-	"github.com/softcorp-io/x/cryptox"
+	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 )

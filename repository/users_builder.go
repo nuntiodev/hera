@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
-	"github.com/softcorp-io/x/cryptox"
+	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -40,7 +40,7 @@ func (ub *usersBuilder) WithPasswordValidation(validatePassword bool) UsersBuild
 
 func (ub *usersBuilder) Build(ctx context.Context) (user_repository.UserRepository, error) {
 	if ub.namespace == "" {
-		ub.namespace = "softcorp-blocks-db"
+		ub.namespace = "nuntio-blocks-db"
 	}
 	collection := ub.client.Database(ub.namespace).Collection("users")
 	userRepository, err := user_repository.New(ctx, collection, ub.crypto, ub.internalEncryptionKeys, ub.externalEncryptionKey, ub.validatePassword)

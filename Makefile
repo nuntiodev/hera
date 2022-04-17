@@ -1,10 +1,10 @@
 .PHONY: helm-install
 helm-install:
-	helm install -f ./helm/values.yaml block-user-service ./helm --namespace=softcorp-blocks --create-namespace
+	helm install -f ./helm/values.yaml block-user-service ./helm --namespace=nuntio-blocks --create-namespace
 
 .PHONY: helm-delete
 helm-delete:
-	helm delete block-user-service --namespace=softcorp-blocks
+	helm delete block-user-service --namespace=nuntio-blocks
 
 helm-package:
 	rm -rf ./helm/charts/* && \

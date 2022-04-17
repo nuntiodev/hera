@@ -9,9 +9,9 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/x/cryptox"
 	"github.com/nuntiodev/x/mockx/mongo_mock"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
@@ -45,7 +45,7 @@ func getTestTokenRepository(ctx context.Context, internal bool, dbName string) (
 		internalKeys = []string{internalKeyOne, internalKeyTwo}
 	}
 	if dbName == "" {
-		dbName = "softcorp-testdb"
+		dbName = "nuntio-testdb"
 	}
 	tokenRepository, err := newMongodbTokenRepository(ctx, mongodbTestClient.Database(dbName).Collection("tokens"), myCrypto, internalKeys)
 	if err != nil {

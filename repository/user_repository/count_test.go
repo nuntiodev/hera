@@ -6,8 +6,8 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/x/cryptox"
 	uuid "github.com/satori/go.uuid"
-	"github.com/softcorp-io/x/cryptox"
 	"github.com/stretchr/testify/assert"
 )
 

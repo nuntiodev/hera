@@ -8,7 +8,7 @@ import (
 	"github.com/nuntiodev/nuntio-user-block/server/grpc_server"
 	"github.com/nuntiodev/nuntio-user-block/token"
 	database "github.com/nuntiodev/x/repositoryx"
-	"github.com/softcorp-io/x/cryptox"
+	"github.com/nuntiodev/x/cryptox"
 	"go.uber.org/zap"
 	"os"
 	"strings"

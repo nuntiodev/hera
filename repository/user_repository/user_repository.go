@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/softcorp-io/x/cryptox"
+	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -91,10 +91,10 @@ func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection,
 			bson.D{
 				{
 					"email_hash", bson.D{
-						{
-							"$gt", "",
-						},
+					{
+						"$gt", "",
 					},
+				},
 				},
 			},
 		).SetName(emailHashIndex),
@@ -110,10 +110,10 @@ func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection,
 			bson.D{
 				{
 					"optional_id", bson.D{
-						{
-							"$gt", "",
-						},
+					{
+						"$gt", "",
 					},
+				},
 				},
 			},
 		).SetName(optionalIdIndex),

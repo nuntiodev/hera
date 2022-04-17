@@ -11,7 +11,6 @@ require (
 	github.com/nuntiodev/block-proto v0.1.58
 	github.com/nuntiodev/x v0.2.0
 	github.com/satori/go.uuid v1.2.0
-	github.com/softcorp-io/x v0.0.10
 	github.com/stretchr/testify v1.7.1
 	go.mongodb.org/mongo-driver v1.9.0
 	go.uber.org/zap v1.21.0

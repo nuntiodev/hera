@@ -1,7 +1,6 @@
 package grpc_server
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -29,7 +28,7 @@ func initialize() error {
 	var ok bool
 	port, ok = os.LookupEnv("GRPC_PORT")
 	if !ok || port == "" {
-		return errors.New("missing required GRPC_PORT")
+		port = "3001"
 	}
 	return nil
 }

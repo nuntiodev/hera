@@ -187,7 +187,7 @@ func TestCreateInvalidEmail(t *testing.T) {
 	assert.NoError(t, err)
 	user := &go_block.User{
 		OptionalId: uuid.NewV4().String(),
-		Email:      "info@@softcorp.io",
+		Email:      "info@@nuntio.io",
 		Password:   gofakeit.Password(true, true, true, true, true, 20),
 		Image:      gofakeit.ImageURL(10, 10),
 		Metadata:   string(metadata),
@@ -204,7 +204,7 @@ func TestCreateInvalidMetadata(t *testing.T) {
 	assert.NoError(t, err)
 	user := &go_block.User{
 		OptionalId: uuid.NewV4().String(),
-		Email:      "info@softcorp.io",
+		Email:      "info@nuntio.io",
 		Password:   gofakeit.Password(true, true, true, true, true, 20),
 		Image:      gofakeit.ImageURL(10, 10),
 		Metadata:   "invalid metadata",

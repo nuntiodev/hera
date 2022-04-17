@@ -28,7 +28,7 @@ func initialize() error {
 	var ok bool
 	port, ok = os.LookupEnv("GRPC_PORT")
 	if !ok || port == "" {
-		port = "3001"
+		port = "9000"
 	}
 	return nil
 }

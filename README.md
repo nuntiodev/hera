@@ -7,9 +7,9 @@ Building Nuntio Blocks: secure, efficient & open-source API blocks that run on a
 ## Environment
 
 | Name                   | Type            | Description                                                  | Default           | Required |
-| ---------------------- | --------------- | ------------------------------------------------------------ | ----------------- | -------- |
+| ---------------------- | --------------- | ------------------------------------------------------------ |-------------------| -------- |
 | ENCRYPTION_KEYS        | []String        | An array of encryption keys used to encrypt/decrypt data at rest. If you provide more than one key, the keys will automatically be used to create a master key. If you think your data has been compromised, add another encryption key to the list, and the service will automatically encrypt users under the new key. | []                | No       |
-| GRPC_PORT              | int             | The port you wish to start the gRPC server on.               | 3001              | No       |
+| GRPC_PORT              | int             | The port you wish to start the gRPC server on.               | 9000              | No       |
 | ACCESS_TOKEN_EXPIRY    | Duration        | The expiration time for the access tokens. Should be a valid string duration such as: "30s", "30m" or "30h". | 30m               | No       |
 | REFRESH_TOKEN_EXPIRY   | Duration        | The expiration time for the refresh tokens. Should be a valid string duration such as: "30s", "30m" or "30h". | 30d               | No       |
 | PUBLIC_KEY             | RSA Public Key  | A public key used to validate access and refresh tokens.     | Empty - required. | Yes      |

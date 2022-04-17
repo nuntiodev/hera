@@ -18,7 +18,7 @@ Building Nuntio Blocks: secure, efficient & open-source API blocks that run on a
 | MONGO_URI              | String          | A URI for your Mongodb database. Use this if you want to provide the URL yourself, else use user and password authentication. | ""                | No       |
 | MONGO_DB_USER          | String          | The username for your Mongodb user.                          | ""                | No       |
 | MONGO_DB_USER_PASSWORD | String          | The password for your Mongodb user.                          | ""                | No       |
-| MONGO_DB_HOST          | String          | The hostname for your Mongodb user.                          |                   | No       |
+| MONGO_DB_HOST          | String          | The hostname for your Mongodb user.                          | ""                | No       |
 
 
 

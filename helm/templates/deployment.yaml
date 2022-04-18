@@ -29,6 +29,12 @@ spec:
           - name: {{ $v.name }}
             value: "{{ $v.value }}"
           {{- end }}
+          {{- if eq .Values.secrets.enabled "true" }}
+          - name: INITIALIZE_SECRETS
+            value: true
+          - name: INITIALIZE_ENGINE
+            value: kubernetes
+          {{- end}}
           envFrom:
             {{- range $secret := .Values.deployment.secretEnv }}
             - secretRef:

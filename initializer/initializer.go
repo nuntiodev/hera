@@ -18,8 +18,8 @@ import (
 
 const (
 	BLOCK_USER_SECRET_NAME = "NUNTIO_USER_BLOCK_CRYPTO"
-	Kubernetes             = "Kubernetes"
-	Memory                 = "Memory"
+	Kubernetes             = "kubernetes"
+	Memory                 = "memory"
 )
 
 type Initializer interface {

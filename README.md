@@ -31,6 +31,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 Please make sure to update tests as appropriate.
 
 ## Buy me a cup of coffee!
-I spend many hours building these API blocks - if you want to support my work, buy me a cup of coffee:
+I spend many hours building these API blocks - if you want to support my work, buy me a cup of coffee below:
+
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/sinbadio)
 

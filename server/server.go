@@ -7,8 +7,8 @@ import (
 	"github.com/nuntiodev/nuntio-user-block/repository"
 	"github.com/nuntiodev/nuntio-user-block/server/grpc_server"
 	"github.com/nuntiodev/nuntio-user-block/token"
-	database "github.com/nuntiodev/x/repositoryx"
 	"github.com/nuntiodev/x/cryptox"
+	database "github.com/nuntiodev/x/repositoryx"
 	"go.uber.org/zap"
 	"os"
 	"strings"
@@ -24,9 +24,17 @@ var (
 
 func initialize() error {
 	encryptionKeysString, _ := os.LookupEnv("ENCRYPTION_KEYS")
+	newEncryptionKey := strings.TrimSpace(os.Getenv("NEW_ENCRYPTION_KEY"))
+	newKeyAlreadyExists := false
 	encryptionKeys = strings.Fields(encryptionKeysString)
 	for i, key := range encryptionKeys {
 		encryptionKeys[i] = strings.TrimSpace(key)
+		if newEncryptionKey == encryptionKeys[i] && !newKeyAlreadyExists {
+			newKeyAlreadyExists = true
+		}
+	}
+	if newEncryptionKey != "" && !newKeyAlreadyExists {
+		encryptionKeys = append(encryptionKeys, newEncryptionKey)
 	}
 	return nil
 }

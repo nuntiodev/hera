@@ -29,3 +29,6 @@ Building Nuntio Blocks: secure, efficient & open-source API blocks that run on a
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
+
+## Buy me a cup of coffee!
+I spend many hours building these API blocks - if you want to support my work, buy me a cup of coffee: [https://www.buymeacoffee.com/sinbadio](https://www.buymeacoffee.com/sinbadio)

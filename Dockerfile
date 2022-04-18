@@ -23,6 +23,6 @@ RUN apk --no-cache add ca-certificates
 
 RUN mkdir /app
 WORKDIR /app
-COPY --from=builder /app/block-user-service .
+COPY --from=builder /app/nuntio-user-block .
 
-CMD ["./block-user-service"]
+CMD ["./nuntio-user-block"]

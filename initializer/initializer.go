@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	BLOCK_USER_RSA_SECRET_NAME        = "NUNTIO_USER_BLOCK_RSA"
-	BLOCK_USER_ENCRYPTION_SECRET_NAME = "NUNTIO_USER_BLOCK_ENCRYPTION"
+	BLOCK_USER_RSA_SECRET_NAME        = "user-block-rsa-secret"
+	BLOCK_USER_ENCRYPTION_SECRET_NAME = "user-block-encryption–secret"
 	Kubernetes                        = "kubernetes"
 	Memory                            = "memory"
 )

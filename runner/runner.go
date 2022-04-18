@@ -12,12 +12,12 @@ import (
 
 var (
 	initializeSecrets = false
-	initializerEngine = ""
+	initializeEngine  = ""
 )
 
 func initialize() error {
 	initializeSecrets, _ = strconv.ParseBool(os.Getenv("INITIALIZE_SECRETS"))
-	initializerEngine = os.Getenv("INITIALIZER_ENGINE")
+	initializeEngine = os.Getenv("INITIALIZE_ENGINE")
 	return nil
 }
 
@@ -29,7 +29,7 @@ func Run(ctx context.Context, zapLog *zap.Logger) error {
 		return err
 	}
 	if initializeSecrets {
-		myInitializer, err := initializer.New(zapLog, initializerEngine)
+		myInitializer, err := initializer.New(zapLog, initializeEngine)
 		if err != nil {
 			return err
 		}

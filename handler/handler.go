@@ -68,7 +68,7 @@ func decodeKeyPair(rsaPrivateKey, rsaPublicKey string) (*rsa.PrivateKey, *rsa.Pu
 	if pubBlock == nil {
 		return nil, nil, fmt.Errorf("pub block is nil with rest: %s", string(rest))
 	}
-	pubKey, err := x509.ParsePKIXPublicKey(pubBlock.Bytes)
+	pubKey, err := x509.ParsePKCS1PublicKey(pubBlock.Bytes)
 	if err != nil {
 		return nil, nil, err
 	}

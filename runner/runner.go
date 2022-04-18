@@ -33,7 +33,7 @@ func Run(ctx context.Context, zapLog *zap.Logger) error {
 		if err != nil {
 			return err
 		}
-		if err := myInitializer.CreateSecrets(ctx); err != nil {
+		if err := myInitializer.CreateRsaSecrets(ctx); err != nil {
 			return err
 		}
 	}

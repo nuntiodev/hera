@@ -34,7 +34,7 @@ type defaultInitializer struct {
 }
 
 func New(zapLog *zap.Logger, engine string) (*defaultInitializer, error) {
-	zapLog.Info("Initializing system with encryption secrets and public/private keys")
+	zapLog.Info("initializing system with encryption secrets and public/private keys")
 	if engine != EngineKubernetes && engine != EngineMemory {
 		return nil, fmt.Errorf("invalid engine %s", engine)
 	}
@@ -69,12 +69,12 @@ func New(zapLog *zap.Logger, engine string) (*defaultInitializer, error) {
 
 func (i *defaultInitializer) CreateSecrets(ctx context.Context) error {
 	if os.Getenv("PUBLIC_KEY") != "" && os.Getenv("PRIVATE_KEY") != "" && os.Getenv("ENCRYPTION_KEYS") != "" {
-		i.zapLog.Info("Secrets is already provided internally by the system (the PUBLIC_KEY, ENCRYPTION_KEYS and PRIVATE_KEY variable is set).")
+		i.zapLog.Info("secrets is already provided internally by the system (the PUBLIC_KEY, ENCRYPTION_KEYS and PRIVATE_KEY variable is set).")
 		return nil
 	}
 	// check if secret already exists
 	if cryptoSecret, err := i.k8s.CoreV1().Secrets(i.namespace).Get(ctx, blockUserSecretName, metav1.GetOptions{}); err != nil {
-		i.zapLog.Info("Block user secret does not exist... creating....")
+		i.zapLog.Info("block user secret does not exist... creating....")
 		// create public private keys
 		rsaPrivateKey, rsaPublicKey, err := i.crypto.GenerateRsaKeyPair(2048)
 		if err != nil {
@@ -120,8 +120,9 @@ func (i *defaultInitializer) CreateSecrets(ctx context.Context) error {
 		if err := os.Setenv("ENCRYPTION_KEYS", encryptionSecret); err != nil {
 			return err
 		}
-		i.zapLog.Info("Successfully created secret")
+		i.zapLog.Info("successfully created secret")
 	} else {
+		i.zapLog.Info("block user secret already exists")
 		newEncryptionKey := strings.TrimSpace(os.Getenv("NEW_ENCRYPTION_KEY"))
 		newKeyAlreadyExists := false
 		encryptionKeys := strings.Fields(string(cryptoSecret.Data["ENCRYPTION_KEYS"]))
@@ -132,6 +133,7 @@ func (i *defaultInitializer) CreateSecrets(ctx context.Context) error {
 			}
 		}
 		if newEncryptionKey != "" && !newKeyAlreadyExists {
+			i.zapLog.Info("new key added... updating existing secret...")
 			encryptionKeys = append(encryptionKeys, newEncryptionKey)
 			secretData := map[string]string{
 				"ENCRYPTION_KEYS": strings.Join(encryptionKeys, " "),
@@ -159,7 +161,6 @@ func (i *defaultInitializer) CreateSecrets(ctx context.Context) error {
 		if err := os.Setenv("ENCRYPTION_KEYS", strings.Join(encryptionKeys, " ")); err != nil {
 			return err
 		}
-		i.zapLog.Info("RSA secret already exists")
 	}
 	return nil
 }

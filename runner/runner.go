@@ -36,6 +36,9 @@ func Run(ctx context.Context, zapLog *zap.Logger) error {
 		if err := myInitializer.CreateRsaSecrets(ctx); err != nil {
 			return err
 		}
+		if err := myInitializer.CreateEncryptionSecret(ctx); err != nil {
+			return err
+		}
 	}
 	zapLog.Info("runner is initializing the application...")
 	serve, err := server.New(ctx, zapLog)

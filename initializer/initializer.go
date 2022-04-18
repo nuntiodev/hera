@@ -70,7 +70,7 @@ func New(zapLog *zap.Logger, engine string) (*defaultInitializer, error) {
 }
 
 func (i *defaultInitializer) CreateRsaSecrets(ctx context.Context) error {
-	if os.Getenv("PUBLIC_KEY") == "" || os.Getenv("PRIVATE_KEY") == "" {
+	if os.Getenv("PUBLIC_KEY") != "" || os.Getenv("PRIVATE_KEY") != "" {
 		i.zapLog.Info("RSA keys is already provided internally by the system (the PUBLIC_KEY or PRIVATE_KEY variable is set).")
 		return nil
 	}

@@ -26,5 +26,5 @@ service:
   port: 9000
   targetPort: 9000
 secrets:
-  enabled: false
+  enabled: "false"
   newSecret: ""

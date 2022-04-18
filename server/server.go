@@ -24,17 +24,9 @@ var (
 
 func initialize() error {
 	encryptionKeysString, _ := os.LookupEnv("ENCRYPTION_KEYS")
-	newEncryptionKey := strings.TrimSpace(os.Getenv("NEW_ENCRYPTION_KEY"))
-	newKeyAlreadyExists := false
 	encryptionKeys = strings.Fields(encryptionKeysString)
 	for i, key := range encryptionKeys {
 		encryptionKeys[i] = strings.TrimSpace(key)
-		if newEncryptionKey == encryptionKeys[i] && !newKeyAlreadyExists {
-			newKeyAlreadyExists = true
-		}
-	}
-	if newEncryptionKey != "" && !newKeyAlreadyExists {
-		encryptionKeys = append(encryptionKeys, newEncryptionKey)
 	}
 	return nil
 }

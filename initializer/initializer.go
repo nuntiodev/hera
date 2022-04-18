@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"os"
+	"strings"
 )
 
 const (
@@ -159,7 +160,33 @@ func (i *defaultInitializer) CreateEncryptionSecret(ctx context.Context) error {
 		}
 		i.zapLog.Info("Successfully created encryption secret")
 	} else {
-		if err := os.Setenv("ENCRYPTION_KEYS", string(cryptoSecret.Data["ENCRYPTION_KEYS"])); err != nil {
+		newEncryptionKey := strings.TrimSpace(os.Getenv("NEW_ENCRYPTION_KEY"))
+		newKeyAlreadyExists := false
+		encryptionKeys := strings.Fields(string(cryptoSecret.Data["ENCRYPTION_KEYS"]))
+		for i, key := range encryptionKeys {
+			encryptionKeys[i] = strings.TrimSpace(key)
+			if newEncryptionKey == encryptionKeys[i] && !newKeyAlreadyExists {
+				newKeyAlreadyExists = true
+			}
+		}
+		if newEncryptionKey != "" && !newKeyAlreadyExists {
+			encryptionKeys = append(encryptionKeys, newEncryptionKey)
+			secretData := map[string]string{
+				"ENCRYPTION_KEYS": strings.Join(encryptionKeys, " "),
+			}
+			if _, err := i.k8s.CoreV1().Secrets(i.namespace).Update(ctx, &v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: i.namespace,
+					Name:      BLOCK_USER_ENCRYPTION_SECRET_NAME,
+				},
+				StringData: secretData,
+				Type:       v1.SecretTypeOpaque,
+			}, metav1.UpdateOptions{}); err != nil {
+				return err
+			}
+		}
+		// set in memory
+		if err := os.Setenv("ENCRYPTION_KEYS", strings.Join(encryptionKeys, " ")); err != nil {
 			return err
 		}
 		i.zapLog.Info("Encryption secret already exists")

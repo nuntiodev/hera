@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	BLOCK_USER_RSA_SECRET_NAME        = "user-block-rsa-secret"
-	BLOCK_USER_ENCRYPTION_SECRET_NAME = "user-block-encryption–secret"
-	Kubernetes                        = "kubernetes"
-	Memory                            = "memory"
+	BLOCK_USER_RSA_SECRET_NAME = "user-block-rsa-secret"
+	BLOCK_USER_ENC_SECRET_NAME = "user-block-enc–secret"
+	Kubernetes                 = "kubernetes"
+	Memory                     = "memory"
 )
 
 type Initializer interface {
@@ -132,7 +132,7 @@ func (i *defaultInitializer) CreateEncryptionSecret(ctx context.Context) error {
 		return nil
 	}
 	// check if secret already exists
-	if cryptoSecret, err := i.k8s.CoreV1().Secrets(i.namespace).Get(ctx, BLOCK_USER_ENCRYPTION_SECRET_NAME, metav1.GetOptions{}); err != nil {
+	if cryptoSecret, err := i.k8s.CoreV1().Secrets(i.namespace).Get(ctx, BLOCK_USER_ENC_SECRET_NAME, metav1.GetOptions{}); err != nil {
 		i.zapLog.Info("Block user encryption secret does not exist... creating....")
 		// create encryption secret
 		encryptionSecret, err := i.crypto.GenerateSymmetricKey(32, cryptox.AlphaNum)
@@ -146,7 +146,7 @@ func (i *defaultInitializer) CreateEncryptionSecret(ctx context.Context) error {
 		secret := &v1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: i.namespace,
-				Name:      BLOCK_USER_ENCRYPTION_SECRET_NAME,
+				Name:      BLOCK_USER_ENC_SECRET_NAME,
 			},
 			StringData: secretData,
 			Type:       v1.SecretTypeOpaque,
@@ -177,7 +177,7 @@ func (i *defaultInitializer) CreateEncryptionSecret(ctx context.Context) error {
 			if _, err := i.k8s.CoreV1().Secrets(i.namespace).Update(ctx, &v1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: i.namespace,
-					Name:      BLOCK_USER_ENCRYPTION_SECRET_NAME,
+					Name:      BLOCK_USER_ENC_SECRET_NAME,
 				},
 				StringData: secretData,
 				Type:       v1.SecretTypeOpaque,

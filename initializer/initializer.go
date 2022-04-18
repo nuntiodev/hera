@@ -19,8 +19,8 @@ import (
 const (
 	BLOCK_USER_RSA_SECRET_NAME = "user-block-rsa-secret"
 	BLOCK_USER_ENC_SECRET_NAME = "user-block-enc–secret"
-	Kubernetes                 = "kubernetes"
-	Memory                     = "memory"
+	EngineKubernetes           = "kubernetes"
+	EngineMemory               = "memory"
 )
 
 type Initializer interface {
@@ -37,7 +37,7 @@ type defaultInitializer struct {
 
 func New(zapLog *zap.Logger, engine string) (*defaultInitializer, error) {
 	zapLog.Info("Initializing system with encryption secrets and public/private keys")
-	if engine != Kubernetes && engine != Memory {
+	if engine != EngineKubernetes && engine != EngineMemory {
 		return nil, fmt.Errorf("invalid engine %s", engine)
 	}
 	config, err := rest.InClusterConfig()
@@ -90,7 +90,7 @@ func (i *defaultInitializer) CreateRsaSecrets(ctx context.Context) error {
 			Type:  "RSA PUBLIC KEY",
 			Bytes: x509.MarshalPKCS1PublicKey(rsaPublicKey),
 		}))
-		// create secret in the Kubernetes api
+		// create secret in the EngineKubernetes api
 		secretData := map[string]string{
 			"PRIVATE_KEY": userPrivateKey,
 			"PUBLIC_KEY":  userPublicKey,
@@ -139,7 +139,7 @@ func (i *defaultInitializer) CreateEncryptionSecret(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		// create secret in the Kubernetes api
+		// create secret in the EngineKubernetes api
 		secretData := map[string]string{
 			"ENCRYPTION_KEYS": encryptionSecret,
 		}
@@ -160,6 +160,7 @@ func (i *defaultInitializer) CreateEncryptionSecret(ctx context.Context) error {
 		}
 		i.zapLog.Info("Successfully created encryption secret")
 	} else {
+		i.zapLog.Info("Encryption secret already exists")
 		newEncryptionKey := strings.TrimSpace(os.Getenv("NEW_ENCRYPTION_KEY"))
 		newKeyAlreadyExists := false
 		encryptionKeys := strings.Fields(string(cryptoSecret.Data["ENCRYPTION_KEYS"]))
@@ -189,7 +190,6 @@ func (i *defaultInitializer) CreateEncryptionSecret(ctx context.Context) error {
 		if err := os.Setenv("ENCRYPTION_KEYS", strings.Join(encryptionKeys, " ")); err != nil {
 			return err
 		}
-		i.zapLog.Info("Encryption secret already exists")
 	}
 	return nil
 }

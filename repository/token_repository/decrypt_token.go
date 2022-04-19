@@ -2,7 +2,6 @@ package token_repository
 
 import (
 	"errors"
-	"fmt"
 )
 
 func (t *mongodbRepository) DecryptToken(token *Token) error {
@@ -19,7 +18,6 @@ func (t *mongodbRepository) DecryptToken(token *Token) error {
 			if err != nil {
 				return err
 			}
-			fmt.Println(decDevice)
 			token.Device = decDevice
 		}
 		if token.Location != "" {

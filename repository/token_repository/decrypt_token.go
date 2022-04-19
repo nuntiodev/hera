@@ -12,11 +12,18 @@ func (t *mongodbRepository) DecryptToken(token *Token) error {
 			return err
 		}
 		if token.Device != "" {
-			encDevice, err := t.crypto.Decrypt(token.Device, encryptionKey)
+			decDevice, err := t.crypto.Decrypt(token.Device, encryptionKey)
 			if err != nil {
 				return err
 			}
-			token.Device = encDevice
+			token.Device = decDevice
+		}
+		if token.Location != "" {
+			decLocation, err := t.crypto.Decrypt(token.Location, encryptionKey)
+			if err != nil {
+				return err
+			}
+			token.Device = decLocation
 		}
 	}
 	return nil

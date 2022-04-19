@@ -7,8 +7,8 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/nuntiodev/block-proto/go_block"
-	uuid "github.com/satori/go.uuid"
 	"github.com/nuntiodev/x/cryptox"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,6 +56,7 @@ func TestGetTokensIEncrypted(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, userTokens)
 		assert.Equal(t, 2, len(userTokens))
+		assert.Equal(t, createdTokenOne.DeviceInfo, device)
 		for _, token := range userTokens {
 			assert.False(t, token.Blocked)
 			assert.NotEmpty(t, token.Id)

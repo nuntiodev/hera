@@ -20,6 +20,13 @@ func (t *mongodbRepository) EncryptToken(action int, token *Token) error {
 				}
 				token.Device = encDevice
 			}
+			if token.Location != "" {
+				encLocation, err := t.crypto.Encrypt(token.Location, encryptionKey)
+				if err != nil {
+					return err
+				}
+				token.Device = encLocation
+			}
 		}
 	}
 	return nil

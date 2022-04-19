@@ -24,6 +24,7 @@ type Token struct {
 	UserId                  string    `bson:"user_id" json:"user_id"`
 	Blocked                 bool      `bson:"blocked" json:"blocked"`
 	Device                  string    `bson:"device" json:"device"`
+	Location                string    `bson:"location" json:"location"`
 	BlockedAt               time.Time `bson:"blocked_at" json:"blocked_at"`
 	CreatedAt               time.Time `bson:"created_at" json:"created_at"`
 	UsedAt                  time.Time `bson:"used_at" json:"used_at"`

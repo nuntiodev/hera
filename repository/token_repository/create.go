@@ -30,6 +30,12 @@ func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (
 	if token.DeviceInfo == "" {
 		token.DeviceInfo = "Unknown"
 	}
+	if token.Location == nil {
+		token.Location = &go_block.Location{
+			Latitude:  0.0,
+			Longitude: 0.0,
+		}
+	}
 	token.Blocked = false
 	token.CreatedAt = ts.Now()
 	token.UsedAt = ts.Now()

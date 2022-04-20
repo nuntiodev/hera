@@ -35,6 +35,13 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 	if isBlocked {
 		return nil, errors.New("token is blocked")
 	}
+	// build data for token
+	loggedInFrom := ""
+	deviceInfo := ""
+	if req.Token != nil {
+		loggedInFrom = req.Token.LoggedInFrom
+		deviceInfo = req.Token.DeviceInfo
+	}
 	// if refresh token is about to expire (in less than 10 hours), create a new one and block the old one
 	refreshToken := req.Token.RefreshToken
 	if time.Unix(refreshClaims.ExpiresAt, 0).Sub(time.Now()) < time.Hour*10 {
@@ -53,9 +60,12 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		refreshClaims = newRefreshclaims
 		// create refresh token in database
 		if _, err := tokens.Create(ctx, &go_block.Token{
-			Id:        newRefreshclaims.Id,
-			UserId:    newRefreshclaims.UserId,
-			ExpiresAt: ts.New(time.Unix(newRefreshclaims.ExpiresAt, 0)),
+			Id:           newRefreshclaims.Id,
+			UserId:       newRefreshclaims.UserId,
+			Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
+			LoggedInFrom: loggedInFrom,
+			DeviceInfo:   deviceInfo,
+			ExpiresAt:    ts.New(time.Unix(newRefreshclaims.ExpiresAt, 0)),
 		}); err != nil {
 			return &go_block.UserResponse{}, err
 		}
@@ -67,9 +77,12 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 	}
 	// add new access token to database
 	if _, err := tokens.Create(ctx, &go_block.Token{
-		Id:        newAccessClaims.Id,
-		UserId:    newAccessClaims.UserId,
-		ExpiresAt: ts.New(time.Unix(newAccessClaims.ExpiresAt, 0)),
+		Id:           newAccessClaims.Id,
+		UserId:       newAccessClaims.UserId,
+		Type:         go_block.TokenType_TOKEN_TYPE_ACCESS,
+		LoggedInFrom: loggedInFrom,
+		DeviceInfo:   deviceInfo,
+		ExpiresAt:    ts.New(time.Unix(newAccessClaims.ExpiresAt, 0)),
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

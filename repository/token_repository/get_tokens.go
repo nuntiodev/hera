@@ -26,14 +26,14 @@ func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token
 		if err := cursor.Decode(&tempToken); err != nil {
 			return nil, err
 		}
-		fmt.Println(resp)
+		fmt.Println(tempToken)
 		if token.Encrypted {
 			fmt.Println("get in here....")
 			if err := t.DecryptToken(&tempToken); err != nil {
 				return nil, err
 			}
 		}
-		fmt.Println(resp)
+		fmt.Println(tempToken)
 		resp = append(resp, TokenToProtoToken(&tempToken))
 	}
 	return resp, nil

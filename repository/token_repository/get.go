@@ -3,8 +3,6 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"fmt"
-
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -20,12 +18,10 @@ func (t *mongodbRepository) Get(ctx context.Context, token *go_block.Token) (*go
 	if err := t.collection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err
 	}
-	fmt.Println(resp)
 	if resp.Encrypted {
 		if err := t.DecryptToken(&resp); err != nil {
 			return nil, err
 		}
 	}
-	fmt.Println(resp)
 	return TokenToProtoToken(&resp), nil
 }

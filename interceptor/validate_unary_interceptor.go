@@ -57,7 +57,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 	switch method[1] {
 	case Heartbeat, GetAll, PublicKeys:
 		break
-	case Create, Get, GetTokens:
+	case Create, Get:
 		if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UserIsNil
 		}
@@ -72,7 +72,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.User == nil {
 			return nil, UserIsNil
 		}
-	case ValidateToken, RefreshToken, BlockToken:
+	case ValidateToken, RefreshToken, BlockToken, GetTokens:
 		if translatedReq.Token == nil {
 			return nil, TokenIsNil
 		}

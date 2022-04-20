@@ -20,8 +20,8 @@ func (t *mongodbRepository) EncryptToken(action int, token *Token) error {
 				}
 				token.Device = encDevice
 			}
-			if token.Location != "" {
-				encLocation, err := t.crypto.Encrypt(token.Location, encryptionKey)
+			if token.LoggedInFrom != "" {
+				encLocation, err := t.crypto.Encrypt(token.LoggedInFrom, encryptionKey)
 				if err != nil {
 					return err
 				}

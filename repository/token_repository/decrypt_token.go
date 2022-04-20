@@ -23,8 +23,8 @@ func (t *mongodbRepository) DecryptToken(token *Token) error {
 			}
 			token.Device = decDevice
 		}
-		if token.Location != "" {
-			decLocation, err := t.crypto.Decrypt(token.Location, encryptionKey)
+		if token.LoggedInFrom != "" {
+			decLocation, err := t.crypto.Decrypt(token.LoggedInFrom, encryptionKey)
 			if err != nil {
 				return err
 			}

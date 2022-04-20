@@ -18,7 +18,7 @@ func (t *mongodbRepository) Get(ctx context.Context, token *go_block.Token) (*go
 	if err := t.collection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err
 	}
-	if resp.Encrypted {
+	if resp.Encrypted && len(t.internalEncryptionKeys) >= resp.InternalEncryptionLevel {
 		if err := t.DecryptToken(&resp); err != nil {
 			return nil, err
 		}

@@ -20,17 +20,18 @@ const (
 )
 
 type Token struct {
-	Id                      string    `bson:"_id" json:"_id"`
-	UserId                  string    `bson:"user_id" json:"user_id"`
-	Blocked                 bool      `bson:"blocked" json:"blocked"`
-	Device                  string    `bson:"device" json:"device"`
-	LoggedInFrom            string    `bson:"logged_in_from" json:"logged_in_from"`
-	BlockedAt               time.Time `bson:"blocked_at" json:"blocked_at"`
-	CreatedAt               time.Time `bson:"created_at" json:"created_at"`
-	UsedAt                  time.Time `bson:"used_at" json:"used_at"`
-	ExpiresAt               time.Time `bson:"expires_at" json:"expires_at"` // unix time
-	Encrypted               bool      `bson:"encrypted" json:"encrypted"`
-	InternalEncryptionLevel int       `bson:"internal_encryption_level" json:"internal_encryption_level"`
+	Id                      string             `bson:"_id" json:"_id"`
+	UserId                  string             `bson:"user_id" json:"user_id"`
+	Blocked                 bool               `bson:"blocked" json:"blocked"`
+	Device                  string             `bson:"device" json:"device"`
+	LoggedInFrom            string             `bson:"logged_in_from" json:"logged_in_from"`
+	Type                    go_block.TokenType `bson:"token_type" json:"token_type"`
+	BlockedAt               time.Time          `bson:"blocked_at" json:"blocked_at"`
+	CreatedAt               time.Time          `bson:"created_at" json:"created_at"`
+	UsedAt                  time.Time          `bson:"used_at" json:"used_at"`
+	ExpiresAt               time.Time          `bson:"expires_at" json:"expires_at"` // unix time
+	Encrypted               bool               `bson:"encrypted" json:"encrypted"`
+	InternalEncryptionLevel int                `bson:"internal_encryption_level" json:"internal_encryption_level"`
 }
 
 type TokenRepository interface {

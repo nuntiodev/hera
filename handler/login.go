@@ -36,19 +36,32 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
+	// build data for token
+	loggedInFrom := ""
+	deviceInfo := ""
+	if req.Token != nil {
+		loggedInFrom = req.Token.LoggedInFrom
+		deviceInfo = req.Token.DeviceInfo
+	}
 	// create refresh token in database
 	if _, err := tokens.Create(ctx, &go_block.Token{
-		Id:        refreshClaims.Id,
-		UserId:    refreshClaims.UserId,
-		ExpiresAt: ts.New(time.Unix(refreshClaims.ExpiresAt, 0)),
+		Id:           refreshClaims.Id,
+		UserId:       refreshClaims.UserId,
+		ExpiresAt:    ts.New(time.Unix(refreshClaims.ExpiresAt, 0)),
+		LoggedInFrom: loggedInFrom,
+		DeviceInfo:   deviceInfo,
+		Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	// create access token in database
 	if _, err := tokens.Create(ctx, &go_block.Token{
-		Id:        accessClaims.Id,
-		UserId:    accessClaims.UserId,
-		ExpiresAt: ts.New(time.Unix(accessClaims.ExpiresAt, 0)),
+		Id:           accessClaims.Id,
+		UserId:       accessClaims.UserId,
+		ExpiresAt:    ts.New(time.Unix(accessClaims.ExpiresAt, 0)),
+		LoggedInFrom: loggedInFrom,
+		DeviceInfo:   deviceInfo,
+		Type:         go_block.TokenType_TOKEN_TYPE_ACCESS,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

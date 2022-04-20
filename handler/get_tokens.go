@@ -11,9 +11,7 @@ func (h *defaultHandler) GetTokens(ctx context.Context, req *go_block.UserReques
 	if err != nil {
 		return nil, err
 	}
-	getTokens, err := tokens.GetTokens(ctx, &go_block.Token{
-		UserId: req.User.Id,
-	})
+	getTokens, err := tokens.GetTokens(ctx, req.Token)
 	if err != nil {
 		return nil, err
 	}

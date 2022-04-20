@@ -35,11 +35,12 @@ const (
 )
 
 var (
-	TokenIsNil       = errors.New("token is nil")
-	UpdateIsNil      = errors.New("update is nil")
-	UserIsNil        = errors.New("user is nil")
-	NamespaceIsEmpty = errors.New("namespace is empty")
-	UserBatchIsNil   = errors.New("user batch is nil")
+	TokenIsNil          = errors.New("token is nil")
+	TokenPointerIsEmpty = errors.New("token pointer is nil")
+	UpdateIsNil         = errors.New("update is nil")
+	UserIsNil           = errors.New("user is nil")
+	NamespaceIsEmpty    = errors.New("namespace is empty")
+	UserBatchIsNil      = errors.New("user batch is nil")
 )
 
 func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -57,6 +58,10 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 	switch method[1] {
 	case Heartbeat, GetAll, PublicKeys:
 		break
+	case BlockToken:
+		if translatedReq.TokenPointer == "" {
+			return nil, TokenPointerIsEmpty
+		}
 	case Create, Get:
 		if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UserIsNil
@@ -72,7 +77,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.User == nil {
 			return nil, UserIsNil
 		}
-	case ValidateToken, RefreshToken, BlockToken, GetTokens:
+	case ValidateToken, RefreshToken, GetTokens:
 		if translatedReq.Token == nil {
 			return nil, TokenIsNil
 		}

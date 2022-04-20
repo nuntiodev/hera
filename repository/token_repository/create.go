@@ -3,7 +3,6 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -34,7 +33,6 @@ func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (
 	if token.LoggedInFrom == "" {
 		token.LoggedInFrom = "Unknown"
 	}
-	fmt.Println(token.LoggedInFrom)
 	token.Blocked = false
 	token.CreatedAt = ts.Now()
 	token.UsedAt = ts.Now()

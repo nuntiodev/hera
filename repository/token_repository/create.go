@@ -3,6 +3,7 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -48,6 +49,7 @@ func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (
 		create.Encrypted = true
 		create.InternalEncryptionLevel = len(r.internalEncryptionKeys)
 	}
+	fmt.Println(create)
 	_, err := r.collection.InsertOne(ctx, create)
 	if err != nil {
 		return nil, err

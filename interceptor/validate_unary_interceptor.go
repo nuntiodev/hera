@@ -26,6 +26,7 @@ const (
 	Login               = "Login"
 	ValidateToken       = "ValidateToken"
 	BlockToken          = "BlockToken"
+	BlockTokenById      = "BlockTokenById"
 	RefreshToken        = "RefreshToken"
 	GetTokens           = "GetTokens"
 	PublicKeys          = "PublicKeys"
@@ -77,7 +78,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.User == nil {
 			return nil, UserIsNil
 		}
-	case ValidateToken, RefreshToken, GetTokens:
+	case ValidateToken, RefreshToken, GetTokens, BlockTokenById:
 		if translatedReq.Token == nil {
 			return nil, TokenIsNil
 		}

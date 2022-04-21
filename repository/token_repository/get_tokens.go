@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token) ([]*go_block.Token, error) {
@@ -13,8 +14,9 @@ func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token
 	} else if token.UserId == "" {
 		return nil, errors.New("missing required user id")
 	}
+	sortOptions := (&options.FindOptions{}).SetSort(bson.D{{"used_at", -1}, {"_id", -1}})
 	filter := bson.M{"user_id": token.UserId}
-	cursor, err := t.collection.Find(ctx, filter)
+	cursor, err := t.collection.Find(ctx, filter, sortOptions)
 	if err != nil {
 		return nil, err
 	}

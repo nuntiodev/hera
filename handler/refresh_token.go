@@ -88,8 +88,10 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 	}
 	// set refresh token used at
 	if _, err := tokens.UpdateUsedAt(ctx, &go_block.Token{
-		Id:     refreshClaims.Id,
-		UserId: refreshClaims.UserId,
+		Id:           refreshClaims.Id,
+		UserId:       refreshClaims.UserId,
+		LoggedInFrom: loggedInFrom,
+		DeviceInfo:   deviceInfo,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

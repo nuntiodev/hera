@@ -36,6 +36,13 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 		Id:     customClaims.Id,
 		UserId: customClaims.UserId,
 	})
+	// build data for token
+	loggedInFrom := ""
+	deviceInfo := ""
+	if req.Token != nil {
+		loggedInFrom = req.Token.LoggedInFrom
+		deviceInfo = req.Token.DeviceInfo
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +50,9 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 		return nil, errors.New("token is blocked")
 	}
 	if _, err := tokens.UpdateUsedAt(ctx, &go_block.Token{
-		Id: customClaims.Id,
+		Id:           customClaims.Id,
+		LoggedInFrom: loggedInFrom,
+		DeviceInfo:   deviceInfo,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

@@ -3,6 +3,7 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
@@ -16,9 +17,20 @@ func (r *mongodbRepository) UpdateUsedAt(ctx context.Context, token *go_block.To
 	} else if token.Id == "" {
 		return nil, errors.New("missing required token id")
 	}
+	token.DeviceInfo = strings.TrimSpace(token.DeviceInfo)
+	token.Id = strings.TrimSpace(token.Id)
+	token.UserId = strings.TrimSpace(token.UserId)
+	if token.DeviceInfo == "" {
+		token.DeviceInfo = "Unknown"
+	}
+	if token.LoggedInFrom == "" {
+		token.LoggedInFrom = "Unknown"
+	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"used_at": time.Now(),
+			"used_at":        time.Now(),
+			"device":         token.DeviceInfo,
+			"logged_in_from": token.LoggedInFrom,
 		},
 	}
 	updateResult, err := r.collection.UpdateOne(

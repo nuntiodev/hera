@@ -20,6 +20,7 @@ func (r *mongodbRepository) Block(ctx context.Context, token *go_block.Token) (*
 		"$set": bson.M{
 			"blocked":    true,
 			"blocked_at": time.Now(),
+			"expires_at": time.Now().Add(time.Hour * 48), // tokens should expire after a day, after being blocked
 		},
 	}
 	updateResult, err := r.collection.UpdateOne(

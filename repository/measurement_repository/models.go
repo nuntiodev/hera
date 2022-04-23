@@ -16,9 +16,14 @@ type ActiveMeasurement struct {
 }
 
 type ActiveHistoryData struct {
-	Seconds int32            `bson:"seconds" json:"seconds"`
-	Points  int32            `bson:"points" json:"points"`
-	From    map[string]int32 `bson:"from" json:"from"`
+	Seconds int32                               `bson:"seconds" json:"seconds"`
+	Points  int32                               `bson:"points" json:"points"`
+	From    map[string]*go_block.CityHistoryMap `bson:"from" json:"from"`
+}
+
+type CityMap struct {
+	City   string `bson:"city" json:"city"`
+	Amount int32  `bson:"amount" json:"amount"`
 }
 
 // ActiveHistory keeps map over data over a year and maps data from month to ActiveHistoryData

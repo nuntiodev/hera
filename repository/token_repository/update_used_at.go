@@ -23,9 +23,6 @@ func (r *mongodbRepository) UpdateUsedAt(ctx context.Context, token *go_block.To
 	if token.DeviceInfo == "" {
 		token.DeviceInfo = "Unknown"
 	}
-	if token.LoggedInFrom == "" {
-		token.LoggedInFrom = "Unknown"
-	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"used_at":        time.Now(),

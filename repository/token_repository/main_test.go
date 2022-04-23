@@ -70,6 +70,11 @@ func getToken(token *go_block.Token) *go_block.Token {
 	if token.ExpiresAt == nil || token.ExpiresAt.IsValid() == false {
 		token.ExpiresAt = ts.New(time.Now().Add(expiresAfter))
 	}
+	token.LoggedInFrom = &go_block.Location{
+		Country:     gofakeit.Country(),
+		City:        gofakeit.City(),
+		CountryCode: "DK",
+	}
 	token.Type = go_block.TokenType_TOKEN_TYPE_ACCESS
 	return token
 }

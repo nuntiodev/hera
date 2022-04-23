@@ -20,12 +20,26 @@ func (t *mongodbRepository) DecryptToken(token *Token) error {
 			}
 			token.Device = decDevice
 		}
-		if token.LoggedInFrom != "" {
-			decLoggedInFrom, err := t.crypto.Decrypt(token.LoggedInFrom, encryptionKey)
+		if token.LoggedInFrom.City != "" {
+			decCity, err := t.crypto.Decrypt(token.LoggedInFrom.City, encryptionKey)
 			if err != nil {
 				return err
 			}
-			token.LoggedInFrom = decLoggedInFrom
+			token.LoggedInFrom.City = decCity
+		}
+		if token.LoggedInFrom.Country != "" {
+			decCountry, err := t.crypto.Decrypt(token.LoggedInFrom.Country, encryptionKey)
+			if err != nil {
+				return err
+			}
+			token.LoggedInFrom.Country = decCountry
+		}
+		if token.LoggedInFrom.CountryCode != "" {
+			decCountryCode, err := t.crypto.Decrypt(token.LoggedInFrom.CountryCode, encryptionKey)
+			if err != nil {
+				return err
+			}
+			token.LoggedInFrom.CountryCode = decCountryCode
 		}
 	}
 	return nil

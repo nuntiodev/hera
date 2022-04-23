@@ -27,7 +27,6 @@ data center whenever you want.
 | INITIALIZE_ENGINE     | String          | If set to "kubernetes", the service will create secrets used when the system starts up again. If set to "memory" the system will create new secrets when starting up again - do not use this option in production. This is only relevant if you initialize encryption secrtets.                                         | memory | No       |
 | NEW_ENCRYPTION_KEY    | String          | If provided, the system will automatically add a new encryption key to the system and encrypt users under that new key.                                                                                                                                                                                                 | ""     | No       |
 | ACTIVE_MEASUREMENT_EXPIRES_AT | Duration | If frontend is sending data to the server about user active engagement, this can be used to save the data for a specific amount of time. | 3 days | No |
-| ENABLE_ACTIVE_MEASUREMENT_REPOSITORY | Bool | If enabled, the repository can recieve requests that measures information about users device. It will once a day accumulate and store activeness in a repository. | false | No |
 
 ## Contributing
 

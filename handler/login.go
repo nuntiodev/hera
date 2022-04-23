@@ -37,7 +37,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		return &go_block.UserResponse{}, err
 	}
 	// build data for token
-	loggedInFrom := ""
+	loggedInFrom := &go_block.Location{}
 	deviceInfo := ""
 	if req.Token != nil {
 		loggedInFrom = req.Token.LoggedInFrom

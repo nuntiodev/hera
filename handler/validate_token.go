@@ -37,7 +37,7 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 		UserId: customClaims.UserId,
 	})
 	// build data for token
-	loggedInFrom := ""
+	loggedInFrom := &go_block.Location{}
 	deviceInfo := ""
 	if req.Token != nil {
 		loggedInFrom = req.Token.LoggedInFrom

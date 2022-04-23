@@ -36,7 +36,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		return nil, errors.New("token is blocked")
 	}
 	// build data for token
-	loggedInFrom := ""
+	loggedInFrom := &go_block.Location{}
 	deviceInfo := ""
 	if req.Token != nil {
 		loggedInFrom = req.Token.LoggedInFrom

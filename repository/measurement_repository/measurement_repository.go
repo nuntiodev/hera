@@ -3,10 +3,15 @@ package measurement_repository
 import (
 	"context"
 	"github.com/nuntiodev/block-proto/go_block"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.uber.org/zap"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	"time"
+)
+
+const (
+	expiresAfterIndex = "expires-after-measurement-index"
 )
 
 var (
@@ -18,14 +23,12 @@ type defaultMeasurementRepository struct {
 	userActiveMeasurementCollection  *mongo.Collection
 	userActiveHistoryCollection      *mongo.Collection
 	namespaceActiveHistoryCollection *mongo.Collection
-	zapLog                           *zap.Logger
 }
 
 type MeasurementRepository interface {
 	RecordActive(ctx context.Context, measurement *go_block.ActiveMeasurement) (*go_block.ActiveMeasurement, error)
-	GetActiveMeasurement(ctx context.Context, measurement *go_block.ActiveMeasurement) (*go_block.ActiveMeasurement, error)
 	GetNamespaceActiveHistory(ctx context.Context, year int32) (*go_block.ActiveHistory, error)
-	GetUserActiveHistory(ctx context.Context, userId string) (*go_block.ActiveHistory, error)
+	GetUserActiveHistory(ctx context.Context, year int32, userId string) (*go_block.ActiveHistory, error)
 }
 
 func initialize() error {
@@ -37,4 +40,25 @@ func initialize() error {
 		}
 	}
 	return nil
+}
+
+func newMongodbMeasurementRepository(ctx context.Context, userActiveMeasurementCollection, userActiveHistoryCollection, namespaceActiveHistoryCollection *mongo.Collection) (*defaultMeasurementRepository, error) {
+	expiresAtIndexModel := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "expires_at", Value: 1},
+		},
+		Options: options.Index().SetExpireAfterSeconds(0).SetName(expiresAfterIndex),
+	}
+	if _, err := userActiveMeasurementCollection.Indexes().CreateOne(ctx, expiresAtIndexModel); err != nil {
+		return nil, err
+	}
+	return &defaultMeasurementRepository{
+		userActiveMeasurementCollection:  userActiveMeasurementCollection,
+		userActiveHistoryCollection:      userActiveHistoryCollection,
+		namespaceActiveHistoryCollection: namespaceActiveHistoryCollection,
+	}, nil
+}
+
+func New(ctx context.Context, userActiveMeasurementCollection, userActiveHistoryCollection, namespaceActiveHistoryCollection *mongo.Collection) (MeasurementRepository, error) {
+	return newMongodbMeasurementRepository(ctx, userActiveMeasurementCollection, userActiveHistoryCollection, namespaceActiveHistoryCollection)
 }

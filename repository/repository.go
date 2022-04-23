@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/nuntiodev/nuntio-user-block/repository/measurement_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,6 +13,7 @@ type Repository interface {
 	Liveness(ctx context.Context) error
 	Users() UsersBuilder
 	Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error)
+	Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error)
 }
 
 type defaultRepository struct {
@@ -38,6 +40,21 @@ func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token
 		return nil, err
 	}
 	return tokenRepository, nil
+}
+
+func (r *defaultRepository) Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error) {
+	if namespace == "" {
+		namespace = "blocks-db"
+	}
+	db := r.mongodbClient.Database(namespace)
+	userActiveMeasurementCollection := db.Collection("user_active_measurements")
+	userActiveHistoryCollection := db.Collection("user_active_history")
+	namespaceActiveHistoryCollection := db.Collection("namespace_active_history")
+	measurementRepository, err := measurement_repository.New(ctx, userActiveMeasurementCollection, userActiveHistoryCollection, namespaceActiveHistoryCollection)
+	if err != nil {
+		return nil, err
+	}
+	return measurementRepository, nil
 }
 
 func New(mongoClient *mongo.Client, crypto cryptox.Crypto, encryptionKeys []string, zapLog *zap.Logger) (Repository, error) {

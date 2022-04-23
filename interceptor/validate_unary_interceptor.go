@@ -11,28 +11,31 @@ import (
 )
 
 const (
-	ProjectName         = "/BlockUser.UserService/"
-	Heartbeat           = "Heartbeat"
-	Create              = "Create"
-	UpdatePassword      = "UpdatePassword"
-	UpdateMetadata      = "UpdateMetadata"
-	UpdateEmail         = "UpdateEmail"
-	UpdateOptionalId    = "UpdateOptionalId"
-	UpdateImage         = "UpdateImage"
-	UpdateSecurity      = "UpdateSecurity"
-	Get                 = "Get"
-	GetAll              = "GetAll"
-	ValidateCredentials = "ValidateCredentials"
-	Login               = "Login"
-	ValidateToken       = "ValidateToken"
-	BlockToken          = "BlockToken"
-	BlockTokenById      = "BlockTokenById"
-	RefreshToken        = "RefreshToken"
-	GetTokens           = "GetTokens"
-	PublicKeys          = "PublicKeys"
-	Delete              = "Delete"
-	DeleteNamespace     = "DeleteNamespace"
-	DeleteBatch         = "DeleteBatch"
+	ProjectName             = "/BlockUser.UserService/"
+	Heartbeat               = "Heartbeat"
+	Create                  = "Create"
+	UpdatePassword          = "UpdatePassword"
+	UpdateMetadata          = "UpdateMetadata"
+	UpdateEmail             = "UpdateEmail"
+	UpdateOptionalId        = "UpdateOptionalId"
+	UpdateImage             = "UpdateImage"
+	UpdateSecurity          = "UpdateSecurity"
+	Get                     = "Get"
+	GetAll                  = "GetAll"
+	ValidateCredentials     = "ValidateCredentials"
+	Login                   = "Login"
+	ValidateToken           = "ValidateToken"
+	BlockToken              = "BlockToken"
+	BlockTokenById          = "BlockTokenById"
+	RefreshToken            = "RefreshToken"
+	GetTokens               = "GetTokens"
+	PublicKeys              = "PublicKeys"
+	RecordActiveMeasurement = "RecordActiveMeasurement"
+	NamespaceActiveHistory  = "NamespaceActiveHistory"
+	UserActiveHistory       = "UserActiveHistory"
+	Delete                  = "Delete"
+	DeleteNamespace         = "DeleteNamespace"
+	DeleteBatch             = "DeleteBatch"
 )
 
 var (
@@ -42,6 +45,7 @@ var (
 	UserIsNil           = errors.New("user is nil")
 	NamespaceIsEmpty    = errors.New("namespace is empty")
 	UserBatchIsNil      = errors.New("user batch is nil")
+	MeasurementIsNil    = errors.New("measurement is nil")
 )
 
 func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -57,11 +61,15 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		return nil, errors.New(fmt.Sprintf("invalid method call: %s", info.FullMethod))
 	}
 	switch method[1] {
-	case Heartbeat, GetAll, PublicKeys:
+	case Heartbeat, GetAll, PublicKeys, NamespaceActiveHistory:
 		break
 	case BlockToken:
 		if translatedReq.TokenPointer == "" {
 			return nil, TokenPointerIsEmpty
+		}
+	case RecordActiveMeasurement, UserActiveHistory:
+		if translatedReq.ActiveMeasurement == nil {
+			return &go_block.UserResponse{}, MeasurementIsNil
 		}
 	case Create, Get:
 		if translatedReq.User == nil {

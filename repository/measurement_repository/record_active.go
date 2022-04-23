@@ -72,8 +72,8 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	}
 	namespaceActiveHistory.Data[month].Seconds += measurement.Seconds
 	namespaceActiveHistory.Data[month].Points += 1
-	if measurement.From != nil && measurement.From.Country != "" {
-		namespaceActiveHistory.Data[month].From[measurement.From.Country].CityAmount[measurement.From.City] += 1
+	if measurement.From != nil && measurement.From.CountryCode != "" {
+		namespaceActiveHistory.Data[month].From[measurement.From.CountryCode].CityAmount[measurement.From.City] += 1
 	}
 	namespaceUpdateOrCreate := ProtoActiveHistoryToActiveHistory(userActiveHistory)
 	if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, namespaceUpdateOrCreate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {

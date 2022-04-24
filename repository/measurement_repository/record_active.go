@@ -3,6 +3,7 @@ package measurement_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -27,6 +28,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	// create in active measurement collection
 	create := ProtoActiveMeasurementToActiveMeasurement(measurement)
 	if _, err := dmr.userActiveMeasurementCollection.InsertOne(ctx, create); err != nil {
+		fmt.Println("get one 1")
 		return nil, err
 	}
 	// create in history collections
@@ -53,6 +55,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	userActiveHistory.Data[month].Points += 1
 	userUpdateOrCreate := ProtoActiveHistoryToActiveHistory(userActiveHistory)
 	if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, userUpdateOrCreate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
+		fmt.Println("get one 2")
 		return nil, err
 	}
 	// now do the same for the namespace collection
@@ -77,6 +80,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	}
 	namespaceUpdateOrCreate := ProtoActiveHistoryToActiveHistory(userActiveHistory)
 	if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, namespaceUpdateOrCreate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
+		fmt.Println("get one 3")
 		return nil, err
 	}
 	return measurement, nil

@@ -80,7 +80,9 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	namespaceActiveHistory.Data[month].Points += 1
 	if measurement.From != nil && measurement.From.CountryCode != "" {
 		if val, ok := namespaceActiveHistory.Data[month].From[measurement.From.CountryCode]; val == nil || !ok {
-			namespaceActiveHistory.Data[month].From[measurement.From.CountryCode] = &go_block.CityHistoryMap{}
+			namespaceActiveHistory.Data[month].From[measurement.From.CountryCode] = &go_block.CityHistoryMap{
+				CityAmount: map[string]int32{},
+			}
 		}
 		namespaceActiveHistory.Data[month].From[measurement.From.CountryCode].CityAmount[measurement.From.City] += 1
 	}

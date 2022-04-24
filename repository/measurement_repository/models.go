@@ -28,9 +28,9 @@ type CityMap struct {
 
 // ActiveHistory keeps map over data over a year and maps data from month to ActiveHistoryData
 type ActiveHistory struct {
-	Year   int32                       `bson:"_id" json:"_id"`
-	UserId string                      `bson:"user_id" json:"user_id"`
-	Data   map[int32]ActiveHistoryData `bson:"data" json:"data"`
+	Year   int32                        `bson:"_id" json:"_id"`
+	UserId string                       `bson:"user_id" json:"user_id"`
+	Data   map[int32]*ActiveHistoryData `bson:"data" json:"data"`
 }
 
 func ActiveMeasurementToProtoActiveMeasurement(active *ActiveMeasurement) *go_block.ActiveMeasurement {
@@ -80,9 +80,9 @@ func ProtoActiveHistoryToActiveHistory(history *go_block.ActiveHistory) *ActiveH
 	if history == nil {
 		return nil
 	}
-	data := map[int32]ActiveHistoryData{}
+	data := map[int32]*ActiveHistoryData{}
 	for k, v := range history.Data {
-		data[k] = ActiveHistoryData{
+		data[k] = &ActiveHistoryData{
 			Seconds: v.Seconds,
 			Points:  v.Points,
 			From:    v.From,

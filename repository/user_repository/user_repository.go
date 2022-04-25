@@ -3,8 +3,6 @@ package user_repository
 import (
 	"context"
 	"errors"
-	"time"
-
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,6 +19,8 @@ const (
 	actionUpdateImage
 	actionUpdateMetadata
 	actionUpdateNamespace
+	actionUpdateBirthdate
+	actionUpdateName
 	actionUpdateSecurity
 	actionGet
 	actionGetAll
@@ -40,23 +40,6 @@ var (
 	UserIsNilErr      = errors.New("user is nil")
 )
 
-type User struct {
-	Id                      string    `bson:"_id" json:"id"`
-	OptionalId              string    `bson:"optional_id" json:"optional_id"`
-	Email                   string    `bson:"email" json:"email"`
-	Password                string    `bson:"password" json:"password"`
-	Image                   string    `bson:"image" json:"image"`
-	ExternalEncrypted       bool      `bson:"external_encrypted" json:"external_encrypted"`
-	InternalEncrypted       bool      `bson:"internal_encrypted" json:"internal_encrypted"`
-	EmailHash               string    `bson:"email_hash" json:"email_hash"`
-	Metadata                string    `bson:"metadata" json:"metadata"`
-	CreatedAt               time.Time `bson:"created_at" json:"created_at"`
-	UpdatedAt               time.Time `bson:"updated_at" json:"updated_at"`
-	EncryptedAt             time.Time `bson:"encrypted_at" json:"encrypted_at"`
-	InternalEncryptionLevel int       `bson:"internal_encryption_level" json:"internal_encryption_level"`
-	ExternalEncryptionLevel int       `bson:"external_encryption_level" json:"external_encryption_level"`
-}
-
 type UserRepository interface {
 	Create(ctx context.Context, user *go_block.User) (*go_block.User, error)
 	UpdatePassword(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
@@ -64,6 +47,8 @@ type UserRepository interface {
 	UpdateOptionalId(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdateName(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdateBirthdate(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error)
 	Get(ctx context.Context, user *go_block.User, upgrade bool) (*go_block.User, error)
 	GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*go_block.User, error)
@@ -91,10 +76,10 @@ func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection,
 			bson.D{
 				{
 					"email_hash", bson.D{
-					{
-						"$gt", "",
+						{
+							"$gt", "",
+						},
 					},
-				},
 				},
 			},
 		).SetName(emailHashIndex),
@@ -110,10 +95,10 @@ func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection,
 			bson.D{
 				{
 					"optional_id", bson.D{
-					{
-						"$gt", "",
+						{
+							"$gt", "",
+						},
 					},
-				},
 				},
 			},
 		).SetName(optionalIdIndex),

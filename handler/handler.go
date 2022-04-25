@@ -34,6 +34,8 @@ type Handler interface {
 	UpdateMetadata(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateImage(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateName(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateBirthdate(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateOptionalId(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateSecurity(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Get(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)

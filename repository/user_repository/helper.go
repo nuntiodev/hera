@@ -25,11 +25,13 @@ func prepare(action int, user *go_block.User) {
 		}
 	case actionUpdatePassword, actionUpdateImage, actionUpdateMetadata,
 		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,
-		actionUpdateOptionalId:
+		actionUpdateOptionalId, actionUpdateName, actionUpdateBirthdate:
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
+	user.FirstName = strings.TrimSpace(user.FirstName)
+	user.LastName = strings.TrimSpace(user.LastName)
 	user.Image = strings.TrimSpace(user.Image)
 	user.OptionalId = strings.TrimSpace(user.OptionalId)
 	user.Metadata = strings.TrimSpace(user.Metadata)
@@ -84,11 +86,15 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 		return nil
 	}
 	if len(user.Email) > maxFieldLength {
-
+		return errors.New("email field is too long")
 	} else if len(user.OptionalId) > maxFieldLength {
-
+		return errors.New("optional id field is too long")
 	} else if len(user.Metadata) > 10*maxFieldLength {
-
+		return errors.New("metadata field is too long")
+	} else if len(user.FirstName) > maxFieldLength {
+		return errors.New("first name field is too long")
+	} else if len(user.LastName) > maxFieldLength {
+		return errors.New("last name field is too long")
 	}
 	return nil
 }
@@ -98,46 +104,4 @@ func validatePassword(password string) error {
 		return err
 	}
 	return nil
-}
-
-func UserToProtoUser(user *User) *go_block.User {
-	if user == nil {
-		return nil
-	}
-	return &go_block.User{
-		Id:                      user.Id,
-		OptionalId:              user.OptionalId,
-		Email:                   user.Email,
-		Password:                user.Password,
-		Image:                   user.Image,
-		ExternalEncrypted:       user.ExternalEncrypted,
-		InternalEncrypted:       user.InternalEncrypted,
-		Metadata:                user.Metadata,
-		CreatedAt:               ts.New(user.CreatedAt),
-		UpdatedAt:               ts.New(user.UpdatedAt),
-		EncryptedAt:             ts.New(user.EncryptedAt),
-		ExternalEncryptionLevel: int32(user.ExternalEncryptionLevel),
-		InternalEncryptionLevel: int32(user.InternalEncryptionLevel),
-	}
-}
-
-func ProtoUserToUser(user *go_block.User) *User {
-	if user == nil {
-		return nil
-	}
-	return &User{
-		Id:                      user.Id,
-		OptionalId:              user.OptionalId,
-		Email:                   user.Email,
-		Password:                user.Password,
-		Image:                   user.Image,
-		ExternalEncrypted:       user.ExternalEncrypted,
-		InternalEncrypted:       user.InternalEncrypted,
-		Metadata:                user.Metadata,
-		CreatedAt:               user.CreatedAt.AsTime(),
-		UpdatedAt:               user.UpdatedAt.AsTime(),
-		EncryptedAt:             user.EncryptedAt.AsTime(),
-		ExternalEncryptionLevel: int(user.ExternalEncryptionLevel),
-		InternalEncryptionLevel: int(user.InternalEncryptionLevel),
-	}
 }

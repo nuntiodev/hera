@@ -38,10 +38,10 @@ const (
 	Delete                  = "Delete"
 	DeleteNamespace         = "DeleteNamespace"
 	DeleteBatch             = "DeleteBatch"
-	CreateConfig            = "CreateConfig"
+	CreateNamespaceConfig   = "CreateNamespaceConfig"
 	UpdateConfigSettings    = "UpdateConfigSettings"
 	UpdateConfigDetails     = "UpdateConfigDetails"
-	UpdateAuthConfig        = "UpdateAuthConfig"
+	UpdateConfigAuthDetails = "UpdateConfigAuthDetails"
 	GetConfig               = "GetConfig"
 	DeleteConfig            = "DeleteConfig"
 )
@@ -54,6 +54,8 @@ var (
 	NamespaceIsEmpty    = errors.New("namespace is empty")
 	UserBatchIsNil      = errors.New("user batch is nil")
 	MeasurementIsNil    = errors.New("measurement is nil")
+	ConfigIsNil         = errors.New("config is nil")
+	AuthConfigIsNil     = errors.New("auth config is nil")
 )
 
 func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -106,6 +108,17 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 	case DeleteBatch:
 		if translatedReq.UserBatch == nil {
 			return nil, UserBatchIsNil
+		}
+	case CreateNamespaceConfig, UpdateConfigSettings,
+		UpdateConfigDetails, GetConfig, DeleteConfig:
+		if translatedReq.Config == nil {
+			return nil, ConfigIsNil
+		}
+	case UpdateConfigAuthDetails:
+		if translatedReq.Config == nil {
+			return nil, ConfigIsNil
+		} else if translatedReq.Config.AuthConfig == nil {
+			return nil, AuthConfigIsNil
 		}
 	default:
 		return &go_block.UserResponse{}, errors.New(fmt.Sprintf("invalid request: %s", info.FullMethod))

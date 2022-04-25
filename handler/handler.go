@@ -54,11 +54,12 @@ type Handler interface {
 	Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteBatch(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteNamespace(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	CreateConfig(ctx context.Context, req *go_block.ConfigRequest) (*go_block.ConfigResponse, error)
-	UpdateSettings(ctx context.Context, req *go_block.ConfigRequest) (*go_block.ConfigResponse, error)
-	UpdateAuthConfig(ctx context.Context, req *go_block.ConfigRequest) (*go_block.ConfigResponse, error)
-	GetConfig(ctx context.Context, req *go_block.ConfigRequest) (*go_block.ConfigResponse, error)
-	DeleteConfig(ctx context.Context, req *go_block.ConfigRequest) (*go_block.ConfigResponse, error)
+	CreateNamespaceConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateConfigSettings(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateConfigDetails(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateConfigAuthDetails(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	DeleteConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 }
 
 type defaultHandler struct {

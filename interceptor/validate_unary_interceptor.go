@@ -38,6 +38,12 @@ const (
 	Delete                  = "Delete"
 	DeleteNamespace         = "DeleteNamespace"
 	DeleteBatch             = "DeleteBatch"
+	CreateConfig            = "CreateConfig"
+	UpdateConfigSettings    = "UpdateConfigSettings"
+	UpdateConfigDetails     = "UpdateConfigDetails"
+	UpdateAuthConfig        = "UpdateAuthConfig"
+	GetConfig               = "GetConfig"
+	DeleteConfig            = "DeleteConfig"
 )
 
 var (

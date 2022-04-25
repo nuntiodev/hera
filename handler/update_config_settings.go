@@ -5,16 +5,16 @@ import (
 	"github.com/nuntiodev/block-proto/go_block"
 )
 
-func (h *defaultHandler) CreateConfig(ctx context.Context, req *go_block.ConfigRequest) (*go_block.ConfigResponse, error) {
+func (h *defaultHandler) UpdateConfigSettings(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	config, err := h.repository.Config(ctx, req.Namespace)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := config.Create(ctx, req.Config)
+	resp, err := config.UpdateSettings(ctx, req.Config)
 	if err != nil {
 		return nil, err
 	}
-	return &go_block.ConfigResponse{
+	return &go_block.UserResponse{
 		Config: resp,
 	}, nil
 }

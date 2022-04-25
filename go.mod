@@ -8,7 +8,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
-	github.com/nuntiodev/block-proto v0.1.83
+	github.com/nuntiodev/block-proto v0.1.85
 	github.com/nuntiodev/x v0.2.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.7.1

@@ -20,4 +20,5 @@ func prepare(action int, config *go_block.Config) {
 	config.About = strings.TrimSpace(config.About)
 	config.Email = strings.TrimSpace(config.Email)
 	config.Logo = strings.TrimSpace(config.Logo)
+	config.Terms = strings.TrimSpace(config.Terms)
 }

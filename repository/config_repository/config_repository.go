@@ -15,8 +15,9 @@ const (
 type ConfigRepository interface {
 	Create(ctx context.Context, config *go_block.Config) (*go_block.Config, error)
 	Get(ctx context.Context, config *go_block.Config) (*go_block.Config, error)
-	UpdateSettings(ctx context.Context, config *go_block.Config) (*go_block.Config, error)
+	UpdateDetails(ctx context.Context, config *go_block.Config) (*go_block.Config, error)
 	UpdateAuthConfig(ctx context.Context, config *go_block.Config) (*go_block.Config, error)
+	UpdateSettings(ctx context.Context, config *go_block.Config) (*go_block.Config, error)
 	Delete(ctx context.Context, config *go_block.Config) error
 }
 

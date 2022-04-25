@@ -40,6 +40,7 @@ type Config struct {
 	CreatedAt               time.Time   `bson:"created_at" json:"created_at"`
 	UpdatedAt               time.Time   `bson:"updated_at" json:"updated_at"`
 	InternalEncryptionLevel int32       `bson:"internal_encryption_level" json:"internal_encryption_level"`
+	ValidatePassword        bool        `bson:"validate_password" json:"validate_password"`
 }
 
 func ProtoConfigToConfig(config *go_block.Config) *Config {
@@ -82,6 +83,7 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 		CreatedAt:               config.CreatedAt.AsTime(),
 		UpdatedAt:               config.UpdatedAt.AsTime(),
 		InternalEncryptionLevel: config.InternalEncryptionLevel,
+		ValidatePassword:        config.ValidatePassword,
 	}
 }
 
@@ -125,5 +127,6 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 		CreatedAt:               ts.New(config.CreatedAt),
 		UpdatedAt:               ts.New(config.UpdatedAt),
 		InternalEncryptionLevel: config.InternalEncryptionLevel,
+		ValidatePassword:        config.ValidatePassword,
 	}
 }

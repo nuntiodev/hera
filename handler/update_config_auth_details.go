@@ -5,12 +5,12 @@ import (
 	"github.com/nuntiodev/block-proto/go_block"
 )
 
-func (h *defaultHandler) GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) UpdateConfigAuthDetails(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	config, err := h.repository.Config(ctx, req.Namespace)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := config.Get(ctx, req.Config)
+	resp, err := config.UpdateAuthConfig(ctx, req.Config)
 	if err != nil {
 		return nil, err
 	}

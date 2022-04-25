@@ -18,27 +18,22 @@ func (cr *defaultConfigRepository) UpdateSettings(ctx context.Context, config *g
 	if err != nil {
 		return nil, err
 	}
-	update := ProtoConfigToConfig(config)
-	if get.InternalEncryptionLevel > 0 {
-		if err := cr.EncryptConfig(actionUpdate, update); err != nil {
-			return nil, err
-		}
-	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"name":       update.Name,
-			"website":    update.Website,
-			"about":      update.About,
-			"email":      update.Email,
-			"logo":       update.Logo,
-			"terms":      update.Terms,
-			"updated_at": time.Now(),
+			"enable_nuntio_connect":  config.EnableNuntioConnect,
+			"disable_default_signup": config.DisableDefaultSignup,
+			"disable_default_login":  config.DisableDefaultLogin,
+			"validate_password":      config.ValidatePassword,
+			"updated_at":             time.Now(),
 		},
 	}
 	if _, err := cr.collection.UpdateOne(ctx, bson.M{"_id": config.Id}, mongoUpdate); err != nil {
 		return nil, err
 	}
 	// set updated fields
-	get.AuthConfig = config.AuthConfig
+	get.EnableNuntioConnect = config.EnableNuntioConnect
+	get.DisableDefaultSignup = config.DisableDefaultSignup
+	get.DisableDefaultLogin = config.DisableDefaultLogin
+	get.ValidatePassword = config.ValidatePassword
 	return get, nil
 }

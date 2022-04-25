@@ -19,6 +19,8 @@ const (
 	UpdateEmail             = "UpdateEmail"
 	UpdateOptionalId        = "UpdateOptionalId"
 	UpdateImage             = "UpdateImage"
+	UpdateName              = "UpdateName"
+	UpdateBirthdate         = "UpdateBirthdate"
 	UpdateSecurity          = "UpdateSecurity"
 	Get                     = "Get"
 	GetAll                  = "GetAll"
@@ -76,7 +78,8 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 			return &go_block.UserResponse{}, UserIsNil
 		}
 	case UpdatePassword, UpdateMetadata,
-		UpdateImage, UpdateEmail, UpdateOptionalId:
+		UpdateImage, UpdateEmail, UpdateOptionalId,
+		UpdateName, UpdateBirthdate:
 		if translatedReq.Update == nil {
 			return &go_block.UserResponse{}, UpdateIsNil
 		} else if translatedReq.User == nil {

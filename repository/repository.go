@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/measurement_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
 	"github.com/nuntiodev/x/cryptox"
@@ -14,6 +15,7 @@ type Repository interface {
 	Users() UsersBuilder
 	Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error)
 	Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error)
+	Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error)
 }
 
 type defaultRepository struct {
@@ -40,6 +42,18 @@ func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token
 		return nil, err
 	}
 	return tokenRepository, nil
+}
+
+func (r *defaultRepository) Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error) {
+	if namespace == "" {
+		namespace = "blocks-db"
+	}
+	collection := r.mongodbClient.Database(namespace).Collection("user_config")
+	configRepository, err := config_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
+	if err != nil {
+		return nil, err
+	}
+	return configRepository, nil
 }
 
 func (r *defaultRepository) Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error) {

@@ -41,7 +41,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		userActiveHistory, err := dmr.GetUserActiveHistory(ctx, year, measurement.UserId)
 		if err != nil {
 			userActiveHistory = &go_block.ActiveHistory{}
-			userActiveHistory.UserId = measurement.Id
+			userActiveHistory.UserId = measurement.UserId
 			userActiveHistory.Year = year
 		}
 		if _, ok := userActiveHistory.Data[month]; !ok {

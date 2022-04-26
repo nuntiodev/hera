@@ -13,7 +13,7 @@ func (dmr *defaultMeasurementRepository) GetUserActiveHistory(ctx context.Contex
 	}
 	filter := bson.M{"user_id": userId, "_id": year}
 	resp := ActiveHistory{}
-	if err := dmr.namespaceActiveHistoryCollection.FindOne(ctx, filter).Decode(&resp); err != nil {
+	if err := dmr.userActiveHistoryCollection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err
 	}
 	return ActiveHistoryToProtoActiveHistory(&resp), nil

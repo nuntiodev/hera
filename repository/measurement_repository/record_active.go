@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -63,10 +64,12 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 			},
 		}
 		if alreadyCreated {
+			fmt.Println("get in here....")
 			if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"user_id": userActiveHistory.UserId}, userMongoUpdate); err != nil {
 				return err
 			}
 		} else {
+			fmt.Println("get in here.... 2")
 			update := ProtoActiveHistoryToActiveHistory(userActiveHistory)
 			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, update); err != nil {
 				return err

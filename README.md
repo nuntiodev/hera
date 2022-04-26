@@ -8,6 +8,9 @@ production faster, without losing control over their data or services. Our goal 
 API-blocks that are secure, easy to set up, scales worldwide and that you can move from Nuntio Cloud to your private
 data center whenever you want.
 
+## Nuntio User Block
+The Nuntio User Block is a fully fledged user-management system, designed to be secure & stateless and to run in Kubernetes. It handles advanced data encryption models and features such as: normal and verfified authentication flows, creating, fetching and updating user information with custom metatadata, sending and validating emails and much more! Reach out to info@softcorp.io if you wanna give it a try, or sign-up for for a porfile in [Nuntio Cloud](https://cloud.nuntio.io) if you wanna try our managed solution.
+
 ## Environment
 
 | Name                  | Type            | Description                                                                                                                                                                                                                                                                                                             | Default | Required |

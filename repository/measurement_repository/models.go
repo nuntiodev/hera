@@ -19,6 +19,7 @@ type ActiveHistoryData struct {
 	Seconds int32                               `bson:"seconds" json:"seconds"`
 	Points  int32                               `bson:"points" json:"points"`
 	From    map[string]*go_block.CityHistoryMap `bson:"from" json:"from"`
+	Dau     map[int32]string                    `bson:"dau" json:"dau"` // day of month int to user hash
 }
 
 type CityMap struct {
@@ -67,6 +68,7 @@ func ActiveHistoryToProtoActiveHistory(history *ActiveHistory) *go_block.ActiveH
 			Seconds: v.Seconds,
 			Points:  v.Points,
 			From:    v.From,
+			Dau:     v.Dau, // Dau maps day of month to hash of user id -> dau is amount of keys in map
 		}
 	}
 	return &go_block.ActiveHistory{
@@ -86,6 +88,7 @@ func ProtoActiveHistoryToActiveHistory(history *go_block.ActiveHistory) *ActiveH
 			Seconds: v.Seconds,
 			Points:  v.Points,
 			From:    v.From,
+			Dau:     v.Dau,
 		}
 	}
 	return &ActiveHistory{

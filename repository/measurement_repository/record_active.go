@@ -2,6 +2,7 @@ package measurement_repository
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
@@ -73,6 +74,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 				Seconds: 0,
 				Points:  0,
 				From:    map[string]*go_block.CityHistoryMap{},
+				Dau:     map[int32]string{},
 			},
 		}
 	}
@@ -80,6 +82,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	namespaceActiveHistory.Data[month].Points += 1
 	if measurement.From != nil && measurement.From.CountryCode != "" {
 		if val, ok := namespaceActiveHistory.Data[month].From[measurement.From.CountryCode]; val == nil || !ok {
+			// country does not exist in map yet; initialize it to 0
 			namespaceActiveHistory.Data[month].From[measurement.From.CountryCode] = &go_block.CityHistoryMap{
 				CityAmount: map[string]int32{
 					measurement.From.City: 0,
@@ -87,6 +90,13 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 			}
 		}
 		namespaceActiveHistory.Data[month].From[measurement.From.CountryCode].CityAmount[measurement.From.City] += 1
+	}
+	if measurement.UserId != "" {
+		// create user id sha hash
+		hash := sha256.New()
+		hash.Write([]byte(measurement.UserId))
+		userShaHash := string(hash.Sum(nil))
+		namespaceActiveHistory.Data[month].Dau[int32(time.Now().Day())] = userShaHash
 	}
 	namespaceMongoUpdate := bson.M{
 		"$set": bson.M{

@@ -56,5 +56,26 @@ func (r *mongodbRepository) decrypt(user *User, encryptionKey string) error {
 		}
 		user.Metadata = decMetadata
 	}
+	if user.FirstName != "" {
+		decFirstName, err := r.crypto.Decrypt(user.FirstName, encryptionKey)
+		if err != nil {
+			return err
+		}
+		user.FirstName = decFirstName
+	}
+	if user.LastName != "" {
+		decLastName, err := r.crypto.Decrypt(user.LastName, encryptionKey)
+		if err != nil {
+			return err
+		}
+		user.LastName = decLastName
+	}
+	if user.Birthdate != "" {
+		decBirthdate, err := r.crypto.Decrypt(user.Birthdate, encryptionKey)
+		if err != nil {
+			return err
+		}
+		user.Birthdate = decBirthdate
+	}
 	return nil
 }

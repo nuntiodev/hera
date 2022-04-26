@@ -16,7 +16,7 @@ type Token struct {
 	Id                      string             `bson:"_id" json:"_id"`
 	UserId                  string             `bson:"user_id" json:"user_id"`
 	Blocked                 bool               `bson:"blocked" json:"blocked"`
-	Device                  string             `bson:"device" json:"device"`
+	DeviceInfo              string             `bson:"device_info" json:"device_info"`
 	LoggedInFrom            Location           `bson:"logged_in_from" json:"logged_in_from"`
 	Type                    go_block.TokenType `bson:"token_type" json:"token_type"`
 	BlockedAt               time.Time          `bson:"blocked_at" json:"blocked_at"`
@@ -40,7 +40,7 @@ func TokenToProtoToken(token *Token) *go_block.Token {
 		Id:                      token.Id,
 		UserId:                  token.UserId,
 		Blocked:                 token.Blocked,
-		DeviceInfo:              token.Device,
+		DeviceInfo:              token.DeviceInfo,
 		LoggedInFrom:            location,
 		Type:                    token.Type,
 		BlockedAt:               ts.New(token.BlockedAt),
@@ -66,7 +66,7 @@ func ProtoTokenToToken(token *go_block.Token) *Token {
 		Id:                      token.Id,
 		UserId:                  token.UserId,
 		Blocked:                 token.Blocked,
-		Device:                  token.DeviceInfo,
+		DeviceInfo:              token.DeviceInfo,
 		LoggedInFrom:            location,
 		Type:                    token.Type,
 		BlockedAt:               token.BlockedAt.AsTime(),

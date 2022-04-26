@@ -11,6 +11,7 @@ import (
 
 const (
 	actionCreate = iota
+	actionUpdate
 )
 
 const (

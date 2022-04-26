@@ -12,6 +12,7 @@ func (t *mongodbRepository) DecryptToken(token *Token) error {
 	if len(t.internalEncryptionKeys) > 0 {
 		encryptionKey, err := t.crypto.CombineSymmetricKeys(t.internalEncryptionKeys, token.InternalEncryptionLevel)
 		if err != nil {
+			fmt.Println("erjaisdjoi12 aw312")
 			return err
 		}
 		if token.Device != "" {

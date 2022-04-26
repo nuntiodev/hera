@@ -38,11 +38,13 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	month := int32(now.Month())
 	// first do this in user collection
 	g.Go(func() error {
+		alreadyCreated := true
 		userActiveHistory, err := dmr.GetUserActiveHistory(ctx, year, measurement.UserId)
 		if err != nil {
 			userActiveHistory = &go_block.ActiveHistory{}
 			userActiveHistory.UserId = measurement.UserId
 			userActiveHistory.Year = year
+			alreadyCreated = true
 		}
 		if _, ok := userActiveHistory.Data[month]; !ok {
 			userActiveHistory.Data = map[int32]*go_block.ActiveHistoryData{
@@ -62,8 +64,14 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 				"data":    userActiveHistory.Data,
 			},
 		}
-		if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, userMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
-			return err
+		if alreadyCreated {
+			if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, userMongoUpdate); err != nil {
+				return err
+			}
+		} else {
+			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, userMongoUpdate); err != nil {
+				return err
+			}
 		}
 		return nil
 	})

@@ -3,6 +3,7 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -28,6 +29,7 @@ func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token
 		}
 		if tempToken.Encrypted && len(t.internalEncryptionKeys) >= tempToken.InternalEncryptionLevel {
 			if err := t.DecryptToken(&tempToken); err != nil {
+				fmt.Println("err is here....")
 				return nil, err
 			}
 		}

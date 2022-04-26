@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -24,7 +23,6 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	} else if measurement.Seconds == 0 {
 		return nil, errors.New("measurement is 0")
 	}
-	fmt.Println(measurement.Seconds)
 	// set default fields
 	measurement.CreatedAt = ts.Now()
 	measurement.ExpiresAt = ts.New(time.Now().Add(activeMeasurementExpiresAt))
@@ -65,12 +63,10 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 			},
 		}
 		if alreadyCreated {
-			fmt.Println("get in herebla.... 2")
 			if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"user_id": userActiveHistory.UserId}, userMongoUpdate); err != nil {
 				return err
 			}
 		} else {
-			fmt.Println("get in herebla.... 1")
 			update := ProtoActiveHistoryToActiveHistory(userActiveHistory)
 			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, update); err != nil {
 				return err
@@ -123,12 +119,10 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 			},
 		}
 		if alreadyCreated {
-			fmt.Println("get in here.... 2")
 			if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"year": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
 				return err
 			}
 		} else {
-			fmt.Println("get in here.... 1")
 			update := ProtoActiveHistoryToActiveHistory(namespaceActiveHistory)
 			if _, err := dmr.namespaceActiveHistoryCollection.InsertOne(ctx, update); err != nil {
 				return err

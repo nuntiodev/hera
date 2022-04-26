@@ -59,13 +59,11 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		userActiveHistory.Data[month].Points += 1
 		userMongoUpdate := bson.M{
 			"$set": bson.M{
-				"_id":     userActiveHistory.Year,
-				"user_id": userActiveHistory.UserId,
-				"data":    userActiveHistory.Data,
+				"data": userActiveHistory.Data,
 			},
 		}
 		if alreadyCreated {
-			if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, userMongoUpdate); err != nil {
+			if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"user_id": userActiveHistory.UserId}, userMongoUpdate); err != nil {
 				return err
 			}
 		} else {
@@ -117,12 +115,11 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		}
 		namespaceMongoUpdate := bson.M{
 			"$set": bson.M{
-				"_id":  namespaceActiveHistory.Year,
 				"data": namespaceActiveHistory.Data,
 			},
 		}
 		if alreadyCreated {
-			if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
+			if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"year": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
 				return err
 			}
 		} else {

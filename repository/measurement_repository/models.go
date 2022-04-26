@@ -29,9 +29,10 @@ type CityMap struct {
 
 // ActiveHistory keeps map over data over a year and maps data from month to ActiveHistoryData
 type ActiveHistory struct {
-	Year   int32                        `bson:"_id" json:"_id"`
-	UserId string                       `bson:"user_id" json:"user_id"`
-	Data   map[int32]*ActiveHistoryData `bson:"data" json:"data"`
+	Year        int32                        `bson:"year" json:"year"`
+	UserId      string                       `bson:"user_id" json:"user_id"`
+	NamespaceId string                       `bson:"namespace_id" json:"namespace_id"`
+	Data        map[int32]*ActiveHistoryData `bson:"data" json:"data"`
 }
 
 func ActiveMeasurementToProtoActiveMeasurement(active *ActiveMeasurement) *go_block.ActiveMeasurement {

@@ -52,6 +52,24 @@ func newMongodbMeasurementRepository(ctx context.Context, userActiveMeasurementC
 	if _, err := userActiveMeasurementCollection.Indexes().CreateOne(ctx, expiresAtIndexModel); err != nil {
 		return nil, err
 	}
+	userIdIndexModel := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "user_id", Value: 1},
+		},
+		Options: options.Index().SetUnique(true),
+	}
+	if _, err := userActiveHistoryCollection.Indexes().CreateOne(ctx, userIdIndexModel); err != nil {
+		return nil, err
+	}
+	yearIdIndexModel := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "year", Value: 1},
+		},
+		Options: options.Index().SetUnique(true),
+	}
+	if _, err := namespaceActiveHistoryCollection.Indexes().CreateOne(ctx, yearIdIndexModel); err != nil {
+		return nil, err
+	}
 	return &defaultMeasurementRepository{
 		userActiveMeasurementCollection:  userActiveMeasurementCollection,
 		userActiveHistoryCollection:      userActiveHistoryCollection,

@@ -11,7 +11,7 @@ func (dmr *defaultMeasurementRepository) GetNamespaceActiveHistory(ctx context.C
 	if year == 0 {
 		return nil, errors.New("missing required year")
 	}
-	filter := bson.M{"_id": year}
+	filter := bson.M{"year": year}
 	resp := ActiveHistory{}
 	if err := dmr.namespaceActiveHistoryCollection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err

@@ -11,7 +11,7 @@ func (dmr *defaultMeasurementRepository) GetUserActiveHistory(ctx context.Contex
 	if userId == "" {
 		return nil, errors.New("missing required user id")
 	}
-	filter := bson.M{"user_id": userId, "_id": year}
+	filter := bson.M{"user_id": userId, "year": year}
 	resp := ActiveHistory{}
 	if err := dmr.userActiveHistoryCollection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -69,7 +70,8 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 				return err
 			}
 		} else {
-			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, userActiveHistory); err != nil {
+			update := ProtoActiveHistoryToActiveHistory(userActiveHistory)
+			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, update); err != nil {
 				return err
 			}
 		}
@@ -116,17 +118,18 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		}
 		namespaceMongoUpdate := bson.M{
 			"$set": bson.M{
-				"_id":     namespaceActiveHistory.Year,
-				"user_id": namespaceActiveHistory.UserId,
-				"data":    namespaceActiveHistory.Data,
+				"_id":  namespaceActiveHistory.Year,
+				"data": namespaceActiveHistory.Data,
 			},
 		}
+		fmt.Println(update)
 		if alreadyCreated {
 			if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
 				return err
 			}
 		} else {
-			if _, err := dmr.namespaceActiveHistoryCollection.InsertOne(ctx, namespaceActiveHistory); err != nil {
+			update := ProtoActiveHistoryToActiveHistory(namespaceActiveHistory)
+			if _, err := dmr.namespaceActiveHistoryCollection.InsertOne(ctx, update); err != nil {
 				return err
 			}
 		}

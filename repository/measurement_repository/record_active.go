@@ -65,12 +65,12 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 			},
 		}
 		if alreadyCreated {
-			fmt.Println("get in here....")
+			fmt.Println("get in herebla.... 2")
 			if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"user_id": userActiveHistory.UserId}, userMongoUpdate); err != nil {
 				return err
 			}
 		} else {
-			fmt.Println("get in here.... 2")
+			fmt.Println("get in herebla.... 1")
 			update := ProtoActiveHistoryToActiveHistory(userActiveHistory)
 			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, update); err != nil {
 				return err
@@ -123,10 +123,12 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 			},
 		}
 		if alreadyCreated {
+			fmt.Println("get in here.... 2")
 			if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"year": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
 				return err
 			}
 		} else {
+			fmt.Println("get in here.... 1")
 			update := ProtoActiveHistoryToActiveHistory(namespaceActiveHistory)
 			if _, err := dmr.namespaceActiveHistoryCollection.InsertOne(ctx, update); err != nil {
 				return err

@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -122,7 +121,6 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 				"data": namespaceActiveHistory.Data,
 			},
 		}
-		fmt.Println(update)
 		if alreadyCreated {
 			if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
 				return err

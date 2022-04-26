@@ -24,6 +24,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	} else if measurement.Seconds == 0 {
 		return nil, errors.New("measurement is 0")
 	}
+	fmt.Println(measurement.Seconds)
 	// set default fields
 	measurement.CreatedAt = ts.Now()
 	measurement.ExpiresAt = ts.New(time.Now().Add(activeMeasurementExpiresAt))

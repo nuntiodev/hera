@@ -44,7 +44,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 			userActiveHistory = &go_block.ActiveHistory{}
 			userActiveHistory.UserId = measurement.UserId
 			userActiveHistory.Year = year
-			alreadyCreated = true
+			alreadyCreated = false
 		}
 		if _, ok := userActiveHistory.Data[month]; !ok {
 			userActiveHistory.Data = map[int32]*go_block.ActiveHistoryData{
@@ -69,7 +69,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 				return err
 			}
 		} else {
-			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, userMongoUpdate); err != nil {
+			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, userActiveHistory); err != nil {
 				return err
 			}
 		}
@@ -77,10 +77,12 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	})
 	// now do the same in namespace collection
 	g.Go(func() error {
+		alreadyCreated := true
 		namespaceActiveHistory, err := dmr.GetNamespaceActiveHistory(ctx, year)
 		if err != nil {
 			namespaceActiveHistory = &go_block.ActiveHistory{}
 			namespaceActiveHistory.Year = year
+			alreadyCreated = false
 		}
 		if _, ok := namespaceActiveHistory.Data[month]; !ok {
 			namespaceActiveHistory.Data = map[int32]*go_block.ActiveHistoryData{
@@ -119,8 +121,14 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 				"data":    namespaceActiveHistory.Data,
 			},
 		}
-		if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
-			return err
+		if alreadyCreated {
+			if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"_id": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
+				return err
+			}
+		} else {
+			if _, err := dmr.namespaceActiveHistoryCollection.InsertOne(ctx, namespaceActiveHistory); err != nil {
+				return err
+			}
 		}
 		return nil
 	})

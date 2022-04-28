@@ -69,6 +69,9 @@ func TestGetTokensIEncrypted(t *testing.T) {
 }
 
 func TestCannotGetUserTokensExpired(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
 	// setup user client
 	tokenRepositoryWithEncryption, err := getTestTokenRepository(context.Background(), true, "")
 	assert.NoError(t, err)

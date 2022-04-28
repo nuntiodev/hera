@@ -6,10 +6,7 @@ import (
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"golang.org/x/sync/errgroup"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
-	"k8s.io/utils/pointer"
 	"time"
 )
 
@@ -31,107 +28,71 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	if _, err := dmr.userActiveMeasurementCollection.InsertOne(ctx, create); err != nil {
 		return nil, err
 	}
-	// create in history collections
-	g := new(errgroup.Group)
+	// create in user history collection
 	now := time.Now()
 	year := int32(now.Year())
 	month := int32(now.Month())
-	// first do this in user collection
-	g.Go(func() error {
-		alreadyCreated := true
-		userActiveHistory, err := dmr.GetUserActiveHistory(ctx, year, measurement.UserId)
-		if err != nil {
-			userActiveHistory = &go_block.ActiveHistory{}
-			userActiveHistory.UserId = measurement.UserId
-			userActiveHistory.Year = year
-			alreadyCreated = false
+	alreadyCreated := true
+	userActiveHistory, err := dmr.GetUserActiveHistory(ctx, year, measurement.UserId)
+	if err != nil {
+		userActiveHistory = &go_block.ActiveHistory{}
+		userActiveHistory.Year = year
+		alreadyCreated = false
+		// set user id hash instead of just id; this is more secure
+		hash := sha256.New()
+		hash.Write([]byte(measurement.UserId))
+		userShaHash := string(hash.Sum(nil))
+		userActiveHistory.UserId = userShaHash
+	}
+	if _, ok := userActiveHistory.Data[month]; !ok {
+		userActiveHistory.Data = map[int32]*go_block.ActiveHistoryData{
+			month: {
+				Seconds: 0,
+				Points:  0,
+				From:    map[string]*go_block.CityHistoryMap{},
+				Device:  map[string]int32{},
+			},
 		}
-		if _, ok := userActiveHistory.Data[month]; !ok {
-			userActiveHistory.Data = map[int32]*go_block.ActiveHistoryData{
-				month: {
-					Seconds: 0,
-					Points:  0,
-					From:    map[string]*go_block.CityHistoryMap{},
+	}
+	// make sure data is initialized
+	if userActiveHistory.Data[month].From == nil {
+		userActiveHistory.Data[month].From = map[string]*go_block.CityHistoryMap{}
+	}
+	if userActiveHistory.Data[month].Device == nil {
+		userActiveHistory.Data[month].Device = map[string]int32{}
+	}
+	// set optional data
+	if measurement.From != nil && measurement.From.CountryCode != "" {
+		if val, ok := userActiveHistory.Data[month].From[measurement.From.CountryCode]; val == nil || !ok {
+			// country does not exist in map yet; initialize it to 0
+			userActiveHistory.Data[month].From[measurement.From.CountryCode] = &go_block.CityHistoryMap{
+				CityAmount: map[string]int32{
+					measurement.From.City: 0,
 				},
 			}
 		}
-		userActiveHistory.Data[month].Seconds += measurement.Seconds
-		userActiveHistory.Data[month].Points += 1
-		userMongoUpdate := bson.M{
-			"$set": bson.M{
-				"data": userActiveHistory.Data,
-			},
+		userActiveHistory.Data[month].From[measurement.From.CountryCode].CityAmount[measurement.From.City] += 1
+	}
+	if measurement.Device != go_block.Platform_INVALID_PLATFORM {
+		userActiveHistory.Data[month].Device[measurement.Device.String()] += 1
+	}
+	// set required data
+	userActiveHistory.Data[month].Seconds += measurement.Seconds
+	userActiveHistory.Data[month].Points += 1
+	userMongoUpdate := bson.M{
+		"$set": bson.M{
+			"data": userActiveHistory.Data,
+		},
+	}
+	if alreadyCreated {
+		if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"user_id": userActiveHistory.UserId}, userMongoUpdate); err != nil {
+			return nil, err
 		}
-		if alreadyCreated {
-			if _, err := dmr.userActiveHistoryCollection.UpdateOne(ctx, bson.M{"user_id": userActiveHistory.UserId}, userMongoUpdate); err != nil {
-				return err
-			}
-		} else {
-			update := ProtoActiveHistoryToActiveHistory(userActiveHistory)
-			if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, update); err != nil {
-				return err
-			}
+	} else {
+		update := ProtoActiveHistoryToActiveHistory(userActiveHistory)
+		if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, update); err != nil {
+			return nil, err
 		}
-		return nil
-	})
-	// now do the same in namespace collection
-	g.Go(func() error {
-		alreadyCreated := true
-		namespaceActiveHistory, err := dmr.GetNamespaceActiveHistory(ctx, year)
-		if err != nil {
-			namespaceActiveHistory = &go_block.ActiveHistory{}
-			namespaceActiveHistory.Year = year
-			alreadyCreated = false
-		}
-		if _, ok := namespaceActiveHistory.Data[month]; !ok {
-			namespaceActiveHistory.Data = map[int32]*go_block.ActiveHistoryData{
-				month: {
-					Seconds: 0,
-					Points:  0,
-					From:    map[string]*go_block.CityHistoryMap{},
-					Dau:     map[int32]string{},
-				},
-			}
-		}
-		namespaceActiveHistory.Data[month].Seconds += measurement.Seconds
-		namespaceActiveHistory.Data[month].Points += 1
-		if measurement.From != nil && measurement.From.CountryCode != "" {
-			if val, ok := namespaceActiveHistory.Data[month].From[measurement.From.CountryCode]; val == nil || !ok {
-				// country does not exist in map yet; initialize it to 0
-				namespaceActiveHistory.Data[month].From[measurement.From.CountryCode] = &go_block.CityHistoryMap{
-					CityAmount: map[string]int32{
-						measurement.From.City: 0,
-					},
-				}
-			}
-			namespaceActiveHistory.Data[month].From[measurement.From.CountryCode].CityAmount[measurement.From.City] += 1
-		}
-		if measurement.UserId != "" {
-			// create user id sha hash
-			hash := sha256.New()
-			hash.Write([]byte(measurement.UserId))
-			userShaHash := string(hash.Sum(nil))
-			namespaceActiveHistory.Data[month].Dau[int32(time.Now().Day())] = userShaHash
-		}
-		namespaceMongoUpdate := bson.M{
-			"$set": bson.M{
-				"data": namespaceActiveHistory.Data,
-			},
-		}
-		if alreadyCreated {
-			if _, err := dmr.namespaceActiveHistoryCollection.UpdateOne(ctx, bson.M{"year": year}, namespaceMongoUpdate, &options.UpdateOptions{Upsert: pointer.BoolPtr(true)}); err != nil {
-				return err
-			}
-		} else {
-			update := ProtoActiveHistoryToActiveHistory(namespaceActiveHistory)
-			if _, err := dmr.namespaceActiveHistoryCollection.InsertOne(ctx, update); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	if err := g.Wait(); err != nil {
-		return nil, err
 	}
 	// now do the same for the namespace collection
 	return measurement, nil

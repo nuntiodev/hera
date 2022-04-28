@@ -273,8 +273,12 @@ github.com/munnerz/goautoneg v0.0.0-20120707110453-a547fc61f48d/go.mod h1:+n7T8m
 github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f/go.mod h1:ZdcZmHo+o7JKHSa8/e818NopupXU1YMK5fe1lsApnBw=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
-github.com/nuntiodev/block-proto v0.1.90 h1:dRak/FevdrgoEV2SzyKv9HbOptT1SnoMRbeLoh/XGCg=
-github.com/nuntiodev/block-proto v0.1.90/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
+github.com/nuntiodev/block-proto v0.1.91 h1:DKA2iwWFAkT31/F0uPUO8gU1qQ6v7Z1HoOEFrqb9zP0=
+github.com/nuntiodev/block-proto v0.1.91/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
+github.com/nuntiodev/block-proto v0.1.92 h1:4HoRO5Gsk5+syEZEIyFaTD/G1xSH7/bvs6eRtickhds=
+github.com/nuntiodev/block-proto v0.1.92/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
+github.com/nuntiodev/block-proto v0.1.93 h1:USHEnCwWFcGgtD51WGnTM9IPoEIedqkRsnKq0NaAQ7E=
+github.com/nuntiodev/block-proto v0.1.93/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
 github.com/nuntiodev/x v0.2.0 h1:m23r2Nh7OOMPVu1BaKk8UEDOgELojfNMimbDb+pqpLk=
 github.com/nuntiodev/x v0.2.0/go.mod h1:9xx95z4bdHvb8ZdgY2eLjpfo4Q/LSdTrAbwXPnvEuvA=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=

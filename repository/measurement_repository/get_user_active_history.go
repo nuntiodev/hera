@@ -2,8 +2,8 @@ package measurement_repository
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
-	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -12,8 +12,10 @@ func (dmr *defaultMeasurementRepository) GetUserActiveHistory(ctx context.Contex
 	if userId == "" {
 		return nil, errors.New("missing required user id")
 	}
-	fmt.Println(userId, year)
-	filter := bson.M{"user_id": userId, "year": year}
+	hash := sha256.New()
+	hash.Write([]byte(userId))
+	userShaHash := string(hash.Sum(nil))
+	filter := bson.M{"user_id": userShaHash, "year": year}
 	resp := ActiveHistory{}
 	if err := dmr.userActiveHistoryCollection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err

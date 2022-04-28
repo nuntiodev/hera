@@ -63,8 +63,7 @@ func (r *defaultRepository) Measurements(ctx context.Context, namespace string) 
 	db := r.mongodbClient.Database(namespace)
 	userActiveMeasurementCollection := db.Collection("user_active_measurements")
 	userActiveHistoryCollection := db.Collection("user_active_history")
-	namespaceActiveHistoryCollection := db.Collection("namespace_active_history")
-	measurementRepository, err := measurement_repository.New(ctx, userActiveMeasurementCollection, userActiveHistoryCollection, namespaceActiveHistoryCollection)
+	measurementRepository, err := measurement_repository.New(ctx, userActiveMeasurementCollection, userActiveHistoryCollection)
 	if err != nil {
 		return nil, err
 	}

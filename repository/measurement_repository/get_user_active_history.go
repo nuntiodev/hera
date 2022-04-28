@@ -17,6 +17,7 @@ func (dmr *defaultMeasurementRepository) GetUserActiveHistory(ctx context.Contex
 	hash := sha256.New()
 	hash.Write([]byte(userId))
 	userShaHash := string(hash.Sum(nil))
+	fmt.Println(userShaHash)
 	filter := bson.M{"user_id": userShaHash, "year": year}
 	resp := ActiveHistory{}
 	if err := dmr.userActiveHistoryCollection.FindOne(ctx, filter).Decode(&resp); err != nil {

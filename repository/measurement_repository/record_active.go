@@ -2,11 +2,11 @@ package measurement_repository
 
 import (
 	"context"
-	"crypto/sha256"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
+	"strings"
 	"time"
 )
 
@@ -20,6 +20,9 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	} else if measurement.Seconds == 0 {
 		return nil, errors.New("measurement is 0")
 	}
+	// prepare
+	measurement.Id = strings.TrimSpace(measurement.Id)
+	measurement.UserId = strings.TrimSpace(measurement.UserId)
 	// set default fields
 	measurement.CreatedAt = ts.Now()
 	measurement.ExpiresAt = ts.New(time.Now().Add(activeMeasurementExpiresAt))
@@ -39,10 +42,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		userActiveHistory.Year = year
 		alreadyCreated = false
 		// set user id hash instead of just id; this is more secure
-		hash := sha256.New()
-		hash.Write([]byte(measurement.UserId))
-		userShaHash := string(hash.Sum(nil))
-		userActiveHistory.UserId = userShaHash
+		userActiveHistory.UserId = getUserHash(measurement.UserId)
 	}
 	if _, ok := userActiveHistory.Data[month]; !ok {
 		userActiveHistory.Data = map[int32]*go_block.ActiveHistoryData{

@@ -6,7 +6,7 @@ import (
 
 func (t *defaultConfigRepository) EncryptConfig(action int, config *Config) error {
 	if config == nil {
-		return errors.New("config is nil")
+		return errors.New("encrypt: config is nil")
 	}
 	encryptionKey := ""
 	var err error

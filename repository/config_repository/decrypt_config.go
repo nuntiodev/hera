@@ -4,7 +4,7 @@ import "errors"
 
 func (t *defaultConfigRepository) DecryptConfig(config *Config) error {
 	if config == nil {
-		return errors.New("config is nil")
+		return errors.New("decrypt: config is nil")
 	}
 	if len(t.internalEncryptionKeys) > 0 {
 		encryptionKey, err := t.crypto.CombineSymmetricKeys(t.internalEncryptionKeys, len(t.internalEncryptionKeys))

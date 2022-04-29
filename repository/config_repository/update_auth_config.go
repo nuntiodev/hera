@@ -3,6 +3,7 @@ package config_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"time"
@@ -14,9 +15,8 @@ func (cr *defaultConfigRepository) UpdateAuthConfig(ctx context.Context, config 
 	} else if config.Id == "" {
 		return nil, errors.New("missing required config id")
 	}
-	if _, err := cr.Create(ctx, &go_block.Config{
-		Id: config.Id,
-	}); err != nil {
+	if _, err := cr.Create(ctx, config); err != nil {
+		fmt.Println("err is here...")
 		return nil, err
 	}
 	get, err := cr.Get(ctx, config)

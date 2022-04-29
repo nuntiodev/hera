@@ -10,6 +10,8 @@ func (cr *defaultConfigRepository) Create(ctx context.Context, config *go_block.
 	prepare(actionCreate, config)
 	if config == nil {
 		return nil, errors.New("missing required config")
+	} else if config.Id == "" {
+		return nil, errors.New("missing required id")
 	}
 	create := ProtoConfigToConfig(config)
 	create.EnableNuntioConnect = true

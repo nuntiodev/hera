@@ -14,7 +14,9 @@ func (cr *defaultConfigRepository) UpdateAuthConfig(ctx context.Context, config 
 	} else if config.Id == "" {
 		return nil, errors.New("missing required config id")
 	}
-	if _, err := cr.Create(ctx, &go_block.Config{}); err != nil {
+	if _, err := cr.Create(ctx, &go_block.Config{
+		Id: config.Id,
+	}); err != nil {
 		return nil, err
 	}
 	get, err := cr.Get(ctx, config)

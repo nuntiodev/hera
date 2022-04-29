@@ -20,6 +20,7 @@ func (cr *defaultConfigRepository) UpdateDetails(ctx context.Context, config *go
 	}
 	update := ProtoConfigToConfig(config)
 	if get.InternalEncryptionLevel > 0 {
+		update.InternalEncryptionLevel = get.InternalEncryptionLevel
 		if err := cr.EncryptConfig(actionUpdate, update); err != nil {
 			return nil, err
 		}

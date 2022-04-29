@@ -3,7 +3,6 @@ package config_repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"time"
@@ -15,16 +14,13 @@ func (cr *defaultConfigRepository) UpdateAuthConfig(ctx context.Context, config 
 	} else if config.Id == "" {
 		return nil, errors.New("missing required config id")
 	}
-	if _, err := cr.Create(ctx, config); err != nil {
-		fmt.Println("err is here...")
-		return nil, err
-	}
 	get, err := cr.Get(ctx, config)
 	if err != nil {
 		return nil, err
 	}
 	update := ProtoConfigToConfig(config)
 	if get.InternalEncryptionLevel > 0 {
+		update.InternalEncryptionLevel = get.InternalEncryptionLevel
 		if err := cr.EncryptConfig(actionUpdate, update); err != nil {
 			return nil, err
 		}

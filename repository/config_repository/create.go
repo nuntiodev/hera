@@ -20,7 +20,7 @@ func (cr *defaultConfigRepository) Create(ctx context.Context, config *go_block.
 	create.ValidatePassword = true
 	create.AuthConfig = &AuthConfig{
 		WelcomeTitle:              "Welcome",
-		WelcomeDetails:            "Welcome Details",
+		WelcomeDetails:            "Already have an account? Welcome in! No? Create one below.",
 		LoginButton:               "Login",
 		LoginTitle:                "Login",
 		LoginDetails:              "Fill in the details below to login to your account",

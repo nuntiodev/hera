@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
@@ -53,7 +52,6 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		DeviceInfo:   deviceInfo,
 		Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
 	}); err != nil {
-		fmt.Println("err is here...")
 		return &go_block.UserResponse{}, err
 	}
 	// create access token in database
@@ -65,7 +63,6 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		DeviceInfo:   deviceInfo,
 		Type:         go_block.TokenType_TOKEN_TYPE_ACCESS,
 	}); err != nil {
-		fmt.Println("err is here... 2")
 		return &go_block.UserResponse{}, err
 	}
 	return &go_block.UserResponse{

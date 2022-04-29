@@ -70,13 +70,6 @@ func (t *defaultConfigRepository) EncryptConfig(action int, config *Config) erro
 			config.Terms = encTerms
 		}
 		if config.AuthConfig != nil {
-			if config.AuthConfig.Logo != "" {
-				encLogo, err := t.crypto.Encrypt(config.AuthConfig.Logo, encryptionKey)
-				if err != nil {
-					return err
-				}
-				config.AuthConfig.Logo = encLogo
-			}
 			if config.AuthConfig.WelcomeTitle != "" {
 				encWelcomeTitle, err := t.crypto.Encrypt(config.AuthConfig.WelcomeTitle, encryptionKey)
 				if err != nil {

@@ -54,13 +54,6 @@ func (t *defaultConfigRepository) DecryptConfig(config *Config) error {
 			config.Terms = decTerms
 		}
 		if config.AuthConfig != nil {
-			if config.AuthConfig.Logo != "" {
-				decLogo, err := t.crypto.Decrypt(config.AuthConfig.Logo, encryptionKey)
-				if err != nil {
-					return err
-				}
-				config.AuthConfig.Logo = decLogo
-			}
 			if config.AuthConfig.WelcomeTitle != "" {
 				decWelcomeTitle, err := t.crypto.Decrypt(config.AuthConfig.WelcomeTitle, encryptionKey)
 				if err != nil {

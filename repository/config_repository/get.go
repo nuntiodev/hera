@@ -43,7 +43,6 @@ func (cr *defaultConfigRepository) upgradeEncryptionLevel(ctx context.Context, c
 	updateAuthConfig := bson.M{}
 	if config.AuthConfig != nil {
 		updateAuthConfig = bson.M{
-			"logo":                          config.AuthConfig.Logo,
 			"welcome_title":                 config.AuthConfig.WelcomeTitle,
 			"welcome_details":               config.AuthConfig.WelcomeDetails,
 			"login_button":                  config.AuthConfig.LoginButton,

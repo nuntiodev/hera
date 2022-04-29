@@ -27,7 +27,6 @@ func (cr *defaultConfigRepository) UpdateAuthConfig(ctx context.Context, config 
 	updateAuthConfig := bson.M{}
 	if config.AuthConfig != nil {
 		updateAuthConfig = bson.M{
-			"logo":                          update.AuthConfig.Logo,
 			"welcome_title":                 update.AuthConfig.WelcomeTitle,
 			"welcome_details":               update.AuthConfig.WelcomeDetails,
 			"login_button":                  update.AuthConfig.LoginButton,

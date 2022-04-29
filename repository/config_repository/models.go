@@ -7,7 +7,6 @@ import (
 )
 
 type AuthConfig struct {
-	Logo                      string `bson:"logo" json:"logo"`
 	WelcomeTitle              string `bson:"welcome_title" json:"welcome_title"`
 	WelcomeDetails            string `bson:"welcome_details" json:"welcome_details"`
 	LoginButton               string `bson:"login_button" json:"login_button"`
@@ -50,7 +49,6 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 	authConfig := &AuthConfig{}
 	if config.AuthConfig != nil {
 		authConfig = &AuthConfig{
-			Logo:                      config.AuthConfig.Logo,
 			WelcomeTitle:              config.AuthConfig.WelcomeTitle,
 			WelcomeDetails:            config.AuthConfig.WelcomeDetails,
 			LoginButton:               config.AuthConfig.LoginButton,
@@ -94,7 +92,6 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 	authConfig := &go_block.AuthConfig{}
 	if config.AuthConfig != nil {
 		authConfig = &go_block.AuthConfig{
-			Logo:                      config.AuthConfig.Logo,
 			WelcomeTitle:              config.AuthConfig.WelcomeTitle,
 			WelcomeDetails:            config.AuthConfig.WelcomeDetails,
 			LoginButton:               config.AuthConfig.LoginButton,

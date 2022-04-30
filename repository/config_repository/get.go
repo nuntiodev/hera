@@ -19,7 +19,7 @@ func (cr *defaultConfigRepository) Get(ctx context.Context, config *go_block.Con
 	result := cr.collection.FindOne(ctx, bson.M{"_id": config.Id})
 	if err := result.Err(); err != nil {
 		// create one since it does not exist
-		// todo: delete
+		// todo: delete - we do not need to create a new one if it does not exist
 		create, err := cr.Create(ctx, config)
 		if err != nil {
 			return nil, err

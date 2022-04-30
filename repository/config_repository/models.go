@@ -87,7 +87,7 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 		}
 	}
 	welcomeText := &WelcomeText{}
-	if config.GeneralText != nil {
+	if config.WelcomeText != nil {
 		welcomeText = &WelcomeText{
 			WelcomeTitle:   config.WelcomeText.WelcomeTitle,
 			WelcomeDetails: config.WelcomeText.WelcomeDetails,

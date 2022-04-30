@@ -42,8 +42,8 @@ func (cr *defaultConfigRepository) UpdateRegisterText(ctx context.Context, confi
 	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"general_text": updateRegisterText,
-			"updated_at":   time.Now(),
+			"register_text": updateRegisterText,
+			"updated_at":    time.Now(),
 		},
 	}
 	if _, err := cr.collection.UpdateOne(ctx, bson.M{"_id": config.Id}, mongoUpdate); err != nil {

@@ -191,6 +191,13 @@ func (t *defaultConfigRepository) DecryptConfig(config *Config) error {
 				}
 				config.RegisterText.RepeatPasswordHint = repeatPasswordHint
 			}
+			if config.RegisterText.ContainsSpecialChar != "" {
+				containsSpecialChar, err := t.crypto.Decrypt(config.RegisterText.ContainsSpecialChar, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.ContainsSpecialChar = containsSpecialChar
+			}
 			if config.RegisterText.ContainsNumberChar != "" {
 				containsNumberChar, err := t.crypto.Decrypt(config.RegisterText.ContainsNumberChar, encryptionKey)
 				if err != nil {

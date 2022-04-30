@@ -98,6 +98,7 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 		registerText = &RegisterText{
 			RegisterButton:            config.RegisterText.RegisterButton,
 			RegisterTitle:             config.RegisterText.RegisterTitle,
+			RegisterDetails:           config.RegisterText.RegisterDetails,
 			PasswordDoNotMatchTitle:   config.RegisterText.PasswordDoNotMatchTitle,
 			PasswordDoNotMatchDetails: config.RegisterText.PasswordDoNotMatchDetails,
 			RepeatPasswordHint:        config.RegisterText.RepeatPasswordHint,
@@ -170,6 +171,7 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 		registerText = &go_block.RegisterText{
 			RegisterButton:            config.RegisterText.RegisterButton,
 			RegisterTitle:             config.RegisterText.RegisterTitle,
+			RegisterDetails:           config.RegisterText.RegisterDetails,
 			PasswordDoNotMatchTitle:   config.RegisterText.PasswordDoNotMatchTitle,
 			PasswordDoNotMatchDetails: config.RegisterText.PasswordDoNotMatchDetails,
 			RepeatPasswordHint:        config.RegisterText.RepeatPasswordHint,

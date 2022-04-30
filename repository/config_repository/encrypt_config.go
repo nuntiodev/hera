@@ -213,6 +213,13 @@ func (t *defaultConfigRepository) EncryptConfig(action int, config *Config) erro
 			}
 			config.RegisterText.ContainsNumberChar = containsNumberChar
 		}
+		if config.RegisterText.ContainsSpecialChar != "" {
+			containsSpecialChar, err := t.crypto.Encrypt(config.RegisterText.ContainsSpecialChar, encryptionKey)
+			if err != nil {
+				return err
+			}
+			config.RegisterText.ContainsSpecialChar = containsSpecialChar
+		}
 		if config.RegisterText.PasswordMustMatch != "" {
 			passwordMustMatch, err := t.crypto.Encrypt(config.RegisterText.PasswordMustMatch, encryptionKey)
 			if err != nil {

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (cr *defaultConfigRepository) UpdateDetails(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
+func (cr *defaultConfigRepository) UpdateWelcomeText(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
 	if config == nil {
 		return nil, errors.New("missing required config")
 	} else if config.Id == "" {
@@ -25,26 +25,23 @@ func (cr *defaultConfigRepository) UpdateDetails(ctx context.Context, config *go
 			return nil, err
 		}
 	}
+	updateWelcomeText := bson.M{}
+	if config.WelcomeText != nil {
+		updateWelcomeText = bson.M{
+			"welcome_title":   update.WelcomeText.WelcomeTitle,
+			"welcome_details": update.WelcomeText.WelcomeDetails,
+		}
+	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"name":       update.Name,
-			"website":    update.Website,
-			"about":      update.About,
-			"email":      update.Email,
-			"logo":       update.Logo,
-			"terms":      update.Terms,
-			"updated_at": time.Now(),
+			"welcome_text": updateWelcomeText,
+			"updated_at":   time.Now(),
 		},
 	}
 	if _, err := cr.collection.UpdateOne(ctx, bson.M{"_id": config.Id}, mongoUpdate); err != nil {
 		return nil, err
 	}
 	// set updated fields
-	get.Name = config.Name
-	get.Website = config.Website
-	get.About = config.About
-	get.Email = config.Email
-	get.Logo = config.Logo
-	get.Terms = config.Terms
+	get.WelcomeText = config.WelcomeText
 	return get, nil
 }

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (cr *defaultConfigRepository) UpdateDetails(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
+func (cr *defaultConfigRepository) UpdateLoginText(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
 	if config == nil {
 		return nil, errors.New("missing required config")
 	} else if config.Id == "" {
@@ -25,14 +25,18 @@ func (cr *defaultConfigRepository) UpdateDetails(ctx context.Context, config *go
 			return nil, err
 		}
 	}
+	updateLoginText := bson.M{}
+	if config.LoginText != nil {
+		updateLoginText = bson.M{
+			"login_button":    update.LoginText.LoginButton,
+			"login_title":     update.LoginText.LoginTitle,
+			"login_details":   update.LoginText.LoginDetails,
+			"forgot_password": update.LoginText.ForgotPassword,
+		}
+	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"name":       update.Name,
-			"website":    update.Website,
-			"about":      update.About,
-			"email":      update.Email,
-			"logo":       update.Logo,
-			"terms":      update.Terms,
+			"login_text": updateLoginText,
 			"updated_at": time.Now(),
 		},
 	}
@@ -40,11 +44,6 @@ func (cr *defaultConfigRepository) UpdateDetails(ctx context.Context, config *go
 		return nil, err
 	}
 	// set updated fields
-	get.Name = config.Name
-	get.Website = config.Website
-	get.About = config.About
-	get.Email = config.Email
-	get.Logo = config.Logo
-	get.Terms = config.Terms
+	get.WelcomeText = config.WelcomeText
 	return get, nil
 }

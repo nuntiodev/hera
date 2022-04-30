@@ -11,39 +11,42 @@ import (
 )
 
 const (
-	ProjectName             = "/BlockUser.UserService/"
-	Heartbeat               = "Heartbeat"
-	Create                  = "Create"
-	UpdatePassword          = "UpdatePassword"
-	UpdateMetadata          = "UpdateMetadata"
-	UpdateEmail             = "UpdateEmail"
-	UpdateOptionalId        = "UpdateOptionalId"
-	UpdateImage             = "UpdateImage"
-	UpdateName              = "UpdateName"
-	UpdateBirthdate         = "UpdateBirthdate"
-	UpdateSecurity          = "UpdateSecurity"
-	Get                     = "Get"
-	GetAll                  = "GetAll"
-	ValidateCredentials     = "ValidateCredentials"
-	Login                   = "Login"
-	ValidateToken           = "ValidateToken"
-	BlockToken              = "BlockToken"
-	BlockTokenById          = "BlockTokenById"
-	RefreshToken            = "RefreshToken"
-	GetTokens               = "GetTokens"
-	PublicKeys              = "PublicKeys"
-	RecordActiveMeasurement = "RecordActiveMeasurement"
-	NamespaceActiveHistory  = "NamespaceActiveHistory"
-	UserActiveHistory       = "UserActiveHistory"
-	Delete                  = "Delete"
-	DeleteNamespace         = "DeleteNamespace"
-	DeleteBatch             = "DeleteBatch"
-	CreateNamespaceConfig   = "CreateNamespaceConfig"
-	UpdateConfigSettings    = "UpdateConfigSettings"
-	UpdateConfigDetails     = "UpdateConfigDetails"
-	UpdateConfigAuthDetails = "UpdateConfigAuthDetails"
-	GetConfig               = "GetConfig"
-	DeleteConfig            = "DeleteConfig"
+	ProjectName              = "/BlockUser.UserService/"
+	Heartbeat                = "Heartbeat"
+	Create                   = "Create"
+	UpdatePassword           = "UpdatePassword"
+	UpdateMetadata           = "UpdateMetadata"
+	UpdateEmail              = "UpdateEmail"
+	UpdateOptionalId         = "UpdateOptionalId"
+	UpdateImage              = "UpdateImage"
+	UpdateName               = "UpdateName"
+	UpdateBirthdate          = "UpdateBirthdate"
+	UpdateSecurity           = "UpdateSecurity"
+	Get                      = "Get"
+	GetAll                   = "GetAll"
+	ValidateCredentials      = "ValidateCredentials"
+	Login                    = "Login"
+	ValidateToken            = "ValidateToken"
+	BlockToken               = "BlockToken"
+	BlockTokenById           = "BlockTokenById"
+	RefreshToken             = "RefreshToken"
+	GetTokens                = "GetTokens"
+	PublicKeys               = "PublicKeys"
+	RecordActiveMeasurement  = "RecordActiveMeasurement"
+	NamespaceActiveHistory   = "NamespaceActiveHistory"
+	UserActiveHistory        = "UserActiveHistory"
+	Delete                   = "Delete"
+	DeleteNamespace          = "DeleteNamespace"
+	DeleteBatch              = "DeleteBatch"
+	CreateNamespaceConfig    = "CreateNamespaceConfig"
+	UpdateConfigSettings     = "UpdateConfigSettings"
+	UpdateConfigDetails      = "UpdateConfigDetails"
+	UpdateConfigGeneralText  = "UpdateConfigGeneralText"
+	UpdateConfigWelcomeText  = "UpdateConfigWelcomeText"
+	UpdateConfigRegisterText = "UpdateConfigRegisterText"
+	UpdateConfigLoginText    = "UpdateConfigLoginText"
+	GetConfig                = "GetConfig"
+	DeleteConfig             = "DeleteConfig"
 )
 
 var (
@@ -110,15 +113,11 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 			return nil, UserBatchIsNil
 		}
 	case CreateNamespaceConfig, UpdateConfigSettings,
-		UpdateConfigDetails, GetConfig, DeleteConfig:
+		UpdateConfigDetails, GetConfig, DeleteConfig,
+		UpdateConfigGeneralText, UpdateConfigWelcomeText, UpdateConfigRegisterText,
+		UpdateConfigLoginText:
 		if translatedReq.Config == nil {
 			return nil, ConfigIsNil
-		}
-	case UpdateConfigAuthDetails:
-		if translatedReq.Config == nil {
-			return nil, ConfigIsNil
-		} else if translatedReq.Config.AuthConfig == nil {
-			return nil, AuthConfigIsNil
 		}
 	default:
 		return &go_block.UserResponse{}, errors.New(fmt.Sprintf("invalid request: %s", info.FullMethod))

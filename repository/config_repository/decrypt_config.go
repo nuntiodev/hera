@@ -12,145 +12,235 @@ func (t *defaultConfigRepository) DecryptConfig(config *Config) error {
 			return err
 		}
 		if config.Name != "" {
-			decName, err := t.crypto.Decrypt(config.Name, encryptionKey)
+			name, err := t.crypto.Decrypt(config.Name, encryptionKey)
 			if err != nil {
 				return err
 			}
-			config.Name = decName
+			config.Name = name
 		}
 		if config.Website != "" {
-			decWebsite, err := t.crypto.Decrypt(config.Website, encryptionKey)
+			website, err := t.crypto.Decrypt(config.Website, encryptionKey)
 			if err != nil {
 				return err
 			}
-			config.Website = decWebsite
+			config.Website = website
 		}
 		if config.About != "" {
-			decAbout, err := t.crypto.Decrypt(config.About, encryptionKey)
+			about, err := t.crypto.Decrypt(config.About, encryptionKey)
 			if err != nil {
 				return err
 			}
-			config.About = decAbout
+			config.About = about
 		}
 		if config.Email != "" {
-			decEmail, err := t.crypto.Decrypt(config.Email, encryptionKey)
+			email, err := t.crypto.Decrypt(config.Email, encryptionKey)
 			if err != nil {
 				return err
 			}
-			config.Email = decEmail
+			config.Email = email
 		}
 		if config.Logo != "" {
-			decLogo, err := t.crypto.Encrypt(config.Logo, encryptionKey)
+			logo, err := t.crypto.Encrypt(config.Logo, encryptionKey)
 			if err != nil {
 				return err
 			}
-			config.Logo = decLogo
+			config.Logo = logo
 		}
 		if config.Terms != "" {
-			decTerms, err := t.crypto.Decrypt(config.Terms, encryptionKey)
+			terms, err := t.crypto.Decrypt(config.Terms, encryptionKey)
 			if err != nil {
 				return err
 			}
-			config.Terms = decTerms
+			config.Terms = terms
 		}
-		if config.AuthConfig != nil {
-			if config.AuthConfig.WelcomeTitle != "" {
-				decWelcomeTitle, err := t.crypto.Decrypt(config.AuthConfig.WelcomeTitle, encryptionKey)
+		if config.GeneralText != nil {
+			if config.GeneralText.MissingPasswordTitle != "" {
+				missingPasswordTitle, err := t.crypto.Decrypt(config.GeneralText.MissingPasswordTitle, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.WelcomeTitle = decWelcomeTitle
+				config.GeneralText.MissingPasswordTitle = missingPasswordTitle
 			}
-			if config.AuthConfig.WelcomeDetails != "" {
-				decWelcomeDetails, err := t.crypto.Decrypt(config.AuthConfig.WelcomeDetails, encryptionKey)
+			if config.GeneralText.MissingPasswordDetails != "" {
+				missingPasswordDetails, err := t.crypto.Decrypt(config.GeneralText.MissingPasswordDetails, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.WelcomeDetails = decWelcomeDetails
+				config.GeneralText.MissingPasswordDetails = missingPasswordDetails
 			}
-			if config.AuthConfig.LoginButton != "" {
-				decLoginButton, err := t.crypto.Decrypt(config.AuthConfig.LoginButton, encryptionKey)
+			if config.GeneralText.MissingEmailTitle != "" {
+				missingEmailTitle, err := t.crypto.Decrypt(config.GeneralText.MissingEmailTitle, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.LoginButton = decLoginButton
+				config.GeneralText.MissingEmailTitle = missingEmailTitle
 			}
-			if config.AuthConfig.LoginTitle != "" {
-				decLoginTitle, err := t.crypto.Decrypt(config.AuthConfig.LoginTitle, encryptionKey)
+			if config.GeneralText.MissingEmailDetails != "" {
+				missingEmailDetails, err := t.crypto.Decrypt(config.GeneralText.MissingEmailDetails, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.LoginTitle = decLoginTitle
+				config.GeneralText.MissingEmailDetails = missingEmailDetails
 			}
-			if config.AuthConfig.LoginDetails != "" {
-				decLoginDetails, err := t.crypto.Decrypt(config.AuthConfig.LoginDetails, encryptionKey)
+			if config.GeneralText.CreatedBy != "" {
+				createdBy, err := t.crypto.Decrypt(config.GeneralText.CreatedBy, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.LoginDetails = decLoginDetails
+				config.GeneralText.CreatedBy = createdBy
 			}
-			if config.AuthConfig.RegisterButton != "" {
-				decRegisterButton, err := t.crypto.Decrypt(config.AuthConfig.RegisterButton, encryptionKey)
+			if config.GeneralText.PasswordHint != "" {
+				passwordHint, err := t.crypto.Decrypt(config.GeneralText.PasswordHint, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.RegisterButton = decRegisterButton
+				config.GeneralText.PasswordHint = passwordHint
 			}
-			if config.AuthConfig.RegisterTitle != "" {
-				decRegisterTitle, err := t.crypto.Decrypt(config.AuthConfig.RegisterTitle, encryptionKey)
+			if config.GeneralText.EmailHint != "" {
+				emailHint, err := t.crypto.Decrypt(config.GeneralText.EmailHint, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.RegisterTitle = decRegisterTitle
+				config.GeneralText.EmailHint = emailHint
 			}
-			if config.AuthConfig.RegisterDetails != "" {
-				decRegisterDetails, err := t.crypto.Decrypt(config.AuthConfig.RegisterDetails, encryptionKey)
+			if config.GeneralText.ErrorTitle != "" {
+				errorTitle, err := t.crypto.Decrypt(config.GeneralText.ErrorTitle, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.RegisterDetails = decRegisterDetails
+				config.GeneralText.ErrorTitle = errorTitle
 			}
-			if config.AuthConfig.MissingPasswordTitle != "" {
-				decMissingPasswordTitle, err := t.crypto.Decrypt(config.AuthConfig.MissingPasswordTitle, encryptionKey)
+			if config.GeneralText.ErrorDescription != "" {
+				errorDescription, err := t.crypto.Decrypt(config.GeneralText.ErrorDescription, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.MissingPasswordTitle = decMissingPasswordTitle
+				config.GeneralText.ErrorDescription = errorDescription
 			}
-			if config.AuthConfig.MissingPasswordDetails != "" {
-				decMissingPasswordDetails, err := t.crypto.Decrypt(config.AuthConfig.MissingPasswordDetails, encryptionKey)
+			if config.GeneralText.NoWifiTitle != "" {
+				noWifiTitle, err := t.crypto.Decrypt(config.GeneralText.NoWifiTitle, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.MissingPasswordDetails = decMissingPasswordDetails
+				config.GeneralText.NoWifiTitle = noWifiTitle
 			}
-			if config.AuthConfig.MissingEmailTitle != "" {
-				decMissingEmailTitle, err := t.crypto.Decrypt(config.AuthConfig.MissingEmailTitle, encryptionKey)
+			if config.GeneralText.NoWifiDescription != "" {
+				noWifiDescription, err := t.crypto.Decrypt(config.GeneralText.NoWifiDescription, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.MissingEmailTitle = decMissingEmailTitle
+				config.GeneralText.NoWifiDescription = noWifiDescription
 			}
-			if config.AuthConfig.MissingEmailDetails != "" {
-				decMissingEmailDetails, err := t.crypto.Decrypt(config.AuthConfig.MissingEmailDetails, encryptionKey)
+		}
+		if config.WelcomeText != nil {
+			if config.WelcomeText.WelcomeTitle != "" {
+				welcomeTitle, err := t.crypto.Decrypt(config.WelcomeText.WelcomeTitle, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.MissingEmailDetails = decMissingEmailDetails
+				config.WelcomeText.WelcomeTitle = welcomeTitle
 			}
-			if config.AuthConfig.PasswordDoNotMatchTitle != "" {
-				decPasswordsDoNotMatchTitle, err := t.crypto.Decrypt(config.AuthConfig.PasswordDoNotMatchTitle, encryptionKey)
+			if config.WelcomeText.WelcomeDetails != "" {
+				welcomeDetails, err := t.crypto.Decrypt(config.WelcomeText.WelcomeDetails, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.PasswordDoNotMatchTitle = decPasswordsDoNotMatchTitle
+				config.WelcomeText.WelcomeDetails = welcomeDetails
 			}
-			if config.AuthConfig.PasswordDoNotMatchDetails != "" {
-				decPasswordsDoNotMatchDetails, err := t.crypto.Decrypt(config.AuthConfig.PasswordDoNotMatchDetails, encryptionKey)
+		}
+		if config.RegisterText != nil {
+			if config.RegisterText.RegisterButton != "" {
+				registerButton, err := t.crypto.Decrypt(config.RegisterText.RegisterButton, encryptionKey)
 				if err != nil {
 					return err
 				}
-				config.AuthConfig.PasswordDoNotMatchDetails = decPasswordsDoNotMatchDetails
+				config.RegisterText.RegisterButton = registerButton
+			}
+			if config.RegisterText.RegisterTitle != "" {
+				registerTitle, err := t.crypto.Decrypt(config.RegisterText.RegisterTitle, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.RegisterTitle = registerTitle
+			}
+			if config.RegisterText.RegisterDetails != "" {
+				registerDetails, err := t.crypto.Decrypt(config.RegisterText.RegisterDetails, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.RegisterDetails = registerDetails
+			}
+			if config.RegisterText.PasswordDoNotMatchTitle != "" {
+				passwordDoNotMatchTitle, err := t.crypto.Decrypt(config.RegisterText.PasswordDoNotMatchTitle, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.PasswordDoNotMatchTitle = passwordDoNotMatchTitle
+			}
+			if config.RegisterText.PasswordDoNotMatchDetails != "" {
+				passwordDoNotMatchDetails, err := t.crypto.Decrypt(config.RegisterText.PasswordDoNotMatchDetails, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.PasswordDoNotMatchDetails = passwordDoNotMatchDetails
+			}
+			if config.RegisterText.RepeatPasswordHint != "" {
+				repeatPasswordHint, err := t.crypto.Decrypt(config.RegisterText.RepeatPasswordHint, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.RepeatPasswordHint = repeatPasswordHint
+			}
+			if config.RegisterText.ContainsNumberChar != "" {
+				containsNumberChar, err := t.crypto.Decrypt(config.RegisterText.ContainsNumberChar, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.ContainsNumberChar = containsNumberChar
+			}
+			if config.RegisterText.PasswordMustMatch != "" {
+				passwordMustMatch, err := t.crypto.Decrypt(config.RegisterText.PasswordMustMatch, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.PasswordMustMatch = passwordMustMatch
+			}
+			if config.RegisterText.ContainsEightChars != "" {
+				containsEightChars, err := t.crypto.Decrypt(config.RegisterText.ContainsEightChars, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.RegisterText.ContainsEightChars = containsEightChars
+			}
+		}
+		if config.LoginText != nil {
+			if config.LoginText.LoginButton != "" {
+				loginButton, err := t.crypto.Decrypt(config.LoginText.LoginButton, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.LoginText.LoginButton = loginButton
+			}
+			if config.LoginText.LoginTitle != "" {
+				loginTitle, err := t.crypto.Decrypt(config.LoginText.LoginTitle, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.LoginText.LoginTitle = loginTitle
+			}
+			if config.LoginText.LoginDetails != "" {
+				loginDetails, err := t.crypto.Decrypt(config.LoginText.LoginDetails, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.LoginText.LoginDetails = loginDetails
+			}
+			if config.LoginText.ForgotPassword != "" {
+				forgotPassword, err := t.crypto.Decrypt(config.LoginText.ForgotPassword, encryptionKey)
+				if err != nil {
+					return err
+				}
+				config.LoginText.ForgotPassword = forgotPassword
 			}
 		}
 	}

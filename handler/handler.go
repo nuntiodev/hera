@@ -57,7 +57,11 @@ type Handler interface {
 	CreateNamespaceConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateConfigSettings(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateConfigDetails(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateConfigAuthDetails(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateConfigGeneralText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateConfigWelcomeText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateConfigRegisterText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateConfigLoginText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+
 	GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 }

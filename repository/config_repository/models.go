@@ -107,6 +107,15 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 			ContainsEightChars:        config.RegisterText.ContainsEightChars,
 		}
 	}
+	loginText := &LoginText{}
+	if config.LoginText != nil {
+		loginText = &LoginText{
+			LoginButton:    config.LoginText.LoginButton,
+			LoginTitle:     config.LoginText.LoginTitle,
+			LoginDetails:   config.LoginText.LoginDetails,
+			ForgotPassword: config.LoginText.ForgotPassword,
+		}
+	}
 	return &Config{
 		Id:                      config.Id,
 		Name:                    config.Name,
@@ -121,6 +130,7 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 		GeneralText:             generalText,
 		WelcomeText:             welcomeText,
 		RegisterText:            registerText,
+		LoginText:               loginText,
 		CreatedAt:               config.CreatedAt.AsTime(),
 		UpdatedAt:               config.UpdatedAt.AsTime(),
 		InternalEncryptionLevel: config.InternalEncryptionLevel,
@@ -169,6 +179,15 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 			ContainsEightChars:        config.RegisterText.ContainsEightChars,
 		}
 	}
+	loginText := &go_block.LoginText{}
+	if config.LoginText != nil {
+		loginText = &go_block.LoginText{
+			LoginButton:    config.LoginText.LoginButton,
+			LoginTitle:     config.LoginText.LoginTitle,
+			LoginDetails:   config.LoginText.LoginDetails,
+			ForgotPassword: config.LoginText.ForgotPassword,
+		}
+	}
 	return &go_block.Config{
 		Id:                      config.Id,
 		Name:                    config.Name,
@@ -183,6 +202,7 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 		GeneralText:             generalText,
 		WelcomeText:             welcomeText,
 		RegisterText:            registerText,
+		LoginText:               loginText,
 		CreatedAt:               ts.New(config.CreatedAt),
 		UpdatedAt:               ts.New(config.UpdatedAt),
 		InternalEncryptionLevel: config.InternalEncryptionLevel,

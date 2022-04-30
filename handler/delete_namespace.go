@@ -11,5 +11,15 @@ func (h *defaultHandler) DeleteNamespace(ctx context.Context, req *go_block.User
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
+	// also delete config
+	config, err := h.repository.Config(ctx, req.Namespace)
+	if err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	if err := config.Delete(ctx, &go_block.Config{
+		Id: req.Namespace,
+	}); err != nil {
+		return &go_block.UserResponse{}, err
+	}
 	return &go_block.UserResponse{}, users.DeleteAll(ctx)
 }

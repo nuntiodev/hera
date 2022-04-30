@@ -10,7 +10,7 @@ func (h *defaultHandler) UpdateConfigLoginText(ctx context.Context, req *go_bloc
 	if err != nil {
 		return nil, err
 	}
-	resp, err := config.UpdateRegisterText(ctx, req.Config)
+	resp, err := config.UpdateLoginText(ctx, req.Config)
 	if err != nil {
 		return nil, err
 	}

@@ -27,7 +27,7 @@ type defaultMeasurementRepository struct {
 type MeasurementRepository interface {
 	RecordActive(ctx context.Context, measurement *go_block.ActiveMeasurement) (*go_block.ActiveMeasurement, error)
 	GetNamespaceActiveHistory(ctx context.Context, year int32) (*go_block.ActiveHistory, error)
-	GetUserActiveHistory(ctx context.Context, year int32, userId string) (*go_block.ActiveHistory, error)
+	GetUserActiveHistory(ctx context.Context, year int32, userId string) (*go_block.ActiveHistory, bool, error)
 }
 
 func initialize() error {

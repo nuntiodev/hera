@@ -3,6 +3,7 @@ package measurement_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
@@ -35,12 +36,13 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	now := time.Now()
 	year := int32(now.Year())
 	month := int32(now.Month())
-	alreadyCreated := true
-	userActiveHistory, err := dmr.GetUserActiveHistory(ctx, year, measurement.UserId)
+	userActiveHistory, alreadyCreated, err := dmr.GetUserActiveHistory(ctx, year, measurement.UserId)
+	if alreadyCreated && err != nil {
+		return nil, fmt.Errorf("could not decode user active history with err: %v", err)
+	}
 	if err != nil {
 		userActiveHistory = &go_block.ActiveHistory{}
 		userActiveHistory.Year = year
-		alreadyCreated = false
 		// set user id hash instead of just id; this is more secure
 		userActiveHistory.UserId = getUserHash(measurement.UserId)
 	}

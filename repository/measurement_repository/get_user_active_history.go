@@ -8,16 +8,20 @@ import (
 	"strings"
 )
 
-func (dmr *defaultMeasurementRepository) GetUserActiveHistory(ctx context.Context, year int32, userId string) (*go_block.ActiveHistory, error) {
+func (dmr *defaultMeasurementRepository) GetUserActiveHistory(ctx context.Context, year int32, userId string) (*go_block.ActiveHistory, bool, error) {
 	if userId == "" {
-		return nil, errors.New("missing required user id")
+		return nil, false, errors.New("missing required user id")
 	}
 	// prepare
 	userId = strings.TrimSpace(userId)
 	filter := bson.M{"user_id": getUserHash(userId), "year": year}
 	resp := ActiveHistory{}
-	if err := dmr.userActiveHistoryCollection.FindOne(ctx, filter).Decode(&resp); err != nil {
-		return nil, err
+	res := dmr.userActiveHistoryCollection.FindOne(ctx, filter)
+	if err := res.Err(); err != nil {
+		return nil, false, err
 	}
-	return ActiveHistoryToProtoActiveHistory(&resp), nil
+	if err := res.Decode(&resp); err != nil {
+		return nil, true, err
+	}
+	return ActiveHistoryToProtoActiveHistory(&resp), true, nil
 }

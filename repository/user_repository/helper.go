@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"unicode"
 
 	"github.com/badoux/checkmail"
 	"github.com/nuntiodev/block-proto/go_block"
 	uuid "github.com/satori/go.uuid"
-	passwordvalidator "github.com/wagslane/go-password-validator"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -100,8 +100,28 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 }
 
 func validatePassword(password string) error {
-	if err := passwordvalidator.Validate(password, minEntropy); err != nil {
-		return err
+	var (
+		num, sym bool
+		tot      uint8
+	)
+	for _, char := range password {
+		switch {
+		case unicode.IsNumber(char):
+			num = true
+			tot++
+		case unicode.IsPunct(char) || unicode.IsSymbol(char):
+			sym = true
+			tot++
+		default:
+			continue
+		}
+	}
+	if !num {
+		return errors.New("missing required number")
+	} else if !sym {
+		return errors.New("missing required symbol")
+	} else if tot < 8 {
+		return errors.New("password is too short; must be at least 8 chars long")
 	}
 	return nil
 }

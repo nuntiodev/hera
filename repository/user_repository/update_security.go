@@ -55,6 +55,7 @@ func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.Us
 			"email":                     update.Email,
 			"image":                     update.Image,
 			"external_encrypted":        update.ExternalEncrypted,
+			"external_encryption_level": update.ExternalEncryptionLevel,
 			"internal_encrypted":        update.InternalEncrypted,
 			"internal_encryption_level": update.InternalEncryptionLevel,
 			"metadata":                  update.Metadata,
@@ -75,6 +76,7 @@ func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.Us
 	}
 	// set updated fields
 	get.ExternalEncrypted = update.ExternalEncrypted
+	get.ExternalEncryptionLevel = int32(update.ExternalEncryptionLevel)
 	get.InternalEncrypted = update.InternalEncrypted
 	get.InternalEncryptionLevel = int32(update.InternalEncryptionLevel)
 	return get, nil

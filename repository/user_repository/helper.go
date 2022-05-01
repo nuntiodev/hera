@@ -106,6 +106,10 @@ func validatePassword(password string) error {
 	)
 	for _, char := range password {
 		switch {
+		case unicode.IsUpper(char):
+			tot++
+		case unicode.IsLower(char):
+			tot++
 		case unicode.IsNumber(char):
 			num = true
 			tot++

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 )
 
@@ -11,7 +10,6 @@ func (h *defaultHandler) UpdateConfigRegisterText(ctx context.Context, req *go_b
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("asd")
 	resp, err := config.UpdateRegisterText(ctx, req.Config)
 	if err != nil {
 		return nil, err

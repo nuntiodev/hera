@@ -22,6 +22,9 @@ type User struct {
 	EncryptedAt             time.Time `bson:"encrypted_at" json:"encrypted_at"`
 	InternalEncryptionLevel int       `bson:"internal_encryption_level" json:"internal_encryption_level"`
 	ExternalEncryptionLevel int       `bson:"external_encryption_level" json:"external_encryption_level"`
+	VerificationEmailSentAt time.Time `bson:"verification_email_sent_at" json:"verification_email_sent_at"`
+	EmailVerifiedAt         time.Time `bson:"email_verified_at" json:"email_verified_at"`
+	EmailIsVerified         bool      `bson:"email_is_verified" json:"email_is_verified"`
 }
 
 func UserToProtoUser(user *User) *go_block.User {
@@ -50,6 +53,9 @@ func UserToProtoUser(user *User) *go_block.User {
 		EncryptedAt:             ts.New(user.EncryptedAt),
 		ExternalEncryptionLevel: int32(user.ExternalEncryptionLevel),
 		InternalEncryptionLevel: int32(user.InternalEncryptionLevel),
+		VerificationEmailSentAt: ts.New(user.VerificationEmailSentAt),
+		EmailVerifiedAt:         ts.New(user.EmailVerifiedAt),
+		EmailIsVerified:         user.EmailIsVerified,
 	}
 }
 
@@ -76,5 +82,8 @@ func ProtoUserToUser(user *go_block.User) *User {
 		EncryptedAt:             user.EncryptedAt.AsTime(),
 		ExternalEncryptionLevel: int(user.ExternalEncryptionLevel),
 		InternalEncryptionLevel: int(user.InternalEncryptionLevel),
+		VerificationEmailSentAt: user.VerificationEmailSentAt.AsTime(),
+		EmailVerifiedAt:         user.EmailVerifiedAt.AsTime(),
+		EmailIsVerified:         user.EmailIsVerified,
 	}
 }

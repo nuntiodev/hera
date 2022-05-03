@@ -1,8 +1,11 @@
 package user_repository
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"strings"
 	"unicode"
 
@@ -20,12 +23,16 @@ func prepare(action int, user *go_block.User) {
 	case actionCreate:
 		user.CreatedAt = ts.Now()
 		user.UpdatedAt = ts.Now()
+		user.VerificationEmailSentAt = &ts.Timestamp{}
+		user.EmailVerifiedAt = &ts.Timestamp{}
+		user.EmailIsVerified = false
 		if strings.TrimSpace(user.Id) == "" {
 			user.Id = uuid.NewV4().String()
 		}
 	case actionUpdatePassword, actionUpdateImage, actionUpdateMetadata,
 		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,
-		actionUpdateOptionalId, actionUpdateName, actionUpdateBirthdate:
+		actionUpdateOptionalId, actionUpdateName, actionUpdateBirthdate,
+		actionUpdateEmailVerified, actionUpdateVerificationEmailSent:
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
@@ -78,7 +85,7 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 		} else if !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
 		}
-	case actionUpdateSecurity:
+	case actionUpdateSecurity, actionUpdateEmailVerified, actionUpdateVerificationEmailSent:
 		if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at")
 		}
@@ -128,4 +135,21 @@ func validatePassword(password string) error {
 		return errors.New("password is too short; must be at least 8 chars long")
 	}
 	return nil
+}
+
+func getUserFilter(user *go_block.User) (bson.M, error) {
+	if user == nil {
+		return nil, errors.New("user is nil")
+	}
+	filter := bson.M{}
+	if user.Id != "" {
+		filter = bson.M{"_id": user.Id}
+	} else if user.Email != "" {
+		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email)))}
+	} else if user.OptionalId != "" {
+		filter = bson.M{"optional_id": user.OptionalId}
+	} else {
+		return nil, errors.New("missing search filter")
+	}
+	return filter, nil
 }

@@ -22,6 +22,8 @@ const (
 	actionUpdateBirthdate
 	actionUpdateName
 	actionUpdateSecurity
+	actionUpdateEmailVerified
+	actionUpdateVerificationEmailSent
 	actionGet
 	actionGetAll
 	actionUpgradeEncryption
@@ -50,6 +52,8 @@ type UserRepository interface {
 	UpdateName(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateBirthdate(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error)
+	UpdateVerificationEmailSent(ctx context.Context, get *go_block.User) (*go_block.User, error)
+	UpdateEmailVerified(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	Get(ctx context.Context, user *go_block.User, upgrade bool) (*go_block.User, error)
 	GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*go_block.User, error)
 	Count(ctx context.Context) (int64, error)

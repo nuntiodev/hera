@@ -1,42 +1,81 @@
 package email
 
 import (
-	"bytes"
-	"fmt"
-	"html/template"
-	"net/smtp"
+	"errors"
+	"github.com/nuntiodev/x/emailx"
+	"os"
+	"strings"
 )
 
+var (
+	smtpFrom     = ""
+	smtpPassword = ""
+	smtpHost     = ""
+	smtpPort     = ""
+	templates    map[string]bool
+)
+
+type TemplateData struct {
+	LogoUrl        string
+	WelcomeMessage string
+	NameOfUser     string
+	BodyMessage    string
+	FooterMessage  string
+}
+
 type Email interface {
+	SendEmail(to, subject, templatePath string, data *TemplateData) error
 }
 
 type defaultEmail struct {
-	auth     smtp.Auth
-	from     string
-	password string
-	port     string
-	host     string
+	emailx emailx.Email
 }
 
-func New(smtpFrom, smtpPassword, smtpHost, smtpPort string) (Email, error) {
+func initialize() error {
+	var ok bool
+	smtpFrom, ok = os.LookupEnv("SMTP_FROM")
+	if !ok || smtpFrom == "" {
+		return errors.New("missing required SMTP_FROM")
+	}
+	smtpPassword, ok = os.LookupEnv("SMTP_PASSWORD")
+	if !ok || smtpPassword == "" {
+		return errors.New("missing required SMTP_PASSWORD")
+	}
+	smtpHost, ok = os.LookupEnv("SMTP_HOST")
+	if !ok || smtpHost == "" {
+		return errors.New("missing required SMTP_HOST")
+	}
+	smtpPort, ok = os.LookupEnv("SMTP_PORT")
+	if !ok || smtpPort == "" {
+		return errors.New("missing required SMTP_PORT")
+	}
+	emailTemplatePaths, _ := os.LookupEnv("EMAIL_TEMPLATE_PATHS")
+	for _, val := range strings.Fields(emailTemplatePaths) {
+		templates[val] = true
+	}
+	return nil
+}
+
+func New() (Email, error) {
+	if err := initialize(); err != nil {
+		return nil, err
+	}
+	myEmail, err := emailx.New(smtpFrom, smtpPassword, smtpHost, smtpPort)
+	if err != nil {
+		return nil, err
+	}
 	return &defaultEmail{
-		auth:     smtp.PlainAuth("", smtpFrom, smtpPassword, smtpHost),
-		from:     smtpFrom,
-		password: smtpPassword,
-		host:     smtpHost,
-		port:     smtpPort,
+		emailx: myEmail,
 	}, nil
 }
 
-func (e *defaultEmail) SendEmail(to, subject, templatePath string, data any) error {
-	t, _ := template.ParseFiles(templatePath)
-	var body bytes.Buffer
-	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	body.Write([]byte(fmt.Sprintf("Subject: %s \n%s\n\n", subject, mimeHeaders)))
-	if err := t.Execute(&body, data); err != nil {
-		return err
+func (e *defaultEmail) SendEmail(to, subject, templatePath string, data *TemplateData) error {
+	if templatePath != "" {
+		if _, ok := templates[templatePath]; !ok {
+			return errors.New("invalid path")
+		}
 	}
-	if err := smtp.SendMail(e.host+":"+e.port, e.auth, e.from, []string{to}, body.Bytes()); err != nil {
+	if err := e.SendEmail(to, subject, templatePath, data); err != nil {
 		return err
 	}
 	return nil

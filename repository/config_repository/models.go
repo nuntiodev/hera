@@ -21,8 +21,10 @@ type GeneralText struct {
 }
 
 type WelcomeText struct {
-	WelcomeTitle   string `bson:"welcome_title" json:"welcome_title"`
-	WelcomeDetails string `bson:"welcome_details" json:"welcome_details"`
+	WelcomeTitle       string `bson:"welcome_title" json:"welcome_title"`
+	WelcomeDetails     string `bson:"welcome_details" json:"welcome_details"`
+	ContinueWithNuntio string `bson:"continue_with_nuntio" json:"continue_with_nuntio"`
+	Logo               string `bson:"logo" json:"logo"`
 }
 
 type RegisterText struct {
@@ -46,24 +48,26 @@ type LoginText struct {
 }
 
 type Config struct {
-	Id                      string        `bson:"_id" json:"id"`
-	Name                    string        `bson:"name" json:"name"`
-	Website                 string        `bson:"website" json:"website"`
-	About                   string        `bson:"about" json:"about"`
-	Email                   string        `bson:"email" json:"email"`
-	Logo                    string        `bson:"logo" json:"logo"`
-	Terms                   string        `bson:"terms" json:"terms"`
-	EnableNuntioConnect     bool          `bson:"enable_nuntio_connect" json:"enable_nuntio_connect"`
-	DisableDefaultSignup    bool          `bson:"disable_default_signup" json:"disable_default_signup"`
-	DisableDefaultLogin     bool          `bson:"disable_default_login" json:"disable_default_login"`
-	GeneralText             *GeneralText  `bson:"general_text" json:"general_text"`
-	WelcomeText             *WelcomeText  `bson:"welcome_text" json:"welcome_text"`
-	LoginText               *LoginText    `bson:"login_text" json:"login_text"`
-	RegisterText            *RegisterText `bson:"register_text" json:"register_text"`
-	CreatedAt               time.Time     `bson:"created_at" json:"created_at"`
-	UpdatedAt               time.Time     `bson:"updated_at" json:"updated_at"`
-	InternalEncryptionLevel int32         `bson:"internal_encryption_level" json:"internal_encryption_level"`
-	ValidatePassword        bool          `bson:"validate_password" json:"validate_password"`
+	Id                       string        `bson:"_id" json:"id"`
+	Name                     string        `bson:"name" json:"name"`
+	Website                  string        `bson:"website" json:"website"`
+	About                    string        `bson:"about" json:"about"`
+	Email                    string        `bson:"email" json:"email"`
+	Logo                     string        `bson:"logo" json:"logo"`
+	Terms                    string        `bson:"terms" json:"terms"`
+	EnableNuntioConnect      bool          `bson:"enable_nuntio_connect" json:"enable_nuntio_connect"`
+	DisableDefaultSignup     bool          `bson:"disable_default_signup" json:"disable_default_signup"`
+	DisableDefaultLogin      bool          `bson:"disable_default_login" json:"disable_default_login"`
+	GeneralText              *GeneralText  `bson:"general_text" json:"general_text"`
+	WelcomeText              *WelcomeText  `bson:"welcome_text" json:"welcome_text"`
+	LoginText                *LoginText    `bson:"login_text" json:"login_text"`
+	RegisterText             *RegisterText `bson:"register_text" json:"register_text"`
+	CreatedAt                time.Time     `bson:"created_at" json:"created_at"`
+	UpdatedAt                time.Time     `bson:"updated_at" json:"updated_at"`
+	InternalEncryptionLevel  int32         `bson:"internal_encryption_level" json:"internal_encryption_level"`
+	ValidatePassword         bool          `bson:"validate_password" json:"validate_password"`
+	NuntioConnectId          string        `bson:"nuntio_connect_id" json:"nuntio_connect_id"`
+	RequireEmailVerification bool          `bson:"require_email_verification" json:"require_email_verification"`
 }
 
 func ProtoConfigToConfig(config *go_block.Config) *Config {
@@ -118,24 +122,26 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 		}
 	}
 	return &Config{
-		Id:                      config.Id,
-		Name:                    config.Name,
-		Website:                 config.Website,
-		About:                   config.About,
-		Email:                   config.Email,
-		Logo:                    config.Logo,
-		Terms:                   config.Terms,
-		EnableNuntioConnect:     config.EnableNuntioConnect,
-		DisableDefaultSignup:    config.DisableDefaultSignup,
-		DisableDefaultLogin:     config.DisableDefaultLogin,
-		GeneralText:             generalText,
-		WelcomeText:             welcomeText,
-		RegisterText:            registerText,
-		LoginText:               loginText,
-		CreatedAt:               config.CreatedAt.AsTime(),
-		UpdatedAt:               config.UpdatedAt.AsTime(),
-		InternalEncryptionLevel: config.InternalEncryptionLevel,
-		ValidatePassword:        config.ValidatePassword,
+		Id:                       config.Id,
+		Name:                     config.Name,
+		Website:                  config.Website,
+		About:                    config.About,
+		Email:                    config.Email,
+		Logo:                     config.Logo,
+		Terms:                    config.Terms,
+		EnableNuntioConnect:      config.EnableNuntioConnect,
+		DisableDefaultSignup:     config.DisableDefaultSignup,
+		DisableDefaultLogin:      config.DisableDefaultLogin,
+		GeneralText:              generalText,
+		WelcomeText:              welcomeText,
+		RegisterText:             registerText,
+		LoginText:                loginText,
+		CreatedAt:                config.CreatedAt.AsTime(),
+		UpdatedAt:                config.UpdatedAt.AsTime(),
+		InternalEncryptionLevel:  config.InternalEncryptionLevel,
+		ValidatePassword:         config.ValidatePassword,
+		NuntioConnectId:          config.NuntioConnectId,
+		RequireEmailVerification: config.RequireEmailVerification,
 	}
 }
 
@@ -191,23 +197,25 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 		}
 	}
 	return &go_block.Config{
-		Id:                      config.Id,
-		Name:                    config.Name,
-		Website:                 config.Website,
-		About:                   config.About,
-		Email:                   config.Email,
-		Logo:                    config.Logo,
-		Terms:                   config.Terms,
-		EnableNuntioConnect:     config.EnableNuntioConnect,
-		DisableDefaultSignup:    config.DisableDefaultSignup,
-		DisableDefaultLogin:     config.DisableDefaultLogin,
-		GeneralText:             generalText,
-		WelcomeText:             welcomeText,
-		RegisterText:            registerText,
-		LoginText:               loginText,
-		CreatedAt:               ts.New(config.CreatedAt),
-		UpdatedAt:               ts.New(config.UpdatedAt),
-		InternalEncryptionLevel: config.InternalEncryptionLevel,
-		ValidatePassword:        config.ValidatePassword,
+		Id:                       config.Id,
+		Name:                     config.Name,
+		Website:                  config.Website,
+		About:                    config.About,
+		Email:                    config.Email,
+		Logo:                     config.Logo,
+		Terms:                    config.Terms,
+		EnableNuntioConnect:      config.EnableNuntioConnect,
+		DisableDefaultSignup:     config.DisableDefaultSignup,
+		DisableDefaultLogin:      config.DisableDefaultLogin,
+		GeneralText:              generalText,
+		WelcomeText:              welcomeText,
+		RegisterText:             registerText,
+		LoginText:                loginText,
+		CreatedAt:                ts.New(config.CreatedAt),
+		UpdatedAt:                ts.New(config.UpdatedAt),
+		InternalEncryptionLevel:  config.InternalEncryptionLevel,
+		ValidatePassword:         config.ValidatePassword,
+		NuntioConnectId:          config.NuntioConnectId,
+		RequireEmailVerification: config.RequireEmailVerification,
 	}
 }

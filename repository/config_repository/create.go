@@ -19,6 +19,7 @@ func (cr *defaultConfigRepository) Create(ctx context.Context, config *go_block.
 	config.DisableDefaultSignup = false
 	config.DisableDefaultLogin = false
 	config.ValidatePassword = true
+	config.RequireEmailVerification = true
 	config.CreatedAt = ts.Now()
 	config.UpdatedAt = ts.Now()
 	// set default text
@@ -36,8 +37,10 @@ func (cr *defaultConfigRepository) Create(ctx context.Context, config *go_block.
 		NoWifiDescription:      "No stable cellular or wifi connection is available.",
 	}
 	config.WelcomeText = &go_block.WelcomeText{
-		WelcomeTitle:   "Welcome",
-		WelcomeDetails: "Welcome to this awesome platform.",
+		WelcomeTitle:       "Welcome",
+		WelcomeDetails:     "Welcome to this awesome platform.",
+		ContinueWithNuntio: "Continue with",
+		Logo:               "",
 	}
 	config.RegisterText = &go_block.RegisterText{
 		RegisterButton:            "Register",

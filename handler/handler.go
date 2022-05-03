@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/nuntiodev/nuntio-user-block/email"
 	"os"
 	"strconv"
 	"time"
@@ -61,16 +62,17 @@ type Handler interface {
 	UpdateConfigWelcomeText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateConfigRegisterText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateConfigLoginText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-
 	GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 }
 
 type defaultHandler struct {
-	repository repository.Repository
-	crypto     cryptox.Crypto
-	token      token.Token
-	zapLog     *zap.Logger
+	repository   repository.Repository
+	crypto       cryptox.Crypto
+	token        token.Token
+	email        email.Email
+	emailEnabled bool
+	zapLog       *zap.Logger
 }
 
 func decodeKeyPair(rsaPrivateKey, rsaPublicKey string) (*rsa.PrivateKey, *rsa.PublicKey, error) {
@@ -130,16 +132,22 @@ func initialize() error {
 	return nil
 }
 
-func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Crypto, token token.Token) (Handler, error) {
+func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Crypto, token token.Token, email email.Email) (Handler, error) {
 	zapLog.Info("creating handler")
 	if err := initialize(); err != nil {
 		return nil, err
 	}
+	emailEnabled := false
+	if email != nil {
+		emailEnabled = true
+	}
 	handler := &defaultHandler{
-		repository: repository,
-		crypto:     crypto,
-		token:      token,
-		zapLog:     zapLog,
+		repository:   repository,
+		crypto:       crypto,
+		token:        token,
+		zapLog:       zapLog,
+		email:        email,
+		emailEnabled: emailEnabled,
 	}
 	return handler, nil
 }

@@ -84,7 +84,13 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.ActiveMeasurement == nil {
 			return &go_block.UserResponse{}, MeasurementIsNil
 		}
-	case Create, Get:
+	case Create:
+		if translatedReq.User == nil {
+			return &go_block.UserResponse{}, UserIsNil
+		} else if translatedReq.RequireEmailVerification && translatedReq.User.Email == "" {
+			return &go_block.UserResponse{}, errors.New("we cannot send a verification email to a user without an email")
+		}
+	case Get:
 		if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UserIsNil
 		}

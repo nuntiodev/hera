@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/nuntiodev/nuntio-user-block/email"
 	"github.com/nuntiodev/nuntio-user-block/handler"
 	"github.com/nuntiodev/nuntio-user-block/interceptor"
 	"github.com/nuntiodev/nuntio-user-block/repository"
@@ -55,7 +56,9 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myHandler, err := handler.New(zapLog, myRepository, myCrypto, myToken)
+	// it should be okay to spin up a service without email provider
+	myEmail, _ := email.New()
+	myHandler, err := handler.New(zapLog, myRepository, myCrypto, myToken, myEmail)
 	if err != nil {
 		return nil, err
 	}

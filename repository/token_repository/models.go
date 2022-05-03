@@ -23,7 +23,6 @@ type Token struct {
 	CreatedAt               time.Time          `bson:"created_at" json:"created_at"`
 	UsedAt                  time.Time          `bson:"used_at" json:"used_at"`
 	ExpiresAt               time.Time          `bson:"expires_at" json:"expires_at"` // unix time
-	Encrypted               bool               `bson:"encrypted" json:"encrypted"`
 	InternalEncryptionLevel int                `bson:"internal_encryption_level" json:"internal_encryption_level"`
 }
 
@@ -47,7 +46,6 @@ func TokenToProtoToken(token *Token) *go_block.Token {
 		CreatedAt:               ts.New(token.CreatedAt),
 		UsedAt:                  ts.New(token.UsedAt),
 		ExpiresAt:               ts.New(token.ExpiresAt),
-		Encrypted:               token.Encrypted,
 		InternalEncryptionLevel: int32(token.InternalEncryptionLevel),
 	}
 }
@@ -73,7 +71,6 @@ func ProtoTokenToToken(token *go_block.Token) *Token {
 		CreatedAt:               token.CreatedAt.AsTime(),
 		UsedAt:                  token.UsedAt.AsTime(),
 		ExpiresAt:               token.ExpiresAt.AsTime(),
-		Encrypted:               token.Encrypted,
 		InternalEncryptionLevel: int(token.InternalEncryptionLevel),
 	}
 }

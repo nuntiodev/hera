@@ -7,8 +7,8 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/nuntiodev/block-proto/go_block"
-	uuid "github.com/satori/go.uuid"
 	"github.com/nuntiodev/x/cryptox"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,7 +46,6 @@ func TestUpdateSecurityIEEncrypted(t *testing.T) {
 		updatedUser, err := userRepository.UpdateSecurity(context.Background(), createdUser)
 		assert.NoError(t, err)
 		assert.NotNil(t, updatedUser)
-		assert.False(t, updatedUser.ExternalEncrypted)
 		// assert that update has been propagated correctly to database
 		getUser, err := userRepository.Get(context.Background(), updatedUser, true)
 		assert.NoError(t, err)
@@ -84,7 +83,6 @@ func TestUpdateSecurityUnencryptedUser(t *testing.T) {
 	updatedUser, err := userRepository.UpdateSecurity(context.Background(), createdUser)
 	assert.NoError(t, err)
 	assert.NotNil(t, updatedUser)
-	assert.True(t, updatedUser.ExternalEncrypted)
 }
 
 func TestUpdateSecurityNilUpdate(t *testing.T) {

@@ -3,6 +3,7 @@ package user_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"testing"
 
@@ -76,7 +77,7 @@ func compareUsers(one, two *go_block.User, validateLevel bool) error {
 	} else if one.Password != two.Password {
 		return errors.New("password are different")
 	} else if validateLevel && one.ExternalEncryptionLevel != two.ExternalEncryptionLevel {
-		return errors.New("external encryption levels are different")
+		return fmt.Errorf("external encryption levels are different: %d/%d", one.ExternalEncryptionLevel, two.ExternalEncryptionLevel)
 	} else if validateLevel && one.InternalEncryptionLevel != two.InternalEncryptionLevel {
 		return errors.New("internal encryption levels are different")
 	}

@@ -10,7 +10,7 @@ func (r *mongodbRepository) decryptUser(ctx context.Context, user *User, upgrade
 		return errors.New("user is nil")
 	}
 	// encrypt using internal keys first
-	if user.InternalEncrypted {
+	if user.InternalEncryptionLevel > 0 {
 		if len(r.internalEncryptionKeys) >= user.InternalEncryptionLevel {
 			internalKey, err := r.crypto.CombineSymmetricKeys(r.internalEncryptionKeys, user.InternalEncryptionLevel)
 			if err != nil {
@@ -23,7 +23,7 @@ func (r *mongodbRepository) decryptUser(ctx context.Context, user *User, upgrade
 			return errors.New("missing required internal encryption keys")
 		}
 	}
-	if user.ExternalEncrypted && r.externalEncryptionKey != "" {
+	if user.ExternalEncryptionLevel > 0 && r.externalEncryptionKey != "" {
 		if err := r.decrypt(user, r.externalEncryptionKey); err != nil {
 			return err
 		}

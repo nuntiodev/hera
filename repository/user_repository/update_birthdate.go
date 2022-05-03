@@ -26,12 +26,10 @@ func (r *mongodbRepository) UpdateBirthdate(ctx context.Context, get *go_block.U
 		UpdatedAt: update.UpdatedAt,
 	})
 	// transfer data from get to update
-	updateUser.ExternalEncrypted = get.ExternalEncrypted
 	updateUser.ExternalEncryptionLevel = int(get.ExternalEncryptionLevel)
-	updateUser.InternalEncrypted = get.InternalEncrypted
 	updateUser.InternalEncryptionLevel = int(get.InternalEncryptionLevel)
 	// encrypt user if user has previously been encrypted
-	if updateUser.ExternalEncrypted || updateUser.InternalEncrypted {
+	if updateUser.ExternalEncryptionLevel > 0 || updateUser.InternalEncryptionLevel > 0 {
 		if err := r.encryptUser(ctx, actionUpdateBirthdate, updateUser); err != nil {
 			return nil, err
 		}

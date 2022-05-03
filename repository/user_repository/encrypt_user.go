@@ -18,7 +18,6 @@ func (r *mongodbRepository) encryptUser(ctx context.Context, action int, user *U
 				return err
 			}
 			user.ExternalEncryptionLevel = 1
-			user.ExternalEncrypted = true
 			user.EncryptedAt = time.Now()
 		}
 		// then encrypt using internal key
@@ -32,17 +31,16 @@ func (r *mongodbRepository) encryptUser(ctx context.Context, action int, user *U
 				return err
 			}
 			user.InternalEncryptionLevel = len(r.internalEncryptionKeys)
-			user.InternalEncrypted = true
 			user.EncryptedAt = time.Now()
 		}
 	case actionUpdateEmail, actionUpdateImage, actionUpdateSecurity, actionUpdateMetadata, actionUpdateName, actionUpdateBirthdate:
-		if user.ExternalEncrypted && r.externalEncryptionKey != "" {
+		if user.ExternalEncryptionLevel > 0 && r.externalEncryptionKey != "" {
 			if err := r.encrypt(user, r.externalEncryptionKey); err != nil {
 				return err
 			}
 			user.EncryptedAt = time.Now()
 		}
-		if user.InternalEncrypted && len(r.internalEncryptionKeys) > 0 {
+		if user.InternalEncryptionLevel > 0 && len(r.internalEncryptionKeys) > 0 {
 			encryptionKey, err := r.crypto.CombineSymmetricKeys(r.internalEncryptionKeys, user.InternalEncryptionLevel)
 			if err != nil {
 				return err

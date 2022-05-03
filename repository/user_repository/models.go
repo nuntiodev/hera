@@ -15,8 +15,6 @@ type User struct {
 	FirstName               string    `bson:"first_name" json:"first_name"`
 	LastName                string    `bson:"last_name" json:"last_name"`
 	Birthdate               string    `bson:"birthdate" json:"birthdate"`
-	ExternalEncrypted       bool      `bson:"external_encrypted" json:"external_encrypted"`
-	InternalEncrypted       bool      `bson:"internal_encrypted" json:"internal_encrypted"`
 	EmailHash               string    `bson:"email_hash" json:"email_hash"`
 	Metadata                string    `bson:"metadata" json:"metadata"`
 	CreatedAt               time.Time `bson:"created_at" json:"created_at"`
@@ -46,8 +44,6 @@ func UserToProtoUser(user *User) *go_block.User {
 		FirstName:               user.FirstName,
 		LastName:                user.LastName,
 		Birthdate:               birthdate,
-		ExternalEncrypted:       user.ExternalEncrypted,
-		InternalEncrypted:       user.InternalEncrypted,
 		Metadata:                user.Metadata,
 		CreatedAt:               ts.New(user.CreatedAt),
 		UpdatedAt:               ts.New(user.UpdatedAt),
@@ -74,8 +70,6 @@ func ProtoUserToUser(user *go_block.User) *User {
 		FirstName:               user.FirstName,
 		LastName:                user.LastName,
 		Birthdate:               birthdate,
-		ExternalEncrypted:       user.ExternalEncrypted,
-		InternalEncrypted:       user.InternalEncrypted,
 		Metadata:                user.Metadata,
 		CreatedAt:               user.CreatedAt.AsTime(),
 		UpdatedAt:               user.UpdatedAt.AsTime(),

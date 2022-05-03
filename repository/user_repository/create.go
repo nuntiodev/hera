@@ -36,8 +36,6 @@ func (r *mongodbRepository) Create(ctx context.Context, user *go_block.User) (*g
 	}
 	// set new data for user created
 	user.EncryptedAt = ts.New(create.EncryptedAt)
-	user.ExternalEncrypted = create.ExternalEncrypted
-	user.InternalEncrypted = create.InternalEncrypted
 	user.ExternalEncryptionLevel = int32(create.ExternalEncryptionLevel)
 	user.InternalEncryptionLevel = int32(create.InternalEncryptionLevel)
 	return user, nil

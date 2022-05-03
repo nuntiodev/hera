@@ -27,9 +27,8 @@ func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.Us
 	}
 	update := ProtoUserToUser(get)
 	// check if we need to encrypt the user
-	if get.ExternalEncrypted {
+	if get.ExternalEncryptionLevel > 0 {
 		// user is already encrypted - disable external encryption
-		update.ExternalEncrypted = false
 		update.ExternalEncryptionLevel = 0
 		// we still want to encrypt user under internal encryption keys
 		encryptionKey, err := r.crypto.CombineSymmetricKeys(r.internalEncryptionKeys, len(r.internalEncryptionKeys))
@@ -42,8 +41,7 @@ func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.Us
 		// also update to the newest internal encryption level
 		update.InternalEncryptionLevel = len(r.internalEncryptionKeys)
 	} else {
-		update.ExternalEncrypted = true
-		update.InternalEncrypted = len(r.internalEncryptionKeys) > 0
+		update.ExternalEncryptionLevel = 1
 		update.InternalEncryptionLevel = len(r.internalEncryptionKeys)
 		if err := r.encryptUser(ctx, actionUpdateSecurity, update); err != nil {
 			return nil, err
@@ -54,9 +52,7 @@ func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.Us
 		"$set": bson.M{
 			"email":                     update.Email,
 			"image":                     update.Image,
-			"external_encrypted":        update.ExternalEncrypted,
 			"external_encryption_level": update.ExternalEncryptionLevel,
-			"internal_encrypted":        update.InternalEncrypted,
 			"internal_encryption_level": update.InternalEncryptionLevel,
 			"metadata":                  update.Metadata,
 			"updated_at":                update.UpdatedAt,
@@ -75,9 +71,7 @@ func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.Us
 		return nil, errors.New("could not find get")
 	}
 	// set updated fields
-	get.ExternalEncrypted = update.ExternalEncrypted
 	get.ExternalEncryptionLevel = int32(update.ExternalEncryptionLevel)
-	get.InternalEncrypted = update.InternalEncrypted
 	get.InternalEncryptionLevel = int32(update.InternalEncryptionLevel)
 	return get, nil
 }

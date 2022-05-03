@@ -36,8 +36,6 @@ func TestCreateIEEncrypted(t *testing.T) {
 	assert.NotNil(t, createdUser)
 	// assert new fields are present
 	assert.NotEmpty(t, createdUser.Id)
-	assert.True(t, createdUser.InternalEncrypted)
-	assert.True(t, createdUser.ExternalEncrypted)
 	assert.Equal(t, createdUser.ExternalEncryptionLevel, int32(1))
 	assert.Equal(t, createdUser.InternalEncryptionLevel, int32(2))
 	// assert that old fields are the same
@@ -71,8 +69,6 @@ func TestCreateIEncrypted(t *testing.T) {
 	assert.NotNil(t, createdUser)
 	// assert new fields are present
 	assert.NotEmpty(t, createdUser.Id)
-	assert.True(t, createdUser.InternalEncrypted)
-	assert.False(t, createdUser.ExternalEncrypted)
 	assert.Equal(t, createdUser.ExternalEncryptionLevel, int32(0))
 	assert.Equal(t, createdUser.InternalEncryptionLevel, int32(2))
 	// assert that old fields are the same
@@ -106,8 +102,6 @@ func TestCreateEEncrypted(t *testing.T) {
 	assert.NotNil(t, createdUser)
 	// assert new fields are present
 	assert.NotEmpty(t, createdUser.Id)
-	assert.False(t, createdUser.InternalEncrypted)
-	assert.True(t, createdUser.ExternalEncrypted)
 	assert.Equal(t, createdUser.ExternalEncryptionLevel, int32(1))
 	assert.Equal(t, createdUser.InternalEncryptionLevel, int32(0))
 	// assert that old fields are the same
@@ -141,8 +135,6 @@ func TestCreateNoEncryption(t *testing.T) {
 	assert.NotNil(t, createdUser)
 	// assert new fields are present
 	assert.NotEmpty(t, createdUser.Id)
-	assert.False(t, createdUser.InternalEncrypted)
-	assert.False(t, createdUser.ExternalEncrypted)
 	assert.Equal(t, createdUser.ExternalEncryptionLevel, int32(0))
 	assert.Equal(t, createdUser.InternalEncryptionLevel, int32(0))
 	// assert that old fields are the same

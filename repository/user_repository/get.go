@@ -26,7 +26,7 @@ func (r *mongodbRepository) Get(ctx context.Context, user *go_block.User, upgrad
 	if err := r.collection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, err
 	}
-	if resp.InternalEncrypted || resp.ExternalEncrypted {
+	if resp.InternalEncryptionLevel > 0 || resp.ExternalEncryptionLevel > 0 {
 		if err := r.decryptUser(ctx, &resp, upgrade); err != nil {
 			return nil, err
 		}

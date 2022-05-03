@@ -41,7 +41,6 @@ func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (
 		if err := r.EncryptToken(actionCreate, create); err != nil {
 			return nil, err
 		}
-		create.Encrypted = true
 		create.InternalEncryptionLevel = len(r.internalEncryptionKeys)
 	}
 	_, err := r.collection.InsertOne(ctx, create)
@@ -49,7 +48,6 @@ func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (
 		return nil, err
 	}
 	// set updated fields
-	token.Encrypted = create.Encrypted
 	token.InternalEncryptionLevel = int32(create.InternalEncryptionLevel)
 	return token, nil
 }

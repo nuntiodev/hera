@@ -26,7 +26,7 @@ func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token
 		if err := cursor.Decode(&tempToken); err != nil {
 			return nil, err
 		}
-		if tempToken.Encrypted && len(t.internalEncryptionKeys) >= tempToken.InternalEncryptionLevel {
+		if tempToken.InternalEncryptionLevel > 0 && len(t.internalEncryptionKeys) >= tempToken.InternalEncryptionLevel {
 			if err := t.DecryptToken(&tempToken); err != nil {
 				return nil, err
 			}

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"github.com/nuntiodev/nuntio-user-block/email"
 	"github.com/nuntiodev/nuntio-user-block/handler"
 	"github.com/nuntiodev/nuntio-user-block/interceptor"
@@ -32,6 +33,20 @@ func initialize() error {
 	return nil
 }
 
+func getSender() (email.Sender, error) {
+	// first check if postmark is present
+	postmarkServerToken := os.Getenv("POSTMARK_SERVER_TOKEN")
+	postmarkAccountToken := os.Getenv("POSTMARK_ACCOUNT_TOKEN")
+	if postmarkServerToken != "" && postmarkAccountToken != "" {
+		postmarkSender, err := email.NewPostmarkSender(postmarkServerToken, postmarkAccountToken)
+		if err != nil {
+			return nil, err
+		}
+		return postmarkSender, nil
+	}
+	return nil, errors.New("no email provider is available")
+}
+
 func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err := initialize(); err != nil {
 		return nil, err
@@ -57,7 +72,14 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 		return nil, err
 	}
 	// it should be okay to spin up a service without email provider
-	myEmail, _ := email.New()
+	sender, err := getSender()
+	if err != nil {
+		zapLog.Warn("no valid sender available witn err: " + err.Error())
+	}
+	myEmail, err := email.New(sender)
+	if err != nil {
+		zapLog.Warn("email is not enabled with err: " + err.Error())
+	}
 	myHandler, err := handler.New(zapLog, myRepository, myCrypto, myToken, myEmail)
 	if err != nil {
 		return nil, err

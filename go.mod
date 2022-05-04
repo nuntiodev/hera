@@ -8,7 +8,8 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
-	github.com/nuntiodev/block-proto v0.2.7
+	github.com/keighl/postmark v0.0.0-20190821160221-28358b1a94e3
+	github.com/nuntiodev/block-proto v0.2.9
 	github.com/nuntiodev/x v0.2.9
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.7.1
@@ -29,7 +30,6 @@ require (
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/keighl/postmark v0.0.0-20190821160221-28358b1a94e3 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/ory/dockertest/v3 v3.8.1 // indirect

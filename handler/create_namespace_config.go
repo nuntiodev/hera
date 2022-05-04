@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/repository/email_repository"
 )
 
 func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
@@ -29,11 +30,29 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not build config with err: %v", err)
 	}
-	resp, err := config.Create(ctx, req.Config)
+	createdConfig, err := config.Create(ctx, req.Config)
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not create config with err: %v", err)
 	}
+	// setup default emails
+	emails, err := h.repository.Emails(ctx, req.Namespace)
+	if err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	// create verification email
+	if _, err := emails.Create(ctx, &go_block.Email{
+		Id:             email_repository.VerificationEmail,
+		Logo:           "",
+		WelcomeMessage: "Hello",
+		BodyMessage:    fmt.Sprintf("Thank you for signing up to %s. In order to get started, we ask of you to confirm your email by entering the following numbers in your %s app.", createdConfig.Name, createdConfig.Name),
+		FooterMessage:  fmt.Sprintf("All the best from %s team", createdConfig.Name),
+		Title:          "Verify your email",
+		Subject:        "Verify your email account",
+		TemplatePath:   emailVerificationTemplatePath,
+	}); err != nil {
+		return &go_block.UserResponse{}, err
+	}
 	return &go_block.UserResponse{
-		Config: resp,
+		Config: createdConfig,
 	}, nil
 }

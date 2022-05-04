@@ -19,11 +19,13 @@ import (
 )
 
 var (
-	accessTokenExpiry  = time.Minute * 30
-	refreshTokenExpiry = time.Hour * 24 * 30
-	publicKey          *rsa.PublicKey
-	publicKeyString    = ""
-	privateKey         *rsa.PrivateKey
+	accessTokenExpiry              = time.Minute * 30
+	refreshTokenExpiry             = time.Hour * 24 * 30
+	publicKey                      *rsa.PublicKey
+	publicKeyString                = ""
+	privateKey                     *rsa.PrivateKey
+	emailVerificationTemplatePath  = ""
+	emailResetPasswordTemplatePath = ""
 )
 
 type Handler interface {
@@ -127,6 +129,25 @@ func initialize() error {
 	return nil
 }
 
+func initializeEmailTemplates() error {
+	var ok bool
+	emailVerificationTemplatePath, ok = os.LookupEnv("EMAIL_VERIFICATION_TEMPLATE_PATH")
+	if !ok || emailVerificationTemplatePath == "" {
+		return errors.New("missing required EMAIL_VERIFICATION_TEMPLATE_PATH")
+	}
+	if _, err := os.Stat(emailVerificationTemplatePath); err != nil && errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	emailResetPasswordTemplatePath, ok = os.LookupEnv("EMAIL_RESET_PASSWORD_TEMPLATE_PATH")
+	if !ok || emailResetPasswordTemplatePath == "" {
+		return errors.New("missing required EMAIL_RESET_PASSWORD_TEMPLATE_PATH")
+	}
+	if _, err := os.Stat(emailResetPasswordTemplatePath); err != nil && errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return nil
+}
+
 func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Crypto, token token.Token, email email.Email) (Handler, error) {
 	zapLog.Info("creating handler")
 	if err := initialize(); err != nil {
@@ -135,6 +156,9 @@ func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Cr
 	emailEnabled := false
 	if email != nil {
 		emailEnabled = true
+		if err := initializeEmailTemplates(); err != nil {
+			return nil, err
+		}
 	}
 	handler := &defaultHandler{
 		repository:   repository,

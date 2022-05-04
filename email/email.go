@@ -3,6 +3,7 @@ package email
 import (
 	"bytes"
 	"errors"
+	"github.com/keighl/postmark"
 	"html/template"
 	"os"
 	"strings"
@@ -34,7 +35,36 @@ type Email interface {
 }
 
 type Sender interface {
-	Send(to, subject, data string, html bool) error
+	Send(to, from, subject, data string, html bool) error
+}
+
+type PostmarkSender struct {
+	client *postmark.Client
+}
+
+func (s *PostmarkSender) Send(to, from, subject string, data string, html bool) error {
+	email := postmark.Email{
+		From:       from,
+		To:         to,
+		Subject:    subject,
+		TrackOpens: true,
+	}
+	if html {
+		email.HtmlBody = data
+	} else {
+		email.TextBody = data
+	}
+	if _, err := s.client.SendEmail(email); err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewPostmarkSender(serverToken, accountToken string) (*PostmarkSender, error) {
+	client := postmark.NewClient(serverToken, accountToken)
+	return &PostmarkSender{
+		client: client,
+	}, nil
 }
 
 type defaultEmail struct {
@@ -54,9 +84,9 @@ func initialize() error {
 	return nil
 }
 
-func New() (Email, error) {
-	if EmailSender == nil {
-		return nil, errors.New("email sender is nil")
+func New(sender Sender) (Email, error) {
+	if sender == nil {
+		return nil, errors.New("invalid")
 	}
 	if err := initialize(); err != nil {
 		return nil, err
@@ -67,7 +97,7 @@ func New() (Email, error) {
 		}
 	}
 	return &defaultEmail{
-		sender: EmailSender,
+		sender: sender,
 	}, nil
 }
 
@@ -96,7 +126,7 @@ func (e *defaultEmail) SendVerificationEmail(to, subject, templatePath string, d
 		plaintext += data.FooterMessage
 		mail = plaintext
 	}
-	if err := e.sender.Send(to, subject, mail, html); err != nil {
+	if err := e.sender.Send(to, emailFrom, subject, mail, html); err != nil {
 		return err
 	}
 	return nil

@@ -1,22 +1,22 @@
 package email
 
 import (
+	"bytes"
 	"errors"
-	"github.com/nuntiodev/x/emailx"
+	"html/template"
 	"os"
 	"strings"
 )
 
 var (
-	smtpFrom     = ""
-	smtpPassword = ""
-	smtpHost     = ""
-	smtpPort     = ""
-	templates    map[string]bool
+	EmailSender Sender
+	templates   = map[string]bool{}
+	emailFrom   = ""
 )
 
 type TemplateData struct {
 	LogoUrl        string
+	Title          string
 	WelcomeMessage string
 	NameOfUser     string
 	BodyMessage    string
@@ -33,27 +33,19 @@ type Email interface {
 	SendVerificationEmail(to, subject, templatePath string, data *VerificationData) error
 }
 
+type Sender interface {
+	Send(to, subject, data string, html bool) error
+}
+
 type defaultEmail struct {
-	emailx emailx.Email
+	sender Sender
 }
 
 func initialize() error {
 	var ok bool
-	smtpFrom, ok = os.LookupEnv("SMTP_FROM")
-	if !ok || smtpFrom == "" {
-		return errors.New("missing required SMTP_FROM")
-	}
-	smtpPassword, ok = os.LookupEnv("SMTP_PASSWORD")
-	if !ok || smtpPassword == "" {
-		return errors.New("missing required SMTP_PASSWORD")
-	}
-	smtpHost, ok = os.LookupEnv("SMTP_HOST")
-	if !ok || smtpHost == "" {
-		return errors.New("missing required SMTP_HOST")
-	}
-	smtpPort, ok = os.LookupEnv("SMTP_PORT")
-	if !ok || smtpPort == "" {
-		return errors.New("missing required SMTP_PORT")
+	emailFrom, ok = os.LookupEnv("EMAIL_FROM")
+	if !ok || emailFrom == "" {
+		return errors.New("missing required EMAIL_FROM")
 	}
 	emailTemplatePaths, _ := os.LookupEnv("EMAIL_TEMPLATE_PATHS")
 	for _, val := range strings.Fields(emailTemplatePaths) {
@@ -63,37 +55,48 @@ func initialize() error {
 }
 
 func New() (Email, error) {
+	if EmailSender == nil {
+		return nil, errors.New("email sender is nil")
+	}
 	if err := initialize(); err != nil {
 		return nil, err
 	}
-	myEmail, err := emailx.New(smtpFrom, smtpPassword, smtpHost, smtpPort)
-	if err != nil {
-		return nil, err
+	for template, _ := range templates {
+		if _, err := os.Stat(template); err != nil && errors.Is(err, os.ErrNotExist) {
+			return nil, err
+		}
 	}
 	return &defaultEmail{
-		emailx: myEmail,
+		sender: EmailSender,
 	}, nil
 }
 
 func (e *defaultEmail) SendEmail(to, subject, templatePath string, data *TemplateData) error {
-	if templatePath != "" {
-		if _, ok := templates[templatePath]; !ok {
-			return errors.New("invalid path")
-		}
-	}
-	if err := e.emailx.SendEmail(to, subject, templatePath, data); err != nil {
-		return err
-	}
 	return nil
 }
 
 func (e *defaultEmail) SendVerificationEmail(to, subject, templatePath string, data *VerificationData) error {
+	mail := ""
+	html := false
 	if templatePath != "" {
 		if _, ok := templates[templatePath]; !ok {
 			return errors.New("invalid path")
 		}
+		t, _ := template.ParseFiles(templatePath)
+		var body bytes.Buffer
+		if err := t.Execute(&body, data); err != nil {
+			return err
+		}
+		mail = body.String()
+		html = true
+	} else {
+		plaintext := data.WelcomeMessage + " " + data.NameOfUser + ",\n\n"
+		plaintext += data.BodyMessage + "\n\n"
+		plaintext += data.Code + "\n\n"
+		plaintext += data.FooterMessage
+		mail = plaintext
 	}
-	if err := e.emailx.SendEmail(to, subject, templatePath, data); err != nil {
+	if err := e.sender.Send(to, subject, mail, html); err != nil {
 		return err
 	}
 	return nil

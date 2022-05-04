@@ -25,6 +25,7 @@ type User struct {
 	VerificationEmailSentAt time.Time `bson:"verification_email_sent_at" json:"verification_email_sent_at"`
 	EmailVerifiedAt         time.Time `bson:"email_verified_at" json:"email_verified_at"`
 	EmailIsVerified         bool      `bson:"email_is_verified" json:"email_is_verified"`
+	VerificationCode        string    `bson:"verification_code" json:"verification_code"`
 }
 
 func UserToProtoUser(user *User) *go_block.User {

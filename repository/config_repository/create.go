@@ -7,14 +7,13 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (cr *defaultConfigRepository) Create(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
+func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
 	prepare(actionCreate, config)
 	if config == nil {
 		return nil, errors.New("missing required config")
-	} else if config.Id == "" {
-		return nil, errors.New("missing required id")
 	}
 	// set default fields
+	config.Id = namespaceConfigName
 	config.EnableNuntioConnect = true
 	config.DisableDefaultSignup = false
 	config.DisableDefaultLogin = false
@@ -40,7 +39,6 @@ func (cr *defaultConfigRepository) Create(ctx context.Context, config *go_block.
 		WelcomeTitle:       "Welcome",
 		WelcomeDetails:     "Welcome to this awesome platform.",
 		ContinueWithNuntio: "Continue with",
-		Logo:               "",
 	}
 	config.RegisterText = &go_block.RegisterText{
 		RegisterButton:            "Register",
@@ -61,10 +59,13 @@ func (cr *defaultConfigRepository) Create(ctx context.Context, config *go_block.
 		ForgotPassword: "Forgot your password?",
 	}
 	create := ProtoConfigToConfig(config)
-	if err := cr.EncryptConfig(actionCreate, create); err != nil {
-		return nil, err
+	if len(c.internalEncryptionKeys) > 0 {
+		if err := c.EncryptConfig(actionCreate, create); err != nil {
+			return nil, err
+		}
+		config.InternalEncryptionLevel = int32(len(c.internalEncryptionKeys))
 	}
-	if _, err := cr.collection.InsertOne(ctx, create); err != nil {
+	if _, err := c.collection.InsertOne(ctx, create); err != nil {
 		return nil, err
 	}
 	// set created fields

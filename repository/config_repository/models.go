@@ -24,7 +24,6 @@ type WelcomeText struct {
 	WelcomeTitle       string `bson:"welcome_title" json:"welcome_title"`
 	WelcomeDetails     string `bson:"welcome_details" json:"welcome_details"`
 	ContinueWithNuntio string `bson:"continue_with_nuntio" json:"continue_with_nuntio"`
-	Logo               string `bson:"logo" json:"logo"`
 }
 
 type RegisterText struct {
@@ -50,11 +49,7 @@ type LoginText struct {
 type Config struct {
 	Id                       string        `bson:"_id" json:"id"`
 	Name                     string        `bson:"name" json:"name"`
-	Website                  string        `bson:"website" json:"website"`
-	About                    string        `bson:"about" json:"about"`
-	Email                    string        `bson:"email" json:"email"`
 	Logo                     string        `bson:"logo" json:"logo"`
-	Terms                    string        `bson:"terms" json:"terms"`
 	EnableNuntioConnect      bool          `bson:"enable_nuntio_connect" json:"enable_nuntio_connect"`
 	DisableDefaultSignup     bool          `bson:"disable_default_signup" json:"disable_default_signup"`
 	DisableDefaultLogin      bool          `bson:"disable_default_login" json:"disable_default_login"`
@@ -124,11 +119,7 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 	return &Config{
 		Id:                       config.Id,
 		Name:                     config.Name,
-		Website:                  config.Website,
-		About:                    config.About,
-		Email:                    config.Email,
 		Logo:                     config.Logo,
-		Terms:                    config.Terms,
 		EnableNuntioConnect:      config.EnableNuntioConnect,
 		DisableDefaultSignup:     config.DisableDefaultSignup,
 		DisableDefaultLogin:      config.DisableDefaultLogin,
@@ -199,11 +190,7 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 	return &go_block.Config{
 		Id:                       config.Id,
 		Name:                     config.Name,
-		Website:                  config.Website,
-		About:                    config.About,
-		Email:                    config.Email,
 		Logo:                     config.Logo,
-		Terms:                    config.Terms,
 		EnableNuntioConnect:      config.EnableNuntioConnect,
 		DisableDefaultSignup:     config.DisableDefaultSignup,
 		DisableDefaultLogin:      config.DisableDefaultLogin,

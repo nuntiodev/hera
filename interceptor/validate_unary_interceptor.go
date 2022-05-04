@@ -22,7 +22,7 @@ const (
 	UpdateName               = "UpdateName"
 	UpdateBirthdate          = "UpdateBirthdate"
 	UpdateSecurity           = "UpdateSecurity"
-	Get                      = "Get"
+	Get                      = "GetNamespaceConfig"
 	GetAll                   = "GetAll"
 	ValidateCredentials      = "ValidateCredentials"
 	Login                    = "Login"
@@ -35,6 +35,8 @@ const (
 	RecordActiveMeasurement  = "RecordActiveMeasurement"
 	NamespaceActiveHistory   = "NamespaceActiveHistory"
 	UserActiveHistory        = "UserActiveHistory"
+	VerifyEmail              = "VerifyEmail"
+	SendVerificationEmail    = "SendVerificationEmail"
 	Delete                   = "Delete"
 	DeleteNamespace          = "DeleteNamespace"
 	DeleteBatch              = "DeleteBatch"
@@ -74,7 +76,8 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		return nil, errors.New(fmt.Sprintf("invalid method call: %s", info.FullMethod))
 	}
 	switch method[1] {
-	case Heartbeat, GetAll, PublicKeys, NamespaceActiveHistory:
+	case Heartbeat, GetAll, PublicKeys,
+		NamespaceActiveHistory, GetConfig, DeleteConfig:
 		break
 	case BlockToken:
 		if translatedReq.TokenPointer == "" {
@@ -84,13 +87,8 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.ActiveMeasurement == nil {
 			return &go_block.UserResponse{}, MeasurementIsNil
 		}
-	case Create:
-		if translatedReq.User == nil {
-			return &go_block.UserResponse{}, UserIsNil
-		} else if translatedReq.RequireEmailVerification && translatedReq.User.Email == "" {
-			return &go_block.UserResponse{}, errors.New("we cannot send a verification email to a user without an email")
-		}
-	case Get:
+	case Get, Create, VerifyEmail,
+		SendVerificationEmail:
 		if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UserIsNil
 		}
@@ -119,9 +117,8 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 			return nil, UserBatchIsNil
 		}
 	case CreateNamespaceConfig, UpdateConfigSettings,
-		UpdateConfigDetails, GetConfig, DeleteConfig,
-		UpdateConfigGeneralText, UpdateConfigWelcomeText, UpdateConfigRegisterText,
-		UpdateConfigLoginText:
+		UpdateConfigDetails, UpdateConfigGeneralText, UpdateConfigWelcomeText,
+		UpdateConfigRegisterText, UpdateConfigLoginText:
 		if translatedReq.Config == nil {
 			return nil, ConfigIsNil
 		}

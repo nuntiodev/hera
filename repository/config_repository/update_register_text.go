@@ -8,20 +8,20 @@ import (
 	"time"
 )
 
-func (cr *defaultConfigRepository) UpdateRegisterText(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
+func (c *defaultConfigRepository) UpdateRegisterText(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
 	if config == nil {
 		return nil, errors.New("missing required config")
 	} else if config.Id == "" {
 		return nil, errors.New("missing required config id")
 	}
-	get, err := cr.Get(ctx, config)
+	get, err := c.GetNamespaceConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 	update := ProtoConfigToConfig(config)
 	if get.InternalEncryptionLevel > 0 {
 		update.InternalEncryptionLevel = get.InternalEncryptionLevel
-		if err := cr.EncryptConfig(actionUpdate, update); err != nil {
+		if err := c.EncryptConfig(actionUpdate, update); err != nil {
 			return nil, err
 		}
 	}
@@ -46,7 +46,7 @@ func (cr *defaultConfigRepository) UpdateRegisterText(ctx context.Context, confi
 			"updated_at":    time.Now(),
 		},
 	}
-	if _, err := cr.collection.UpdateOne(ctx, bson.M{"_id": config.Id}, mongoUpdate); err != nil {
+	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {
 		return nil, err
 	}
 	// set updated fields

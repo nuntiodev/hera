@@ -17,9 +17,7 @@ func (h *defaultHandler) DeleteNamespace(ctx context.Context, req *go_block.User
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not build config with err: %v", err)
 	}
-	if err := config.Delete(ctx, &go_block.Config{
-		Id: req.Namespace,
-	}); err != nil {
+	if err := config.Delete(ctx); err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not delete config with err: %v", err)
 	}
 	if err := users.DeleteAll(ctx); err != nil {

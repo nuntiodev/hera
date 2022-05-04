@@ -2,12 +2,16 @@ package config_repository
 
 import (
 	"context"
+	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"time"
 )
 
-func (cr *defaultConfigRepository) upgradeEncryptionLevel(ctx context.Context, config Config) error {
-	if err := cr.EncryptConfig(actionCreate, &config); err != nil {
+func (c *defaultConfigRepository) upgradeEncryptionLevel(ctx context.Context, config Config) error {
+	if len(c.internalEncryptionKeys) <= 0 {
+		return errors.New("length of internal encryption keys is 0")
+	}
+	if err := c.EncryptConfig(actionCreate, &config); err != nil {
 		return err
 	}
 	updateGeneralText := bson.M{}
@@ -32,7 +36,6 @@ func (cr *defaultConfigRepository) upgradeEncryptionLevel(ctx context.Context, c
 			"welcome_title":        config.WelcomeText.WelcomeTitle,
 			"welcome_details":      config.WelcomeText.WelcomeTitle,
 			"continue_with_nuntio": config.WelcomeText.ContinueWithNuntio,
-			"logo":                 config.WelcomeText.Logo,
 		}
 	}
 	updateRegisterText := bson.M{}
@@ -62,19 +65,16 @@ func (cr *defaultConfigRepository) upgradeEncryptionLevel(ctx context.Context, c
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"name":                      config.Name,
-			"website":                   config.Website,
-			"about":                     config.About,
-			"email":                     config.Email,
 			"logo":                      config.Logo,
 			"general_text":              updateGeneralText,
 			"welcome_text":              updateWelcomeText,
 			"register_text":             updateLoginText,
 			"login_text":                updateRegisterText,
-			"internal_encryption_level": int32(len(cr.internalEncryptionKeys)),
+			"internal_encryption_level": int32(len(c.internalEncryptionKeys)),
 			"updated_at":                time.Now(),
 		},
 	}
-	if _, err := cr.collection.UpdateOne(ctx, bson.M{"_id": config.Id}, mongoUpdate); err != nil {
+	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {
 		return err
 	}
 	return nil

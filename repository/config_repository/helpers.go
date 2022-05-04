@@ -14,11 +14,9 @@ func prepare(action int, config *go_block.Config) {
 	case actionCreate:
 		config.CreatedAt = ts.Now()
 		config.UpdatedAt = ts.Now()
+	case actionUpdate:
+		config.UpdatedAt = ts.Now()
 	}
 	config.Name = strings.TrimSpace(config.Name)
-	config.Website = strings.TrimSpace(config.Website)
-	config.About = strings.TrimSpace(config.About)
-	config.Email = strings.TrimSpace(config.Email)
 	config.Logo = strings.TrimSpace(config.Logo)
-	config.Terms = strings.TrimSpace(config.Terms)
 }

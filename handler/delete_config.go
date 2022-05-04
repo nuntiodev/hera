@@ -10,7 +10,7 @@ func (h *defaultHandler) DeleteConfig(ctx context.Context, req *go_block.UserReq
 	if err != nil {
 		return nil, err
 	}
-	if err := config.Delete(ctx, req.Config); err != nil {
+	if err := config.Delete(ctx); err != nil {
 		return nil, err
 	}
 	return &go_block.UserResponse{}, nil

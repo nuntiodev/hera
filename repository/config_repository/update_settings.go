@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-func (cr *defaultConfigRepository) UpdateSettings(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
+func (c *defaultConfigRepository) UpdateSettings(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
 	if config == nil {
 		return nil, errors.New("missing required config")
 	} else if config.Id == "" {
 		return nil, errors.New("missing required config id")
 	}
-	get, err := cr.Get(ctx, config)
+	get, err := c.GetNamespaceConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (cr *defaultConfigRepository) UpdateSettings(ctx context.Context, config *g
 			"updated_at":             time.Now(),
 		},
 	}
-	if _, err := cr.collection.UpdateOne(ctx, bson.M{"_id": config.Id}, mongoUpdate); err != nil {
+	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {
 		return nil, err
 	}
 	// set updated fields

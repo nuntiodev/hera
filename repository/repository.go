@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
+	"github.com/nuntiodev/nuntio-user-block/repository/email_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/measurement_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
 	"github.com/nuntiodev/x/cryptox"
@@ -16,6 +17,7 @@ type Repository interface {
 	Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error)
 	Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error)
 	Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error)
+	Emails(ctx context.Context, namespace string) (email_repository.EmailRepository, error)
 }
 
 type defaultRepository struct {
@@ -44,18 +46,6 @@ func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token
 	return tokenRepository, nil
 }
 
-func (r *defaultRepository) Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error) {
-	if namespace == "" {
-		namespace = "blocks-db"
-	}
-	collection := r.mongodbClient.Database(namespace).Collection("user_config")
-	configRepository, err := config_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
-	if err != nil {
-		return nil, err
-	}
-	return configRepository, nil
-}
-
 func (r *defaultRepository) Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error) {
 	if namespace == "" {
 		namespace = "blocks-db"
@@ -68,6 +58,30 @@ func (r *defaultRepository) Measurements(ctx context.Context, namespace string) 
 		return nil, err
 	}
 	return measurementRepository, nil
+}
+
+func (r *defaultRepository) Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error) {
+	if namespace == "" {
+		namespace = "blocks-db"
+	}
+	collection := r.mongodbClient.Database(namespace).Collection("user_config")
+	configRepository, err := config_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
+	if err != nil {
+		return nil, err
+	}
+	return configRepository, nil
+}
+
+func (r *defaultRepository) Emails(ctx context.Context, namespace string) (email_repository.EmailRepository, error) {
+	if namespace == "" {
+		namespace = "blocks-db"
+	}
+	collection := r.mongodbClient.Database(namespace).Collection("user_emails")
+	emailRepository, err := email_repository.New(collection, r.crypto, r.internalEncryptionKeys)
+	if err != nil {
+		return nil, err
+	}
+	return emailRepository, nil
 }
 
 func New(mongoClient *mongo.Client, crypto cryptox.Crypto, encryptionKeys []string, zapLog *zap.Logger) (Repository, error) {

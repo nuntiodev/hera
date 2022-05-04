@@ -23,8 +23,14 @@ type TemplateData struct {
 	FooterMessage  string
 }
 
+type VerificationData struct {
+	Code string
+	TemplateData
+}
+
 type Email interface {
 	SendEmail(to, subject, templatePath string, data *TemplateData) error
+	SendVerificationEmail(to, subject, templatePath string, data *VerificationData) error
 }
 
 type defaultEmail struct {
@@ -75,7 +81,19 @@ func (e *defaultEmail) SendEmail(to, subject, templatePath string, data *Templat
 			return errors.New("invalid path")
 		}
 	}
-	if err := e.SendEmail(to, subject, templatePath, data); err != nil {
+	if err := e.emailx.SendEmail(to, subject, templatePath, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *defaultEmail) SendVerificationEmail(to, subject, templatePath string, data *VerificationData) error {
+	if templatePath != "" {
+		if _, ok := templates[templatePath]; !ok {
+			return errors.New("invalid path")
+		}
+	}
+	if err := e.emailx.SendEmail(to, subject, templatePath, data); err != nil {
 		return err
 	}
 	return nil

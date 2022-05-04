@@ -10,7 +10,7 @@ func (h *defaultHandler) GetConfig(ctx context.Context, req *go_block.UserReques
 	if err != nil {
 		return nil, err
 	}
-	resp, err := config.Get(ctx, req.Config)
+	resp, err := config.GetNamespaceConfig(ctx)
 	if err != nil {
 		return nil, err
 	}

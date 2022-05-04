@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"github.com/nuntiodev/nuntio-user-block/email"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
@@ -25,7 +24,6 @@ var (
 	publicKey          *rsa.PublicKey
 	publicKeyString    = ""
 	privateKey         *rsa.PrivateKey
-	validatePassword   = false
 )
 
 type Handler interface {
@@ -52,6 +50,8 @@ type Handler interface {
 	RecordActiveMeasurement(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UserActiveHistory(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	NamespaceActiveHistory(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	SendVerificationEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	VerifyEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteBatch(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteNamespace(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
@@ -123,11 +123,6 @@ func initialize() error {
 	privateKey, publicKey, err = decodeKeyPair(privateKeyString, publicKeyString)
 	if err != nil {
 		return err
-	}
-	validatePasswordString, ok := os.LookupEnv("VALIDATE_PASSWORD")
-	if ok && validatePasswordString != "" {
-		// on error it returns false
-		validatePassword, _ = strconv.ParseBool(validatePasswordString)
 	}
 	return nil
 }

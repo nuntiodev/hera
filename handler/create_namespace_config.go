@@ -20,12 +20,16 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not marshal user with err: %v", err)
 	}
-	users.Create(ctx, &go_block.User{
+	// create test user
+	if _, err := users.Create(ctx, &go_block.User{
 		FirstName: "Test",
 		LastName:  "User",
 		Email:     "test@user.io",
 		Metadata:  string(metadata),
-	})
+	}); err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	// create initial config
 	config, err := h.repository.Config(ctx, req.Namespace)
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not build config with err: %v", err)

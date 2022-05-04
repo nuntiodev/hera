@@ -21,6 +21,11 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if eq .Values.email.enabled "true" }}
+          volumeMounts:
+            - mountPath: {{ .Values.email.path }}
+              name: {{ .Release.Name }}-emails
+          {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             {{- range $port := .Values.deployment.ports }}
@@ -42,3 +47,7 @@ spec:
             - secretRef:
                 name: {{ $secret }}
             {{- end }}
+      volumes:
+        - name: {{ .Release.Name }}-emails
+          configMap:
+            name: {{ .Release.Name }}-emails

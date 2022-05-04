@@ -22,7 +22,7 @@ const (
 	UpdateName               = "UpdateName"
 	UpdateBirthdate          = "UpdateBirthdate"
 	UpdateSecurity           = "UpdateSecurity"
-	Get                      = "GetNamespaceConfig"
+	Get                      = "Get"
 	GetAll                   = "GetAll"
 	ValidateCredentials      = "ValidateCredentials"
 	Login                    = "Login"

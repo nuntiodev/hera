@@ -20,6 +20,9 @@ func (h *defaultHandler) Create(ctx context.Context, req *go_block.UserRequest) 
 	if !h.emailEnabled && namespaceConfig.RequireEmailVerification {
 		return &go_block.UserResponse{}, errors.New("email provider is not enabled and verification email cannot be sent")
 	}
+	// set default fields
+	req.User.RequireEmailVerification = namespaceConfig.RequireEmailVerification
+	// create user in db
 	users, err := h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).WithPasswordValidation(namespaceConfig.ValidatePassword).Build(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, err

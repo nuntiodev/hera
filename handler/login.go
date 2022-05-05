@@ -20,7 +20,8 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	if resp.User.RequireEmailVerification && resp.User.EmailIsVerified == false {
 		return &go_block.UserResponse{
 			Error: go_block.ErrorType_ERROR_EMAIL_IS_NOT_VERIFIED,
-		}, errors.New("user has not verified his/her email")
+		}, nil
+		//errors.New("user has not verified his/her email")
 	}
 	if resp.User.Password == "" {
 		return &go_block.UserResponse{}, errors.New("please update the user with a non-empty password")

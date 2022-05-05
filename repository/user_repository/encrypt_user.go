@@ -3,6 +3,7 @@ package user_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -65,42 +66,42 @@ func (r *mongodbRepository) encrypt(user *User, encryptionKey string) error {
 	if user.Email != "" {
 		encEmail, err := r.crypto.Encrypt(user.Email, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot encrypt email: %v", err)
 		}
 		user.Email = encEmail
 	}
 	if user.Image != "" {
 		encImage, err := r.crypto.Encrypt(user.Image, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot encrypt image: %v", err)
 		}
 		user.Image = encImage
 	}
 	if user.Metadata != "" {
 		encMetadata, err := r.crypto.Encrypt(user.Metadata, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot encrypt metadata: %v", err)
 		}
 		user.Metadata = encMetadata
 	}
 	if user.FirstName != "" {
 		encFirstName, err := r.crypto.Encrypt(user.FirstName, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot encrypt first name: %v", err)
 		}
 		user.FirstName = encFirstName
 	}
 	if user.LastName != "" {
 		encLastName, err := r.crypto.Encrypt(user.LastName, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot encrypt last name: %v", err)
 		}
 		user.LastName = encLastName
 	}
 	if user.Birthdate != "" {
 		encBirthdate, err := r.crypto.Encrypt(user.Birthdate, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot encrypt birthdate: %v", err)
 		}
 		user.Birthdate = encBirthdate
 	}

@@ -3,6 +3,7 @@ package user_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 )
 
 func (r *mongodbRepository) decryptUser(ctx context.Context, user *User, upgrade bool) error {
@@ -38,13 +39,14 @@ func (r *mongodbRepository) decrypt(user *User, encryptionKey string) error {
 	if user.Email != "" {
 		decEmail, err := r.crypto.Decrypt(user.Email, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot decrypt email: %v", err)
 		}
 		user.Email = decEmail
 	}
 	if user.Image != "" {
 		decImage, err := r.crypto.Decrypt(user.Image, encryptionKey)
 		if err != nil {
+			return fmt.Errorf("cannot decrypt image: %v", err)
 			return err
 		}
 		user.Image = decImage
@@ -52,28 +54,28 @@ func (r *mongodbRepository) decrypt(user *User, encryptionKey string) error {
 	if user.Metadata != "" {
 		decMetadata, err := r.crypto.Decrypt(user.Metadata, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot decrypt metadata: %v", err)
 		}
 		user.Metadata = decMetadata
 	}
 	if user.FirstName != "" {
 		decFirstName, err := r.crypto.Decrypt(user.FirstName, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot decrypt first name: %v", err)
 		}
 		user.FirstName = decFirstName
 	}
 	if user.LastName != "" {
 		decLastName, err := r.crypto.Decrypt(user.LastName, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot decrypt last name: %v", err)
 		}
 		user.LastName = decLastName
 	}
 	if user.Birthdate != "" {
 		decBirthdate, err := r.crypto.Decrypt(user.Birthdate, encryptionKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot decrypt birthdate: %v", err)
 		}
 		user.Birthdate = decBirthdate
 	}

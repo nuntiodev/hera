@@ -42,6 +42,7 @@ func prepare(action int, user *go_block.User) {
 	user.Image = strings.TrimSpace(user.Image)
 	user.OptionalId = strings.TrimSpace(user.OptionalId)
 	user.Metadata = strings.TrimSpace(user.Metadata)
+	user.VerificationCode = strings.TrimSpace(user.VerificationCode)
 }
 
 func (r *mongodbRepository) validate(action int, user *go_block.User) error {

@@ -153,6 +153,7 @@ func getUserFilter(user *go_block.User) (bson.M, error) {
 		filter = bson.M{"_id": user.Id}
 	} else if user.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email)))}
+		fmt.Println(fmt.Sprintf("%x", md5.Sum([]byte(user.Email))))
 	} else if user.OptionalId != "" {
 		filter = bson.M{"optional_id": user.OptionalId}
 	} else {

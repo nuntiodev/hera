@@ -44,6 +44,5 @@ func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, use
 	// set updated fields
 	resp.VerificationEmailSentAt = time.Now()
 	resp.UpdatedAt = time.Now()
-
 	return UserToProtoUser(&resp), nil
 }

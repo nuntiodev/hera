@@ -3,8 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
@@ -20,7 +18,9 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	}
 	// if email validation is required and email is not verified; return error
 	if resp.User.RequireEmailVerification && resp.User.EmailIsVerified == false {
-		return &go_block.UserResponse{}, status.Error(codes.Code(go_block.ErrorType_ERROR_EMAIL_IS_NOT_VERIFIED), "user has not verified his/her email")
+		return &go_block.UserResponse{
+			Error: go_block.ErrorType_ERROR_EMAIL_IS_NOT_VERIFIED,
+		}, nil //status.Error(codes.Code(go_block.ErrorType_ERROR_EMAIL_IS_NOT_VERIFIED), "user has not verified his/her email")
 	}
 	if resp.User.Password == "" {
 		return &go_block.UserResponse{}, errors.New("please update the user with a non-empty password")

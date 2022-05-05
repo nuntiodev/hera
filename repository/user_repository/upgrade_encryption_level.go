@@ -11,9 +11,8 @@ func (r *mongodbRepository) isEncryptionLevelUpgradable(user *User) bool {
 	if user == nil {
 		return false
 	}
-	validExternalEncConfig := user.ExternalEncryptionLevel == 0                                                             // if user is not externally encrypted that is perfectly fine
-	validExternalEncConfig = validExternalEncConfig || (user.ExternalEncryptionLevel != 0 && r.externalEncryptionKey != "") // if user is externally encrypted we require the key to be present
-	userNeedsInternalUpgrading := len(r.internalEncryptionKeys) > int(user.InternalEncryptionLevel)
+	validExternalEncConfig := user.ExternalEncryptionLevel == 0 || (user.ExternalEncryptionLevel > 0 && r.externalEncryptionKey != "")
+	userNeedsInternalUpgrading := len(r.internalEncryptionKeys) > user.InternalEncryptionLevel
 	userIsLevelZero := user.InternalEncryptionLevel == 0 && len(r.internalEncryptionKeys) > 0
 	return (validExternalEncConfig && userNeedsInternalUpgrading) || userIsLevelZero
 }

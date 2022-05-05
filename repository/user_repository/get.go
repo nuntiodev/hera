@@ -19,7 +19,7 @@ func (r *mongodbRepository) Get(ctx context.Context, user *go_block.User, upgrad
 		return nil, err
 	}
 	if resp.InternalEncryptionLevel > 0 || resp.ExternalEncryptionLevel > 0 {
-		if err := r.decryptUser(ctx, &resp, upgrade); err != nil {
+		if err := r.decryptUser(&resp); err != nil {
 			return nil, err
 		}
 	}

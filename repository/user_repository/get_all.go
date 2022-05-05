@@ -48,7 +48,7 @@ func (r *mongodbRepository) GetAll(ctx context.Context, userFilter *go_block.Use
 		}
 		// check if external encryption has been applied
 		if user.InternalEncryptionLevel > 0 || user.ExternalEncryptionLevel > 0 {
-			if err := r.decryptUser(ctx, &user, true); err != nil {
+			if err := r.decryptUser(&user); err != nil {
 				return nil, err
 			}
 		}

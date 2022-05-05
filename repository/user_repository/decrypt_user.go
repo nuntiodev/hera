@@ -1,12 +1,11 @@
 package user_repository
 
 import (
-	"context"
 	"errors"
 	"fmt"
 )
 
-func (r *mongodbRepository) decryptUser(ctx context.Context, user *User, upgrade bool) error {
+func (r *mongodbRepository) decryptUser(user *User) error {
 	if user == nil {
 		return errors.New("user is nil")
 	}
@@ -18,7 +17,7 @@ func (r *mongodbRepository) decryptUser(ctx context.Context, user *User, upgrade
 				return err
 			}
 			if err := r.decrypt(user, internalKey); err != nil {
-				return err
+				return fmt.Errorf("could not decrypt user using internal key: %v", err)
 			}
 		} else {
 			return errors.New("missing required internal encryption keys")
@@ -26,7 +25,7 @@ func (r *mongodbRepository) decryptUser(ctx context.Context, user *User, upgrade
 	}
 	if user.ExternalEncryptionLevel > 0 && r.externalEncryptionKey != "" {
 		if err := r.decrypt(user, r.externalEncryptionKey); err != nil {
-			return err
+			return fmt.Errorf("could not decrypt user using external key: %v", err)
 		}
 	}
 	return nil

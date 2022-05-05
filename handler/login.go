@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
@@ -14,7 +15,7 @@ import (
 func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	resp, err := h.Get(ctx, req)
 	if err != nil {
-		return &go_block.UserResponse{}, err
+		return &go_block.UserResponse{}, fmt.Errorf("could not get user with err: %v", err)
 	}
 	// if email validation is required and email is not verified; return error
 	if resp.User.RequireEmailVerification && resp.User.EmailIsVerified == false {
@@ -22,7 +23,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		if time.Now().Sub(resp.User.VerificationEmailSentAt.AsTime()).Minutes() > maxEmailVerificationAge.Minutes() {
 			// sent new email
 			if _, err := h.SendVerificationEmail(ctx, req); err != nil {
-				return &go_block.UserResponse{}, err
+				return &go_block.UserResponse{}, fmt.Errorf("could not send email with err: %v", err)
 			}
 		}
 		return &go_block.UserResponse{
@@ -41,16 +42,16 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	// issue access and refresh token pair
 	refreshToken, refreshClaims, err := h.token.GenerateToken(privateKey, resp.User.Id, "", token.TokenTypeRefresh, refreshTokenExpiry)
 	if err != nil {
-		return &go_block.UserResponse{}, err
+		return &go_block.UserResponse{}, fmt.Errorf("could generate refresh token with err: %v", err)
 	}
 	accessToken, accessClaims, err := h.token.GenerateToken(privateKey, resp.User.Id, refreshClaims.UserId, token.TokenTypeAccess, accessTokenExpiry)
 	if err != nil {
-		return &go_block.UserResponse{}, err
+		return &go_block.UserResponse{}, fmt.Errorf("could generate access token with err: %v", err)
 	}
 	// setup token database
 	tokens, err := h.repository.Tokens(ctx, req.Namespace)
 	if err != nil {
-		return &go_block.UserResponse{}, err
+		return &go_block.UserResponse{}, fmt.Errorf("could setup tokens with err: %v", err)
 	}
 	// build data for token
 	loggedInFrom := &go_block.Location{}
@@ -68,7 +69,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		DeviceInfo:   deviceInfo,
 		Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
 	}); err != nil {
-		return &go_block.UserResponse{}, err
+		return &go_block.UserResponse{}, fmt.Errorf("could create refresh token with err: %v", err)
 	}
 	// create access token in database
 	if _, err := tokens.Create(ctx, &go_block.Token{
@@ -79,7 +80,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		DeviceInfo:   deviceInfo,
 		Type:         go_block.TokenType_TOKEN_TYPE_ACCESS,
 	}); err != nil {
-		return &go_block.UserResponse{}, err
+		return &go_block.UserResponse{}, fmt.Errorf("could create refresh token with err: %v", err)
 	}
 	return &go_block.UserResponse{
 		Token: &go_block.Token{

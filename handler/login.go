@@ -18,6 +18,13 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	}
 	// if email validation is required and email is not verified; return error
 	if resp.User.RequireEmailVerification && resp.User.EmailIsVerified == false {
+		// check if we should send a new email
+		if time.Now().Sub(resp.User.VerificationEmailSentAt.AsTime()).Minutes() > maxEmailVerificationAge.Minutes() {
+			// sent new email
+			if _, err := h.SendVerificationEmail(ctx, req); err != nil {
+				return &go_block.UserResponse{}, err
+			}
+		}
 		return &go_block.UserResponse{
 			Error: go_block.ErrorType_ERROR_EMAIL_IS_NOT_VERIFIED,
 		}, nil //status.Error(codes.Code(go_block.ErrorType_ERROR_EMAIL_IS_NOT_VERIFIED), "user has not verified his/her email")

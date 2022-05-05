@@ -26,6 +26,7 @@ var (
 	privateKey                     *rsa.PrivateKey
 	emailVerificationTemplatePath  = ""
 	emailResetPasswordTemplatePath = ""
+	maxEmailVerificationAge        = time.Minute * 15
 )
 
 type Handler interface {

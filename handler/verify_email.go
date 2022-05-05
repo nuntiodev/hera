@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
@@ -25,6 +26,7 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_block.UserRequ
 	if time.Now().Sub(get.VerificationEmailSentAt.AsTime()).Minutes() > maxEmailVerificationAge.Minutes() {
 		return &go_block.UserResponse{}, errors.New("verification email has expired, send a new one or login again")
 	}
+	fmt.Println(get.VerificationCode, req.EmailVerificationCode)
 	if err := bcrypt.CompareHashAndPassword([]byte(get.VerificationCode), []byte(strings.TrimSpace(req.EmailVerificationCode))); err != nil {
 		return &go_block.UserResponse{}, err
 	}

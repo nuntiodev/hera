@@ -2,6 +2,7 @@ package user_repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -17,6 +18,7 @@ func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, use
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(user.VerificationCode)
 	hashedCode, err := bcrypt.GenerateFromPassword([]byte(user.VerificationCode), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err

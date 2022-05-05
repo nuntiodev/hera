@@ -10,9 +10,11 @@ import (
 )
 
 var (
-	EmailSender Sender
-	templates   = map[string]bool{}
-	emailFrom   = ""
+	EmailSender                    Sender
+	templates                      = map[string]bool{}
+	emailFrom                      = ""
+	emailVerificationTemplatePath  = ""
+	emailResetPasswordTemplatePath = ""
 )
 
 type TemplateData struct {
@@ -81,6 +83,16 @@ func initialize() error {
 	for _, val := range strings.Fields(emailTemplatePaths) {
 		templates[val] = true
 	}
+	emailVerificationTemplatePath, ok = os.LookupEnv("EMAIL_VERIFICATION_TEMPLATE_PATH")
+	if !ok || emailVerificationTemplatePath == "" {
+		return errors.New("missing required EMAIL_VERIFICATION_TEMPLATE_PATH")
+	}
+	emailResetPasswordTemplatePath, ok = os.LookupEnv("EMAIL_RESET_PASSWORD_TEMPLATE_PATH")
+	if !ok || emailResetPasswordTemplatePath == "" {
+		return errors.New("missing required EMAIL_RESET_PASSWORD_TEMPLATE_PATH")
+	}
+	templates[emailVerificationTemplatePath] = true
+	templates[emailResetPasswordTemplatePath] = true
 	return nil
 }
 

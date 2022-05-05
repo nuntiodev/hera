@@ -63,11 +63,12 @@ func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.C
 		if err := c.EncryptConfig(actionCreate, create); err != nil {
 			return nil, err
 		}
-		config.InternalEncryptionLevel = int32(len(c.internalEncryptionKeys))
+		create.InternalEncryptionLevel = int32(len(c.internalEncryptionKeys))
 	}
 	if _, err := c.collection.InsertOne(ctx, create); err != nil {
 		return nil, err
 	}
 	// set created fields
+	config.InternalEncryptionLevel = create.InternalEncryptionLevel
 	return config, nil
 }

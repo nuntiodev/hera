@@ -35,21 +35,16 @@ func (r *mongodbRepository) UpdateEmailVerified(ctx context.Context, get *go_blo
 			"updated_at":        updateUser.UpdatedAt,
 		},
 	}
-	result := r.collection.FindOneAndUpdate(
+	if _, err := r.collection.UpdateOne(
 		ctx,
 		filter,
 		mongoUpdate,
-	)
-	if err := result.Err(); err != nil {
-		return nil, err
-	}
-	var resp User
-	if err := result.Decode(&resp); err != nil {
+	); err != nil {
 		return nil, err
 	}
 	// set updated fields
-	resp.EmailVerifiedAt = updateUser.EmailVerifiedAt
-	resp.EmailIsVerified = updateUser.EmailIsVerified
-	resp.UpdatedAt = updateUser.UpdatedAt
-	return UserToProtoUser(&resp), nil
+	get.EmailVerifiedAt = ts.New(updateUser.EmailVerifiedAt)
+	get.EmailIsVerified = updateUser.EmailIsVerified
+	get.UpdatedAt = ts.New(updateUser.UpdatedAt)
+	return get, nil
 }

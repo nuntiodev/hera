@@ -25,8 +25,8 @@ func (r *mongodbRepository) UpdateResetPasswordEmailSent(ctx context.Context, us
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"email_reset_password_code":    user.EmailResetPasswordCode,
-			"reset_password_email_sent_at": time.Now(),
-			"updated_at":                   time.Now(),
+			"reset_password_email_sent_at": time.Now().UTC(),
+			"updated_at":                   time.Now().UTC(),
 		},
 	}
 	result := r.collection.FindOneAndUpdate(
@@ -42,7 +42,7 @@ func (r *mongodbRepository) UpdateResetPasswordEmailSent(ctx context.Context, us
 		return nil, err
 	}
 	// set updated fields
-	resp.ResetPasswordEmailSentAt = time.Now()
-	resp.UpdatedAt = time.Now()
+	resp.ResetPasswordEmailSentAt = time.Now().UTC()
+	resp.UpdatedAt = time.Now().UTC()
 	return UserToProtoUser(&resp), nil
 }

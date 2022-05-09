@@ -29,7 +29,7 @@ func (c *defaultConfigRepository) UpdateDetails(ctx context.Context, config *go_
 		"$set": bson.M{
 			"name":       update.Name,
 			"logo":       update.Logo,
-			"updated_at": time.Now(),
+			"updated_at": time.Now().UTC(),
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {

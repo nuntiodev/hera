@@ -43,7 +43,7 @@ func (c *defaultConfigRepository) UpdateRegisterText(ctx context.Context, config
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"register_text": updateRegisterText,
-			"updated_at":    time.Now(),
+			"updated_at":    time.Now().UTC(),
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {

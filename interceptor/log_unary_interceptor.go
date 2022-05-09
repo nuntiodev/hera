@@ -8,7 +8,7 @@ import (
 )
 
 func (i *DefaultInterceptor) WithLogUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	start := time.Now()
+	start := time.Now().UTC()
 	h, err := handler(ctx, req) // make actual request
 	if err != nil {
 		i.zapLog.Error(fmt.Sprintf("Method:%s	Duration:%s   Error:%v",

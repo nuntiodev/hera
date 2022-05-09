@@ -68,7 +68,7 @@ func getToken(token *go_block.Token) *go_block.Token {
 		token.DeviceInfo = gofakeit.Phone()
 	}
 	if token.ExpiresAt == nil || token.ExpiresAt.IsValid() == false {
-		token.ExpiresAt = ts.New(time.Now().Add(expiresAfter))
+		token.ExpiresAt = ts.New(time.Now().UTC().Add(expiresAfter))
 	}
 	token.LoggedInFrom = &go_block.Location{
 		Country:     gofakeit.Country(),

@@ -23,7 +23,7 @@ func (e *defaultEmailRepository) upgradeEncryptionLevel(ctx context.Context, ema
 			"subject":                   email.Subject,
 			"template_path":             email.TemplatePath,
 			"internal_encryption_level": int32(len(e.internalEncryptionKeys)),
-			"updated_at":                time.Now(),
+			"updated_at":                time.Now().UTC(),
 		},
 	}
 	if _, err := e.collection.UpdateOne(ctx, bson.M{"_id": email.Id}, mongoUpdate); err != nil {

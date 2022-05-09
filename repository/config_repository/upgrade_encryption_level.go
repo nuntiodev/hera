@@ -71,7 +71,7 @@ func (c *defaultConfigRepository) upgradeEncryptionLevel(ctx context.Context, co
 			"register_text":             updateLoginText,
 			"login_text":                updateRegisterText,
 			"internal_encryption_level": int32(len(c.internalEncryptionKeys)),
-			"updated_at":                time.Now(),
+			"updated_at":                time.Now().UTC(),
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {

@@ -19,6 +19,8 @@ func (h *defaultHandler) Create(ctx context.Context, req *go_block.UserRequest) 
 	// we cannot send an email if the email provider is not enabled
 	if !h.emailEnabled && namespaceConfig.RequireEmailVerification {
 		return &go_block.UserResponse{}, errors.New("email provider is not enabled and verification email cannot be sent")
+	} else if namespaceConfig.RequireEmailVerification && req.User.Email == "" {
+		return &go_block.UserResponse{}, errors.New("require email verification is enabled and user email is empty")
 	}
 	// set default fields
 	req.User.RequireEmailVerification = namespaceConfig.RequireEmailVerification

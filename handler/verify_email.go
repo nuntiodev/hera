@@ -19,7 +19,7 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_block.UserRequ
 	if get.EmailIsVerified {
 		return &go_block.UserResponse{}, errors.New("email is already verified")
 	}
-	if get.VerificationCode == "" {
+	if get.EmailVerificationCode == "" {
 		return &go_block.UserResponse{}, errors.New("verification email has not been sent")
 	}
 	if req.EmailVerificationCode == "" {
@@ -28,7 +28,7 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_block.UserRequ
 	if time.Now().Sub(get.VerificationEmailSentAt.AsTime()).Minutes() > maxEmailVerificationAge.Minutes() {
 		return &go_block.UserResponse{}, errors.New("verification email has expired, send a new one or login again")
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(get.VerificationCode), []byte(strings.TrimSpace(req.EmailVerificationCode))); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(get.EmailVerificationCode), []byte(strings.TrimSpace(req.EmailVerificationCode))); err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	users, err := h.repository.Users().SetNamespace(req.Namespace).Build(ctx)

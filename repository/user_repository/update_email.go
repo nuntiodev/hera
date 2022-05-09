@@ -35,6 +35,7 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 	// transfer data from get to update
 	updateUser.ExternalEncryptionLevel = int(get.ExternalEncryptionLevel)
 	updateUser.InternalEncryptionLevel = int(get.InternalEncryptionLevel)
+	updateUser.EmailIsVerified = false
 	// encrypt user if user has previously been encrypted
 	if updateUser.InternalEncryptionLevel > 0 || updateUser.ExternalEncryptionLevel > 0 {
 		if err := r.encryptUser(ctx, actionUpdateEmail, updateUser); err != nil {
@@ -44,9 +45,10 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 	updateUser.EmailHash = emailHash
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"email":      updateUser.Email,
-			"email_hash": updateUser.EmailHash,
-			"updated_at": updateUser.UpdatedAt,
+			"email":             updateUser.Email,
+			"email_is_verified": updateUser.EmailIsVerified,
+			"email_hash":        updateUser.EmailHash,
+			"updated_at":        updateUser.UpdatedAt,
 		},
 	}
 	updateResult, err := r.collection.UpdateOne(
@@ -63,5 +65,6 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 	// set updated fields
 	get.Email = update.Email
 	get.UpdatedAt = ts.New(updateUser.UpdatedAt)
+	get.EmailIsVerified = false
 	return get, nil
 }

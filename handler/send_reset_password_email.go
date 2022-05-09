@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	if !h.emailEnabled {
 		return nil, errors.New("email provider is not enabled")
 	}
@@ -24,9 +24,7 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_bloc
 	if get.Email == "" {
 		return &go_block.UserResponse{}, errors.New("user do not have an email - set the email for the user")
 	}
-	if get.EmailIsVerified {
-		return &go_block.UserResponse{}, errors.New("email is already verified")
-	}
+
 	// generate verification code and send it to the user
 	emails, err := h.repository.Emails(ctx, req.Namespace) // email config containing text to send
 	if err != nil {

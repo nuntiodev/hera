@@ -17,14 +17,14 @@ func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, use
 	if err != nil {
 		return nil, err
 	}
-	hashedCode, err := bcrypt.GenerateFromPassword([]byte(user.VerificationCode), bcrypt.DefaultCost)
+	hashedCode, err := bcrypt.GenerateFromPassword([]byte(user.EmailVerificationCode), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
-	user.VerificationCode = string(hashedCode)
+	user.EmailVerificationCode = string(hashedCode)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"verification_code":          user.VerificationCode,
+			"email_verification_code":    user.EmailVerificationCode,
 			"verification_email_sent_at": time.Now(),
 			"updated_at":                 time.Now(),
 		},

@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	if !h.emailEnabled {
 		return nil, errors.New("email provider is not enabled")
 	}

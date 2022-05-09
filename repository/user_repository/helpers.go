@@ -42,7 +42,7 @@ func prepare(action int, user *go_block.User) {
 	user.Image = strings.TrimSpace(user.Image)
 	user.OptionalId = strings.TrimSpace(user.OptionalId)
 	user.Metadata = strings.TrimSpace(user.Metadata)
-	user.VerificationCode = strings.TrimSpace(user.VerificationCode)
+	user.EmailVerificationCode = strings.TrimSpace(user.EmailVerificationCode)
 }
 
 func (r *mongodbRepository) validate(action int, user *go_block.User) error {
@@ -93,7 +93,7 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 	case actionUpdateVerificationEmailSent:
 		if user.Id == "" && user.Email == "" && user.OptionalId == "" {
 			return errors.New("missing required search parameter")
-		} else if user.VerificationCode == "" {
+		} else if user.EmailVerificationCode == "" {
 			return errors.New("missing required verification code")
 		}
 	case actionGetAll, actionUpdateOptionalId:

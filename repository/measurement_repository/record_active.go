@@ -47,13 +47,11 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		userActiveHistory.UserId = getUserHash(measurement.UserId)
 	}
 	if _, ok := userActiveHistory.Data[month]; !ok {
-		userActiveHistory.Data = map[int32]*go_block.ActiveHistoryData{
-			month: {
-				Seconds: 0,
-				Points:  0,
-				From:    map[string]*go_block.CityHistoryMap{},
-				Device:  map[string]int32{},
-			},
+		userActiveHistory.Data[month] = &go_block.ActiveHistoryData{
+			Seconds: 0,
+			Points:  0,
+			From:    map[string]*go_block.CityHistoryMap{},
+			Device:  map[string]int32{},
 		}
 	}
 	// make sure data is initialized

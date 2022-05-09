@@ -2,8 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/nuntiodev/block-proto/go_block"
 )
 
@@ -21,7 +19,6 @@ func (h *defaultHandler) UpdatePassword(ctx context.Context, req *go_block.UserR
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	fmt.Println(req.String())
 	updatedUser, err := users.UpdatePassword(ctx, req.User, req.Update)
 	if err != nil {
 		return &go_block.UserResponse{}, err

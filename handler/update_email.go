@@ -27,6 +27,9 @@ func (h *defaultHandler) UpdateEmail(ctx context.Context, req *go_block.UserRequ
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
+	// set default fields
+	req.Update.RequireEmailVerification = namespaceConfig.RequireEmailVerification
+	// perform update
 	updatedUser, err := users.UpdateEmail(ctx, req.User, req.Update)
 	if err != nil {
 		return nil, err

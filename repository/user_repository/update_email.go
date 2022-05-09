@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,13 +30,15 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 		return nil, err
 	}
 	updateUser := ProtoUserToUser(&go_block.User{
-		Email:     update.Email,
-		UpdatedAt: update.UpdatedAt,
+		Email:                    update.Email,
+		UpdatedAt:                update.UpdatedAt,
+		RequireEmailVerification: update.RequireEmailVerification,
 	})
 	// transfer data from get to update
 	updateUser.ExternalEncryptionLevel = int(get.ExternalEncryptionLevel)
 	updateUser.InternalEncryptionLevel = int(get.InternalEncryptionLevel)
 	updateUser.EmailIsVerified = false
+	updateUser.VerificationEmailSentAt = time.Time{}
 	// encrypt user if user has previously been encrypted
 	if updateUser.InternalEncryptionLevel > 0 || updateUser.ExternalEncryptionLevel > 0 {
 		if err := r.encryptUser(ctx, actionUpdateEmail, updateUser); err != nil {
@@ -45,10 +48,12 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 	updateUser.EmailHash = emailHash
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"email":             updateUser.Email,
-			"email_is_verified": updateUser.EmailIsVerified,
-			"email_hash":        updateUser.EmailHash,
-			"updated_at":        updateUser.UpdatedAt,
+			"email":                      updateUser.Email,
+			"email_is_verified":          updateUser.EmailIsVerified,
+			"verification_email_sent_at": updateUser.VerificationEmailSentAt,
+			"require_email_verification": updateUser.RequireEmailVerification,
+			"email_hash":                 updateUser.EmailHash,
+			"updated_at":                 updateUser.UpdatedAt,
 		},
 	}
 	updateResult, err := r.collection.UpdateOne(

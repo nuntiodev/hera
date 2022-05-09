@@ -27,6 +27,7 @@ func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, use
 			"email_verification_code":       user.EmailVerificationCode,
 			"verification_email_sent_at":    time.Now().UTC(),
 			"verification_email_expires_at": time.Now().UTC().Add(time.Minute * 15),
+			"verify_email_attempts":         int32(0),
 			"updated_at":                    time.Now().UTC(),
 		},
 	}

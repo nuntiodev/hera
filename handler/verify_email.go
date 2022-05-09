@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/helpers"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
@@ -28,15 +29,15 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_block.UserRequ
 	if time.Now().UTC().Sub(get.VerificationEmailSentAt.AsTime()).Minutes() > maxEmailVerificationAge.Minutes() {
 		return &go_block.UserResponse{}, errors.New("verification email has expired, send a new one or login again")
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(get.EmailVerificationCode), []byte(strings.TrimSpace(req.EmailVerificationCode))); err != nil {
-		return &go_block.UserResponse{}, err
-	}
+	// provide exponential backoff
+	time.Sleep(helpers.GetExponentialBackoff(float64(get.VerifyEmailAttempts)))
+	bcryptErr := bcrypt.CompareHashAndPassword([]byte(get.EmailVerificationCode), []byte(strings.TrimSpace(req.EmailVerificationCode)))
 	users, err := h.repository.Users().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	if _, err := users.UpdateEmailVerified(ctx, get, &go_block.User{
-		EmailIsVerified: true,
+		EmailIsVerified: bcryptErr == nil,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

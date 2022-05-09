@@ -10,30 +10,30 @@ type User struct {
 	Id                          string    `bson:"_id" json:"id"`
 	OptionalId                  string    `bson:"optional_id" json:"optional_id"`
 	Email                       string    `bson:"email" json:"email"`
+	EmailHash                   string    `bson:"email_hash" json:"email_hash"`
 	Password                    string    `bson:"password" json:"password"`
 	Image                       string    `bson:"image" json:"image"`
-	FirstName                   string    `bson:"first_name" json:"first_name"`
-	LastName                    string    `bson:"last_name" json:"last_name"`
-	Birthdate                   string    `bson:"birthdate" json:"birthdate"`
-	EmailHash                   string    `bson:"email_hash" json:"email_hash"`
+	InternalEncryptionLevel     int       `bson:"internal_encryption_level" json:"internal_encryption_level"`
+	ExternalEncryptionLevel     int       `bson:"external_encryption_level" json:"external_encryption_level"`
 	Metadata                    string    `bson:"metadata" json:"metadata"`
 	CreatedAt                   time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt                   time.Time `bson:"updated_at" json:"updated_at"`
 	EncryptedAt                 time.Time `bson:"encrypted_at" json:"encrypted_at"`
-	InternalEncryptionLevel     int       `bson:"internal_encryption_level" json:"internal_encryption_level"`
-	ExternalEncryptionLevel     int       `bson:"external_encryption_level" json:"external_encryption_level"`
-	VerificationEmailSentAt     time.Time `bson:"verification_email_sent_at" json:"verification_email_sent_at"`
+	RequireEmailVerification    bool      `bson:"require_email_verification" json:"require_email_verification"`
+	FirstName                   string    `bson:"first_name" json:"first_name"`
+	LastName                    string    `bson:"last_name" json:"last_name"`
+	Birthdate                   string    `bson:"birthdate" json:"birthdate"`
 	EmailVerifiedAt             time.Time `bson:"email_verified_at" json:"email_verified_at"`
 	EmailIsVerified             bool      `bson:"email_is_verified" json:"email_is_verified"`
-	RequireEmailVerification    bool      `bson:"require_email_verification" json:"require_email_verification"`
+	VerificationEmailSentAt     time.Time `bson:"verification_email_sent_at" json:"verification_email_sent_at"`
 	EmailVerificationCode       string    `bson:"email_verification_code" json:"email_verification_code"`
 	VerificationEmailExpiresAt  time.Time `bson:"verification_email_expires_at" json:"verification_email_expires_at"`
-	EmailResetPasswordCode      string    `bson:"email_reset_password_code" json:"email_reset_password_code"`
+	VerifyEmailAttempts         int32     `bson:"verify_email_attempts" json:"verify_email_attempts"`
+	ResetPasswordCode           string    `bson:"reset_password_code" json:"reset_password_code"`
 	ResetPasswordEmailSentAt    time.Time `bson:"reset_password_email_sent_at" json:"reset_password_email_sent_at"`
 	ResetPasswordEmailExpiresAt time.Time `bson:"reset_password_email_expires_at" json:"reset_password_email_expires_at"`
+	ResetPasswordAttempts       int32     `bson:"reset_password_attempts" json:"reset_password_attempts"`
 }
-
-//todo: add expiresAt fields that is set when required email verification is set
 
 func UserToProtoUser(user *User) *go_block.User {
 	if user == nil {
@@ -67,9 +67,11 @@ func UserToProtoUser(user *User) *go_block.User {
 		EmailIsVerified:             user.EmailIsVerified,
 		EmailVerificationCode:       user.EmailVerificationCode,
 		VerificationEmailExpiresAt:  ts.New(user.VerificationEmailExpiresAt),
-		EmailResetPasswordCode:      user.EmailResetPasswordCode,
+		ResetPasswordCode:           user.ResetPasswordCode,
 		ResetPasswordEmailSentAt:    ts.New(user.ResetPasswordEmailSentAt),
 		ResetPasswordEmailExpiresAt: ts.New(user.ResetPasswordEmailExpiresAt),
+		ResetPasswordAttempts:       user.ResetPasswordAttempts,
+		VerifyEmailAttempts:         user.VerifyEmailAttempts,
 	}
 }
 
@@ -102,8 +104,10 @@ func ProtoUserToUser(user *go_block.User) *User {
 		RequireEmailVerification:    user.RequireEmailVerification,
 		EmailVerificationCode:       user.EmailVerificationCode,
 		VerificationEmailExpiresAt:  user.VerificationEmailExpiresAt.AsTime(),
-		EmailResetPasswordCode:      user.EmailResetPasswordCode,
+		ResetPasswordCode:           user.ResetPasswordCode,
 		ResetPasswordEmailSentAt:    user.ResetPasswordEmailSentAt.AsTime(),
 		ResetPasswordEmailExpiresAt: user.ResetPasswordEmailExpiresAt.AsTime(),
+		ResetPasswordAttempts:       user.ResetPasswordAttempts,
+		VerifyEmailAttempts:         user.VerifyEmailAttempts,
 	}
 }

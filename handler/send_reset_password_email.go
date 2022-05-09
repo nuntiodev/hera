@@ -24,7 +24,6 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_blo
 	if get.Email == "" {
 		return &go_block.UserResponse{}, errors.New("user do not have an email - set the email for the user")
 	}
-
 	// generate verification code and send it to the user
 	emails, err := h.repository.Emails(ctx, req.Namespace) // email config containing text to send
 	if err != nil {
@@ -69,8 +68,8 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_blo
 	}
 	get.EmailVerificationCode = string(resetPasswordCode)
 	if _, err := users.UpdateResetPasswordEmailSent(ctx, &go_block.User{
-		EmailResetPasswordCode: string(resetPasswordCode),
-		Id:                     get.Id,
+		ResetPasswordCode: string(resetPasswordCode),
+		Id:                get.Id,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

@@ -99,8 +99,8 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 	case actionUpdateResetPasswordEmailSent:
 		if user.Id == "" && user.Email == "" && user.OptionalId == "" {
 			return errors.New("missing required search parameter")
-		} else if user.EmailResetPasswordCode == "" {
-			return errors.New("missing required verification code")
+		} else if user.ResetPasswordCode == "" {
+			return errors.New("missing required reset password code")
 		}
 	case actionGetAll, actionUpdateOptionalId:
 		return nil

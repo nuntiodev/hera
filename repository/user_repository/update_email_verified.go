@@ -9,9 +9,6 @@ import (
 
 func (r *mongodbRepository) UpdateEmailVerified(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
 	prepare(actionGet, get)
-	if err := r.validate(actionGet, get); err != nil {
-		return nil, err
-	}
 	prepare(actionUpdateEmailVerified, update)
 	if err := r.validate(actionUpdateEmailVerified, update); err != nil {
 		return nil, err
@@ -34,6 +31,7 @@ func (r *mongodbRepository) UpdateEmailVerified(ctx context.Context, get *go_blo
 			"email_verified_at": updateUser.EmailVerifiedAt,
 			"updated_at":        updateUser.UpdatedAt,
 		},
+		"$inc": bson.D{{"verify_email_attempts", 1}},
 	}
 	if _, err := r.collection.UpdateOne(
 		ctx,

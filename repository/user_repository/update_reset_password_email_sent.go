@@ -17,16 +17,18 @@ func (r *mongodbRepository) UpdateResetPasswordEmailSent(ctx context.Context, us
 	if err != nil {
 		return nil, err
 	}
-	hashedCode, err := bcrypt.GenerateFromPassword([]byte(user.EmailResetPasswordCode), bcrypt.DefaultCost)
+	hashedCode, err := bcrypt.GenerateFromPassword([]byte(user.ResetPasswordCode), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
-	user.EmailResetPasswordCode = string(hashedCode)
+	user.ResetPasswordCode = string(hashedCode)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"email_reset_password_code":    user.EmailResetPasswordCode,
-			"reset_password_email_sent_at": time.Now().UTC(),
-			"updated_at":                   time.Now().UTC(),
+			"reset_password_code":             user.ResetPasswordCode,
+			"reset_password_email_sent_at":    time.Now().UTC(),
+			"reset_password_email_expires_at": time.Now().UTC().Add(time.Minute * 15),
+			"reset_password_attempts":         int32(0),
+			"updated_at":                      time.Now().UTC(),
 		},
 	}
 	result := r.collection.FindOneAndUpdate(

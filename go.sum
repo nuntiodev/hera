@@ -284,6 +284,8 @@ github.com/nuntiodev/block-proto v0.2.13 h1:dl7uCLOQAjQ9YsqSeF2QpuXERnouchbeSvmV
 github.com/nuntiodev/block-proto v0.2.13/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
 github.com/nuntiodev/block-proto v0.2.14 h1:+PMw2Vf6IE1D44FC5Q9UqVXvuaG8YTw2o/i5SyD68Mk=
 github.com/nuntiodev/block-proto v0.2.14/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
+github.com/nuntiodev/block-proto v0.2.15 h1:txWF5cYod46K3atKyWhx8uI8rBSQ+p8QQNlXo8KtYos=
+github.com/nuntiodev/block-proto v0.2.15/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
 github.com/nuntiodev/x v0.2.2 h1:iT5mN5dLZTlo/Hc/bTixHbcwOaIwrXmztgS0+25NFjE=
 github.com/nuntiodev/x v0.2.2/go.mod h1:jaFmwyUkU2G1Mtvn+YlvmVpg+SEEc/v/NxRhueZ7p9Q=
 github.com/nuntiodev/x v0.2.3 h1:JfXbalPR9PGNhaPMO9VP4vfDFP5vMI2AofSnXj/sg+g=

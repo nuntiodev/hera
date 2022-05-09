@@ -29,6 +29,10 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 	if err != nil {
 		return nil, err
 	}
+	// validate update is required
+	if get.Email == emailHash {
+		return nil, errors.New("email is identiacal to current email")
+	}
 	updateUser := ProtoUserToUser(&go_block.User{
 		Email:                    update.Email,
 		UpdatedAt:                update.UpdatedAt,

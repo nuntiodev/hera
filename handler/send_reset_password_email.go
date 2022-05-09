@@ -34,12 +34,12 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_blo
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	verificationCode, err := hex.DecodeString(randomCode)
+	resetPasswordCode, err := hex.DecodeString(randomCode)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	emailConfig, err := emails.Get(ctx, &go_block.Email{
-		Id: email_repository.VerificationEmail,
+		Id: email_repository.ResetPasswordEmail,
 	})
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_blo
 		nameOfUser = strings.TrimSpace(get.FirstName + " " + get.LastName)
 	}
 	if err := h.email.SendVerificationEmail(get.Email, emailConfig.Subject, emailConfig.TemplatePath, &email.VerificationData{
-		Code: string(verificationCode),
+		Code: string(resetPasswordCode),
 		TemplateData: email.TemplateData{
 			LogoUrl:        emailConfig.Logo,
 			WelcomeMessage: emailConfig.WelcomeMessage,
@@ -67,10 +67,10 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_blo
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	get.EmailVerificationCode = string(verificationCode)
-	if _, err := users.UpdateVerificationEmailSent(ctx, &go_block.User{
-		EmailVerificationCode: string(verificationCode),
-		Id:                    get.Id,
+	get.EmailVerificationCode = string(resetPasswordCode)
+	if _, err := users.UpdateResetPasswordEmailSent(ctx, &go_block.User{
+		EmailResetPasswordCode: string(resetPasswordCode),
+		Id:                     get.Id,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

@@ -24,9 +24,10 @@ func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, use
 	user.EmailVerificationCode = string(hashedCode)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"email_verification_code":    user.EmailVerificationCode,
-			"verification_email_sent_at": time.Now(),
-			"updated_at":                 time.Now(),
+			"email_verification_code":       user.EmailVerificationCode,
+			"verification_email_sent_at":    time.Now(),
+			"verification_email_expires_at": time.Now().Add(time.Minute * 15),
+			"updated_at":                    time.Now(),
 		},
 	}
 	result := r.collection.FindOneAndUpdate(

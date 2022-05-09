@@ -28,10 +28,9 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		}
 		return &go_block.UserResponse{
 			LoginSession: &go_block.LoginSession{
-				LoginStatus: go_block.LoginStatus_EMAIL_IS_NOT_VERIFIED,
-			},
-			User: &go_block.User{
-				VerificationEmailSentAt: resp.User.VerificationEmailSentAt,
+				LoginStatus:    go_block.LoginStatus_EMAIL_IS_NOT_VERIFIED,
+				EmailSentAt:    resp.User.VerificationEmailSentAt,
+				EmailExpiresAt: resp.User.VerificationEmailExpiresAt,
 			},
 		}, nil //status.Error(codes.Code(go_block.ErrorType_ERROR_EMAIL_IS_NOT_VERIFIED), "user has not verified his/her email")
 	}

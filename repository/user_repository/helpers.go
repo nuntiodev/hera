@@ -32,7 +32,7 @@ func prepare(action int, user *go_block.User) {
 	case actionUpdatePassword, actionUpdateImage, actionUpdateMetadata,
 		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,
 		actionUpdateOptionalId, actionUpdateName, actionUpdateBirthdate,
-		actionUpdateEmailVerified, actionUpdateVerificationEmailSent:
+		actionUpdateEmailVerified, actionUpdateVerificationEmailSent, actionUpdateResetPasswordEmailSent:
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
@@ -94,6 +94,12 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 		if user.Id == "" && user.Email == "" && user.OptionalId == "" {
 			return errors.New("missing required search parameter")
 		} else if user.EmailVerificationCode == "" {
+			return errors.New("missing required verification code")
+		}
+	case actionUpdateResetPasswordEmailSent:
+		if user.Id == "" && user.Email == "" && user.OptionalId == "" {
+			return errors.New("missing required search parameter")
+		} else if user.EmailResetPasswordCode == "" {
 			return errors.New("missing required verification code")
 		}
 	case actionGetAll, actionUpdateOptionalId:

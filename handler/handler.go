@@ -55,6 +55,8 @@ type Handler interface {
 	NamespaceActiveHistory(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	SendVerificationEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	VerifyEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	SendResetPasswordEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	ResetPassword(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteBatch(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteNamespace(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)

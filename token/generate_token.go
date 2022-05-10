@@ -13,7 +13,7 @@ import (
 func (c *defaultToken) GenerateToken(privateKey *rsa.PrivateKey, userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_block.CustomClaims, error) {
 	expiresAtInt64 := int64(0)
 	if expiresAt.Seconds() != 0 {
-		expiresAtInt64 = time.Now().UTC().UTC().Add(expiresAt).Unix()
+		expiresAtInt64 = time.Now().Add(expiresAt).Unix()
 	}
 	if tokenType != TokenTypeAccess && tokenType != TokenTypeRefresh {
 		return "", nil, errors.New("invalid token type")

@@ -26,14 +26,14 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	measurement.UserId = strings.TrimSpace(measurement.UserId)
 	// set default fields
 	measurement.CreatedAt = ts.Now()
-	measurement.ExpiresAt = ts.New(time.Now().UTC().Add(activeMeasurementExpiresAt))
+	measurement.ExpiresAt = ts.New(time.Now().Add(activeMeasurementExpiresAt))
 	// create in active measurement collection
 	create := ProtoActiveMeasurementToActiveMeasurement(measurement)
 	if _, err := dmr.userActiveMeasurementCollection.InsertOne(ctx, create); err != nil {
 		return nil, err
 	}
 	// create in user history collection
-	now := time.Now().UTC()
+	now := time.Now()
 	year := int32(now.Year())
 	month := int32(now.Month())
 	userActiveHistory, alreadyCreated, err := dmr.GetUserActiveHistory(ctx, year, measurement.UserId)

@@ -12,7 +12,7 @@ func (h *defaultHandler) NamespaceActiveHistory(ctx context.Context, req *go_blo
 	if err != nil {
 		return nil, err
 	}
-	resp, err := measurements.GetNamespaceActiveHistory(ctx, int32(time.Now().UTC().Year()))
+	resp, err := measurements.GetNamespaceActiveHistory(ctx, int32(time.Now().Year()))
 	if err != nil {
 		return nil, err
 	}

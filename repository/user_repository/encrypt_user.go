@@ -19,7 +19,7 @@ func (r *mongodbRepository) encryptUser(ctx context.Context, action int, user *U
 				return err
 			}
 			user.ExternalEncryptionLevel = 1
-			user.EncryptedAt = time.Now().UTC()
+			user.EncryptedAt = time.Now()
 		}
 		// then encrypt using internal key
 		if len(r.internalEncryptionKeys) > 0 {
@@ -32,14 +32,14 @@ func (r *mongodbRepository) encryptUser(ctx context.Context, action int, user *U
 				return err
 			}
 			user.InternalEncryptionLevel = len(r.internalEncryptionKeys)
-			user.EncryptedAt = time.Now().UTC()
+			user.EncryptedAt = time.Now()
 		}
 	case actionUpdateEmail, actionUpdateImage, actionUpdateSecurity, actionUpdateMetadata, actionUpdateName, actionUpdateBirthdate:
 		if user.ExternalEncryptionLevel > 0 && r.externalEncryptionKey != "" {
 			if err := r.encrypt(user, r.externalEncryptionKey); err != nil {
 				return err
 			}
-			user.EncryptedAt = time.Now().UTC()
+			user.EncryptedAt = time.Now()
 		}
 		if user.InternalEncryptionLevel > 0 && len(r.internalEncryptionKeys) > 0 {
 			encryptionKey, err := r.crypto.CombineSymmetricKeys(r.internalEncryptionKeys, user.InternalEncryptionLevel)
@@ -49,7 +49,7 @@ func (r *mongodbRepository) encryptUser(ctx context.Context, action int, user *U
 			if err := r.encrypt(user, encryptionKey); err != nil {
 				return err
 			}
-			user.EncryptedAt = time.Now().UTC()
+			user.EncryptedAt = time.Now()
 		}
 	default:
 		return errors.New("invalid case")
@@ -105,6 +105,6 @@ func (r *mongodbRepository) encrypt(user *User, encryptionKey string) error {
 		}
 		user.Birthdate = encBirthdate
 	}
-	user.EncryptedAt = time.Now().UTC()
+	user.EncryptedAt = time.Now()
 	return nil
 }

@@ -44,7 +44,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 	}
 	// if refresh token is about to expire (in less than 10 hours), create a new one and block the old one
 	refreshToken := req.Token.RefreshToken
-	if time.Unix(refreshClaims.ExpiresAt, 0).Sub(time.Now().UTC()) < time.Hour*10 {
+	if time.Unix(refreshClaims.ExpiresAt, 0).Sub(time.Now()) < time.Hour*10 {
 		if _, err := h.BlockToken(ctx, &go_block.UserRequest{
 			Token: &go_block.Token{
 				RefreshToken: refreshToken,

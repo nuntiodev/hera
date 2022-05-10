@@ -24,7 +24,7 @@ func (e *defaultEmailRepository) Update(ctx context.Context, email *go_block.Ema
 		if err := e.EncryptEmail(actionUpdate, update); err != nil {
 			return nil, err
 		}
-		update.EncryptedAt = time.Now().UTC()
+		update.EncryptedAt = time.Now()
 	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{

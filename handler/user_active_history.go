@@ -12,7 +12,7 @@ func (h *defaultHandler) UserActiveHistory(ctx context.Context, req *go_block.Us
 	if err != nil {
 		return nil, err
 	}
-	resp, _, err := measurements.GetUserActiveHistory(ctx, int32(time.Now().UTC().Year()), req.ActiveMeasurement.UserId)
+	resp, _, err := measurements.GetUserActiveHistory(ctx, int32(time.Now().Year()), req.ActiveMeasurement.UserId)
 	if err != nil {
 		return nil, err
 	}

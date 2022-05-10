@@ -38,7 +38,7 @@ func (r *mongodbRepository) UpdateUsedAt(ctx context.Context, token *go_block.To
 	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"used_at":        time.Now().UTC(),
+			"used_at":        time.Now(),
 			"device_info":    update.DeviceInfo,
 			"logged_in_from": update.LoggedInFrom,
 		},

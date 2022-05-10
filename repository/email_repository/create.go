@@ -25,7 +25,7 @@ func (e *defaultEmailRepository) Create(ctx context.Context, email *go_block.Ema
 			return nil, err
 		}
 		create.InternalEncryptionLevel = int32(len(e.internalEncryptionKeys))
-		create.EncryptedAt = time.Now().UTC()
+		create.EncryptedAt = time.Now()
 	}
 	if _, err := e.collection.InsertOne(ctx, create); err != nil {
 		return nil, err

@@ -20,7 +20,7 @@ func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (
 		return nil, errors.New("missing required user id")
 	} else if token.ExpiresAt == nil || token.ExpiresAt.IsValid() == false {
 		return nil, errors.New("missing required token expires at")
-	} else if token.ExpiresAt.AsTime().Sub(time.Now().UTC()).Seconds() < 0 {
+	} else if token.ExpiresAt.AsTime().Sub(time.Now()).Seconds() < 0 {
 		return nil, errors.New("expires at cannot be in the past")
 	} else if token.Type == go_block.TokenType_TOKEN_TYPE_INVALID {
 		return nil, errors.New("invalid token type")

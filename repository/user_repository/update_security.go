@@ -47,7 +47,7 @@ func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.Us
 			return nil, err
 		}
 	}
-	update.UpdatedAt = time.Now().UTC()
+	update.UpdatedAt = time.Now()
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"email":                     update.Email,

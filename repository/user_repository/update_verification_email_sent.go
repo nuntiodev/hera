@@ -25,10 +25,10 @@ func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, use
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"email_verification_code":       user.EmailVerificationCode,
-			"verification_email_sent_at":    time.Now().UTC(),
-			"verification_email_expires_at": time.Now().UTC().Add(time.Minute * 15),
+			"verification_email_sent_at":    time.Now(),
+			"verification_email_expires_at": time.Now().Add(time.Minute * 15),
 			"verify_email_attempts":         int32(0),
-			"updated_at":                    time.Now().UTC(),
+			"updated_at":                    time.Now(),
 		},
 	}
 	result := r.collection.FindOneAndUpdate(
@@ -44,8 +44,8 @@ func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, use
 		return nil, err
 	}
 	// set updated fields
-	resp.VerificationEmailSentAt = time.Now().UTC()
-	resp.VerificationEmailExpiresAt = time.Now().UTC().Add(time.Minute * 15)
-	resp.UpdatedAt = time.Now().UTC()
+	resp.VerificationEmailSentAt = time.Now()
+	resp.VerificationEmailExpiresAt = time.Now().Add(time.Minute * 15)
+	resp.UpdatedAt = time.Now()
 	return UserToProtoUser(&resp), nil
 }

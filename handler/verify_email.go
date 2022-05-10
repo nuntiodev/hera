@@ -26,7 +26,7 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_block.UserRequ
 	if req.EmailVerificationCode == "" {
 		return &go_block.UserResponse{}, errors.New("missing provided email verification code")
 	}
-	if time.Now().UTC().Sub(get.VerificationEmailSentAt.AsTime()).Minutes() > maxEmailVerificationAge.Minutes() {
+	if time.Now().Sub(get.VerificationEmailSentAt.AsTime()).Minutes() > maxEmailVerificationAge.Minutes() {
 		return &go_block.UserResponse{}, errors.New("verification email has expired, send a new one or login again")
 	}
 	// provide exponential backoff
@@ -40,6 +40,9 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_block.UserRequ
 		EmailIsVerified: bcryptErr == nil,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
+	}
+	if bcryptErr != nil {
+		return &go_block.UserResponse{}, bcryptErr
 	}
 	return &go_block.UserResponse{}, nil
 }

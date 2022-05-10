@@ -24,7 +24,7 @@ func (c *defaultConfigRepository) UpdateSettings(ctx context.Context, config *go
 			"disable_default_signup": config.DisableDefaultSignup,
 			"disable_default_login":  config.DisableDefaultLogin,
 			"validate_password":      config.ValidatePassword,
-			"updated_at":             time.Now().UTC(),
+			"updated_at":             time.Now(),
 		},
 	}
 	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {

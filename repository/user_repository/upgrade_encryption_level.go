@@ -52,8 +52,8 @@ func (r *mongodbRepository) upgradeInternalEncryptionLevel(ctx context.Context, 
 				"internal_encryption_level": update.InternalEncryptionLevel,
 				"external_encryption_level": update.ExternalEncryptionLevel,
 				"metadata":                  update.Metadata,
-				"updated_at":                time.Now().UTC(),
-				"encrypted_at":              time.Now().UTC(),
+				"updated_at":                time.Now(),
+				"encrypted_at":              time.Now(),
 			},
 		}
 		if err := r.collection.FindOneAndUpdate(

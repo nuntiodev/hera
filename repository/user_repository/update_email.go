@@ -31,7 +31,7 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 	}
 	// validate update is required
 	if get.Email == emailHash {
-		return nil, errors.New("email is identiacal to current email")
+		return nil, errors.New("email is identical to current email")
 	}
 	updateUser := ProtoUserToUser(&go_block.User{
 		Email:                    update.Email,
@@ -50,8 +50,8 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 		}
 	}
 	// check if new email already is verified previously; if so -> set to true
-	for _, emailHash := range get.VerifiedEmails {
-		if emailHash == emailHash {
+	for _, verifiedEmail := range get.VerifiedEmails {
+		if verifiedEmail == emailHash {
 			updateUser.EmailIsVerified = true
 		}
 	}

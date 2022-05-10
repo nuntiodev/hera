@@ -20,11 +20,13 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	// if email validation is required and email is not verified; return error
 	if resp.User.RequireEmailVerification && resp.User.EmailIsVerified == false {
 		// check if we should send a new email
-		if time.Now().Sub(resp.User.VerificationEmailSentAt.AsTime()).Minutes() > maxEmailVerificationAge.Minutes() {
+		if resp.User.VerificationEmailExpiresAt.AsTime().Sub(time.Now()).Seconds() <= 0 {
 			// sent new email
-			if _, err := h.SendVerificationEmail(ctx, req); err != nil {
+			verificationEmail, err := h.SendVerificationEmail(ctx, req)
+			if err != nil {
 				return &go_block.UserResponse{}, fmt.Errorf("could not send email with err: %v", err)
 			}
+			resp.User = verificationEmail.User
 		}
 		return &go_block.UserResponse{
 			LoginSession: &go_block.LoginSession{

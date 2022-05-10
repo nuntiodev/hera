@@ -70,11 +70,14 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_bloc
 		return &go_block.UserResponse{}, err
 	}
 	get.EmailVerificationCode = string(verificationCode)
-	if _, err := users.UpdateVerificationEmailSent(ctx, &go_block.User{
+	updatedUser, err := users.UpdateVerificationEmailSent(ctx, &go_block.User{
 		EmailVerificationCode: string(verificationCode),
 		Id:                    get.Id,
-	}); err != nil {
+	})
+	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	return &go_block.UserResponse{}, nil
+	return &go_block.UserResponse{
+		User: updatedUser,
+	}, nil
 }

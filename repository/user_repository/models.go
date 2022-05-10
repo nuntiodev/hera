@@ -10,7 +10,6 @@ type User struct {
 	Id                          string    `bson:"_id" json:"id"`
 	OptionalId                  string    `bson:"optional_id" json:"optional_id"`
 	Email                       string    `bson:"email" json:"email"`
-	EmailHash                   string    `bson:"email_hash" json:"email_hash"`
 	Password                    string    `bson:"password" json:"password"`
 	Image                       string    `bson:"image" json:"image"`
 	InternalEncryptionLevel     int       `bson:"internal_encryption_level" json:"internal_encryption_level"`
@@ -34,6 +33,7 @@ type User struct {
 	ResetPasswordEmailExpiresAt time.Time `bson:"reset_password_email_expires_at" json:"reset_password_email_expires_at"`
 	ResetPasswordAttempts       int32     `bson:"reset_password_attempts" json:"reset_password_attempts"`
 	VerifiedEmails              []string  `bson:"verified_emails" json:"verified_emails"`
+	EmailHash                   string    `bson:"email_hash" json:"email_hash"`
 }
 
 func UserToProtoUser(user *User) *go_block.User {
@@ -74,6 +74,7 @@ func UserToProtoUser(user *User) *go_block.User {
 		ResetPasswordAttempts:       user.ResetPasswordAttempts,
 		VerifyEmailAttempts:         user.VerifyEmailAttempts,
 		VerifiedEmails:              user.VerifiedEmails,
+		EmailHash:                   user.EmailHash,
 	}
 }
 
@@ -112,5 +113,6 @@ func ProtoUserToUser(user *go_block.User) *User {
 		ResetPasswordAttempts:       user.ResetPasswordAttempts,
 		VerifyEmailAttempts:         user.VerifyEmailAttempts,
 		VerifiedEmails:              user.VerifiedEmails,
+		EmailHash:                   user.EmailHash,
 	}
 }

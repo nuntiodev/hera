@@ -43,6 +43,7 @@ func prepare(action int, user *go_block.User) {
 	user.OptionalId = strings.TrimSpace(user.OptionalId)
 	user.Metadata = strings.TrimSpace(user.Metadata)
 	user.EmailVerificationCode = strings.TrimSpace(user.EmailVerificationCode)
+	user.EmailHash = strings.TrimSpace(user.EmailHash)
 }
 
 func (r *mongodbRepository) validate(action int, user *go_block.User) error {
@@ -93,8 +94,8 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 	case actionUpdateEmailVerified:
 		if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at")
-		} else if err := checkmail.ValidateFormat(user.Email); err != nil {
-			return err
+		} else if user.EmailHash == "" {
+			return errors.New("missing required email hash")
 		}
 	case actionUpdateVerificationEmailSent:
 		if user.Id == "" && user.Email == "" && user.OptionalId == "" {

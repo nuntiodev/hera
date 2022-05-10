@@ -42,17 +42,17 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 	updateUser.ExternalEncryptionLevel = int(get.ExternalEncryptionLevel)
 	updateUser.InternalEncryptionLevel = int(get.InternalEncryptionLevel)
 	updateUser.EmailIsVerified = false
-	// check if new email already is verified previously
-	for _, email := range get.VerifiedEmails {
-		if email == updateUser.Email {
-			updateUser.EmailIsVerified = true
-		}
-	}
 	updateUser.VerificationEmailSentAt = time.Time{}
 	// encrypt user if user has previously been encrypted
 	if updateUser.InternalEncryptionLevel > 0 || updateUser.ExternalEncryptionLevel > 0 {
 		if err := r.encryptUser(ctx, actionUpdateEmail, updateUser); err != nil {
 			return nil, err
+		}
+	}
+	// check if new email already is verified previously; if so -> set to true
+	for _, emailHash := range get.VerifiedEmails {
+		if emailHash == emailHash {
+			updateUser.EmailIsVerified = true
 		}
 	}
 	updateUser.EmailHash = emailHash

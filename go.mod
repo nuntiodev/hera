@@ -9,7 +9,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/keighl/postmark v0.0.0-20190821160221-28358b1a94e3
-	github.com/nuntiodev/block-proto v0.2.15
+	github.com/nuntiodev/block-proto v0.2.17
 	github.com/nuntiodev/x v0.2.9
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.7.1
@@ -24,7 +24,6 @@ require (
 )
 
 require (
-	github.com/ainsleyclark/go-mail v1.1.1 // indirect
 	github.com/go-logr/logr v1.2.0 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
@@ -33,6 +32,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/ory/dockertest/v3 v3.8.1 // indirect
+	goji.io v2.0.2+incompatible // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect

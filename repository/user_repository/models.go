@@ -33,6 +33,7 @@ type User struct {
 	ResetPasswordEmailSentAt    time.Time `bson:"reset_password_email_sent_at" json:"reset_password_email_sent_at"`
 	ResetPasswordEmailExpiresAt time.Time `bson:"reset_password_email_expires_at" json:"reset_password_email_expires_at"`
 	ResetPasswordAttempts       int32     `bson:"reset_password_attempts" json:"reset_password_attempts"`
+	VerifiedEmails              []string  `bson:"verified_emails" json:"verified_emails"`
 }
 
 func UserToProtoUser(user *User) *go_block.User {
@@ -72,6 +73,7 @@ func UserToProtoUser(user *User) *go_block.User {
 		ResetPasswordEmailExpiresAt: ts.New(user.ResetPasswordEmailExpiresAt),
 		ResetPasswordAttempts:       user.ResetPasswordAttempts,
 		VerifyEmailAttempts:         user.VerifyEmailAttempts,
+		VerifiedEmails:              user.VerifiedEmails,
 	}
 }
 
@@ -109,5 +111,6 @@ func ProtoUserToUser(user *go_block.User) *User {
 		ResetPasswordEmailExpiresAt: user.ResetPasswordEmailExpiresAt.AsTime(),
 		ResetPasswordAttempts:       user.ResetPasswordAttempts,
 		VerifyEmailAttempts:         user.VerifyEmailAttempts,
+		VerifiedEmails:              user.VerifiedEmails,
 	}
 }

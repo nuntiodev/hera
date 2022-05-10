@@ -86,9 +86,15 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 		} else if !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
 		}
-	case actionUpdateSecurity, actionUpdateEmailVerified:
+	case actionUpdateSecurity:
 		if !user.UpdatedAt.IsValid() {
 			return errors.New("invalid updated at")
+		}
+	case actionUpdateEmailVerified:
+		if !user.UpdatedAt.IsValid() {
+			return errors.New("invalid updated at")
+		} else if err := checkmail.ValidateFormat(user.Email); err != nil {
+			return err
 		}
 	case actionUpdateVerificationEmailSent:
 		if user.Id == "" && user.Email == "" && user.OptionalId == "" {

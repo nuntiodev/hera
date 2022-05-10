@@ -33,6 +33,9 @@ func (r *mongodbRepository) UpdateEmailVerified(ctx context.Context, get *go_blo
 		},
 		"$inc": bson.D{{"verify_email_attempts", 1}},
 	}
+	if update.EmailIsVerified {
+		mongoUpdate["$addToSet"] = bson.D{{"verified_emails", update.Email}}
+	}
 	if _, err := r.collection.UpdateOne(
 		ctx,
 		filter,

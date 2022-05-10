@@ -38,7 +38,7 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_block.UserRequ
 	}
 	if _, err := users.UpdateEmailVerified(ctx, get, &go_block.User{
 		EmailIsVerified: bcryptErr == nil,
-		Email:           get.EmailHash,
+		EmailHash:       get.EmailHash,
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}

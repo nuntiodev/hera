@@ -40,6 +40,7 @@ type Handler interface {
 	UpdateBirthdate(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateOptionalId(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateSecurity(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateEnableBiometrics(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Get(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	GetAll(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	ValidateCredentials(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
@@ -67,7 +68,6 @@ type Handler interface {
 	UpdateConfigWelcomeText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateConfigRegisterText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateConfigLoginText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateEnableBiometrics(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 }

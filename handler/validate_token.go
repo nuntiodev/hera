@@ -56,9 +56,14 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	return &go_block.UserResponse{
+	// validate user exists
+	get, err := h.Get(ctx, &go_block.UserRequest{
 		User: &go_block.User{
 			Id: customClaims.UserId,
 		},
-	}, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return get, nil
 }

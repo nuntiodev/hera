@@ -34,6 +34,7 @@ type User struct {
 	ResetPasswordAttempts       int32     `bson:"reset_password_attempts" json:"reset_password_attempts"`
 	VerifiedEmails              []string  `bson:"verified_emails" json:"verified_emails"`
 	EmailHash                   string    `bson:"email_hash" json:"email_hash"`
+	EnableBiometrics            bool      `bson:"enable_biometrics" json:"enable_biometrics"`
 }
 
 func UserToProtoUser(user *User) *go_block.User {
@@ -75,6 +76,7 @@ func UserToProtoUser(user *User) *go_block.User {
 		VerifyEmailAttempts:         user.VerifyEmailAttempts,
 		VerifiedEmails:              user.VerifiedEmails,
 		EmailHash:                   user.EmailHash,
+		EnableBiometrics:            user.EnableBiometrics,
 	}
 }
 
@@ -114,5 +116,6 @@ func ProtoUserToUser(user *go_block.User) *User {
 		VerifyEmailAttempts:         user.VerifyEmailAttempts,
 		VerifiedEmails:              user.VerifiedEmails,
 		EmailHash:                   user.EmailHash,
+		EnableBiometrics:            user.EnableBiometrics,
 	}
 }

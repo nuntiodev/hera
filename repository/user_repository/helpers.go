@@ -32,7 +32,8 @@ func prepare(action int, user *go_block.User) {
 	case actionUpdatePassword, actionUpdateImage, actionUpdateMetadata,
 		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,
 		actionUpdateOptionalId, actionUpdateName, actionUpdateBirthdate,
-		actionUpdateEmailVerified, actionUpdateVerificationEmailSent, actionUpdateResetPasswordEmailSent:
+		actionUpdateEmailVerified, actionUpdateVerificationEmailSent, actionUpdateResetPasswordEmailSent,
+		actionUpdateEnableBiometrics:
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
@@ -109,7 +110,7 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 		} else if user.ResetPasswordCode == "" {
 			return errors.New("missing required reset password code")
 		}
-	case actionGetAll, actionUpdateOptionalId:
+	case actionGetAll, actionUpdateOptionalId, actionUpdateEnableBiometrics:
 		return nil
 	}
 	if len(user.Email) > maxFieldLength {

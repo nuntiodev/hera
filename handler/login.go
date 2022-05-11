@@ -17,6 +17,12 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not get user with err: %v", err)
 	}
+	if resp.User.Password == "" {
+		return &go_block.UserResponse{}, errors.New("please update the user with a non-empty password")
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(resp.User.Password), []byte(req.User.Password)); err != nil {
+		return &go_block.UserResponse{}, err
+	}
 	// if email validation is required and email is not verified; return error
 	if resp.User.RequireEmailVerification && resp.User.EmailIsVerified == false {
 		// check if we should send a new email
@@ -35,12 +41,6 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 				EmailExpiresAt: resp.User.VerificationEmailExpiresAt,
 			},
 		}, nil //status.Error(codes.Code(go_block.ErrorType_ERROR_EMAIL_IS_NOT_VERIFIED), "user has not verified his/her email")
-	}
-	if resp.User.Password == "" {
-		return &go_block.UserResponse{}, errors.New("please update the user with a non-empty password")
-	}
-	if err := bcrypt.CompareHashAndPassword([]byte(resp.User.Password), []byte(req.User.Password)); err != nil {
-		return &go_block.UserResponse{}, err
 	}
 	// issue access and refresh token pair
 	refreshToken, refreshClaims, err := h.token.GenerateToken(privateKey, resp.User.Id, "", token.TokenTypeRefresh, refreshTokenExpiry)

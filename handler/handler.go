@@ -67,6 +67,7 @@ type Handler interface {
 	UpdateConfigWelcomeText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateConfigRegisterText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateConfigLoginText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	UpdateEnableBiometrics(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 }

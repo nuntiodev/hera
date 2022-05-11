@@ -9,7 +9,7 @@ import (
 )
 
 func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	customClaims, err := h.token.ValidateToken(publicKey, req.Token.AccessToken)
+	customClaims, err := h.token.ValidateToken(publicKey, req.TokenPointer)
 	if err != nil {
 		return nil, err
 	}

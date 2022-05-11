@@ -105,9 +105,13 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.User == nil {
 			return nil, UserIsNil
 		}
-	case ValidateToken, RefreshToken, GetTokens, BlockTokenById:
+	case RefreshToken, GetTokens, BlockTokenById:
 		if translatedReq.Token == nil {
 			return nil, TokenIsNil
+		}
+	case ValidateToken:
+		if translatedReq.TokenPointer == "" {
+			return nil, errors.New("token pointer is nil")
 		}
 	case DeleteNamespace:
 		if translatedReq.Namespace == "" {

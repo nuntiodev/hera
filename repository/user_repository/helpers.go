@@ -26,6 +26,7 @@ func prepare(action int, user *go_block.User) {
 		user.VerificationEmailSentAt = &ts.Timestamp{}
 		user.EmailVerifiedAt = &ts.Timestamp{}
 		user.EmailIsVerified = false
+		user.VerifiedEmails = []string{}
 		if strings.TrimSpace(user.Id) == "" {
 			user.Id = uuid.NewV4().String()
 		}

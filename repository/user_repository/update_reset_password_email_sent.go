@@ -26,7 +26,7 @@ func (r *mongodbRepository) UpdateResetPasswordEmailSent(ctx context.Context, us
 		"$set": bson.M{
 			"reset_password_code":             user.ResetPasswordCode,
 			"reset_password_email_sent_at":    time.Now(),
-			"reset_password_email_expires_at": time.Now().Add(time.Minute * 15),
+			"reset_password_email_expires_at": time.Now().Add(r.maxEmailVerificationAge),
 			"reset_password_attempts":         int32(0),
 			"updated_at":                      time.Now(),
 		},

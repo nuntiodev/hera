@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+	"time"
 )
 
 const (
@@ -67,15 +68,16 @@ type UserRepository interface {
 }
 
 type mongodbRepository struct {
-	collection             *mongo.Collection
-	crypto                 cryptox.Crypto
-	zapLog                 *zap.Logger
-	internalEncryptionKeys []string
-	externalEncryptionKey  string
-	validatePassword       bool
+	collection              *mongo.Collection
+	crypto                  cryptox.Crypto
+	zapLog                  *zap.Logger
+	internalEncryptionKeys  []string
+	externalEncryptionKey   string
+	validatePassword        bool
+	maxEmailVerificationAge time.Duration
 }
 
-func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, internalEncryptionKeys []string, externalEncryptionKey string, validatePassword bool) (*mongodbRepository, error) {
+func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, internalEncryptionKeys []string, externalEncryptionKey string, validatePassword bool, maxEmailVerificationAge time.Duration) (*mongodbRepository, error) {
 	emailNamespaceIndexModel := mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "email_hash", Value: 1},
@@ -115,14 +117,15 @@ func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection,
 		return nil, err
 	}
 	return &mongodbRepository{
-		collection:             collection,
-		crypto:                 crypto,
-		internalEncryptionKeys: internalEncryptionKeys,
-		externalEncryptionKey:  externalEncryptionKey,
-		validatePassword:       validatePassword,
+		collection:              collection,
+		crypto:                  crypto,
+		internalEncryptionKeys:  internalEncryptionKeys,
+		externalEncryptionKey:   externalEncryptionKey,
+		validatePassword:        validatePassword,
+		maxEmailVerificationAge: maxEmailVerificationAge,
 	}, nil
 }
 
-func New(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, internalEncryptionKeys []string, externalEncryptionKey string, validatePassword bool) (UserRepository, error) {
-	return newMongodbUserRepository(ctx, collection, crypto, internalEncryptionKeys, externalEncryptionKey, validatePassword)
+func New(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, internalEncryptionKeys []string, externalEncryptionKey string, validatePassword bool, maxEmailVerificationAge time.Duration) (UserRepository, error) {
+	return newMongodbUserRepository(ctx, collection, crypto, internalEncryptionKeys, externalEncryptionKey, validatePassword, maxEmailVerificationAge)
 }

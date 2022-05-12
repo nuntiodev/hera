@@ -5,6 +5,7 @@ import (
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
 type UsersBuilder interface {
@@ -15,12 +16,13 @@ type UsersBuilder interface {
 }
 
 type usersBuilder struct {
-	namespace              string
-	externalEncryptionKey  string
-	validatePassword       bool
-	internalEncryptionKeys []string
-	client                 *mongo.Client
-	crypto                 cryptox.Crypto
+	namespace               string
+	externalEncryptionKey   string
+	validatePassword        bool
+	internalEncryptionKeys  []string
+	client                  *mongo.Client
+	crypto                  cryptox.Crypto
+	maxEmailVerificationAge time.Duration
 }
 
 func (ub *usersBuilder) SetNamespace(namespace string) UsersBuilder {
@@ -43,7 +45,7 @@ func (ub *usersBuilder) Build(ctx context.Context) (user_repository.UserReposito
 		ub.namespace = "nuntio-blocks-db"
 	}
 	collection := ub.client.Database(ub.namespace).Collection("users")
-	userRepository, err := user_repository.New(ctx, collection, ub.crypto, ub.internalEncryptionKeys, ub.externalEncryptionKey, ub.validatePassword)
+	userRepository, err := user_repository.New(ctx, collection, ub.crypto, ub.internalEncryptionKeys, ub.externalEncryptionKey, ub.validatePassword, ub.maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +54,9 @@ func (ub *usersBuilder) Build(ctx context.Context) (user_repository.UserReposito
 
 func (r *defaultRepository) Users() UsersBuilder {
 	return &usersBuilder{
-		crypto:                 r.crypto,
-		client:                 r.mongodbClient,
-		internalEncryptionKeys: r.internalEncryptionKeys,
+		crypto:                  r.crypto,
+		client:                  r.mongodbClient,
+		internalEncryptionKeys:  r.internalEncryptionKeys,
+		maxEmailVerificationAge: r.maxEmailVerificationAge,
 	}
 }

@@ -26,7 +26,6 @@ var (
 	privateKey                     *rsa.PrivateKey
 	emailVerificationTemplatePath  = ""
 	emailResetPasswordTemplatePath = ""
-	maxEmailVerificationAge        = time.Minute * 15
 )
 
 type Handler interface {
@@ -73,12 +72,13 @@ type Handler interface {
 }
 
 type defaultHandler struct {
-	repository   repository.Repository
-	crypto       cryptox.Crypto
-	token        token.Token
-	email        email.Email
-	emailEnabled bool
-	zapLog       *zap.Logger
+	repository              repository.Repository
+	crypto                  cryptox.Crypto
+	token                   token.Token
+	email                   email.Email
+	emailEnabled            bool
+	zapLog                  *zap.Logger
+	maxEmailVerificationAge time.Duration
 }
 
 func decodeKeyPair(rsaPrivateKey, rsaPublicKey string) (*rsa.PrivateKey, *rsa.PublicKey, error) {
@@ -152,7 +152,7 @@ func initializeEmailTemplates() error {
 	return nil
 }
 
-func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Crypto, token token.Token, email email.Email) (Handler, error) {
+func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Crypto, token token.Token, email email.Email, maxEmailVerificationAge time.Duration) (Handler, error) {
 	zapLog.Info("creating handler")
 	if err := initialize(); err != nil {
 		return nil, err
@@ -165,12 +165,13 @@ func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Cr
 		}
 	}
 	handler := &defaultHandler{
-		repository:   repository,
-		crypto:       crypto,
-		token:        token,
-		zapLog:       zapLog,
-		email:        email,
-		emailEnabled: emailEnabled,
+		repository:              repository,
+		crypto:                  crypto,
+		token:                   token,
+		zapLog:                  zapLog,
+		email:                   email,
+		emailEnabled:            emailEnabled,
+		maxEmailVerificationAge: maxEmailVerificationAge,
 	}
 	return handler, nil
 }

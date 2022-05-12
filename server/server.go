@@ -14,6 +14,7 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"strings"
+	"time"
 )
 
 type Server struct {
@@ -21,7 +22,8 @@ type Server struct {
 }
 
 var (
-	encryptionKeys []string
+	encryptionKeys          []string
+	maxEmailVerificationAge = time.Minute * 5
 )
 
 func initialize() error {
@@ -29,6 +31,14 @@ func initialize() error {
 	encryptionKeys = strings.Fields(encryptionKeysString)
 	for i, key := range encryptionKeys {
 		encryptionKeys[i] = strings.TrimSpace(key)
+	}
+	// MAX_EMAIL_VERIFICATION_AGE
+	maxEmailVerificationAgeString, ok := os.LookupEnv("MAX_EMAIL_VERIFICATION_AGE")
+	if ok && maxEmailVerificationAgeString == "" {
+		t, err := time.ParseDuration(maxEmailVerificationAgeString)
+		if err != nil {
+			maxEmailVerificationAge = t
+		}
 	}
 	return nil
 }
@@ -67,7 +77,7 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myRepository, err := repository.New(mongoClient, myCrypto, encryptionKeys, zapLog)
+	myRepository, err := repository.New(mongoClient, myCrypto, encryptionKeys, zapLog, maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +90,7 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		zapLog.Warn("email is not enabled with err: " + err.Error())
 	}
-	myHandler, err := handler.New(zapLog, myRepository, myCrypto, myToken, myEmail)
+	myHandler, err := handler.New(zapLog, myRepository, myCrypto, myToken, myEmail, maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}

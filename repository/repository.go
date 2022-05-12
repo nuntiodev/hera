@@ -9,6 +9,7 @@ import (
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
+	"time"
 )
 
 type Repository interface {
@@ -21,10 +22,11 @@ type Repository interface {
 }
 
 type defaultRepository struct {
-	namespace              string
-	mongodbClient          *mongo.Client
-	crypto                 cryptox.Crypto
-	internalEncryptionKeys []string
+	namespace               string
+	mongodbClient           *mongo.Client
+	crypto                  cryptox.Crypto
+	internalEncryptionKeys  []string
+	maxEmailVerificationAge time.Duration
 }
 
 func (r *defaultRepository) Liveness(ctx context.Context) error {
@@ -84,12 +86,13 @@ func (r *defaultRepository) Emails(ctx context.Context, namespace string) (email
 	return emailRepository, nil
 }
 
-func New(mongoClient *mongo.Client, crypto cryptox.Crypto, encryptionKeys []string, zapLog *zap.Logger) (Repository, error) {
+func New(mongoClient *mongo.Client, crypto cryptox.Crypto, encryptionKeys []string, zapLog *zap.Logger, maxEmailVerificationAge time.Duration) (Repository, error) {
 	zapLog.Info("creating repository...")
 	repository := &defaultRepository{
-		mongodbClient:          mongoClient,
-		crypto:                 crypto,
-		internalEncryptionKeys: encryptionKeys,
+		mongodbClient:           mongoClient,
+		crypto:                  crypto,
+		internalEncryptionKeys:  encryptionKeys,
+		maxEmailVerificationAge: maxEmailVerificationAge,
 	}
 	return repository, nil
 }

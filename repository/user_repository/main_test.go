@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/x/cryptox"
@@ -52,7 +53,7 @@ func getTestUserRepository(ctx context.Context, internal, external bool, dbName 
 	if dbName == "" {
 		dbName = "nuntio-testdb"
 	}
-	userRepository, err := newMongodbUserRepository(ctx, mongoTestClient.Database(dbName).Collection("users"), myCrypto, internalKeys, externalKey, true)
+	userRepository, err := newMongodbUserRepository(ctx, mongoTestClient.Database(dbName).Collection("users"), myCrypto, internalKeys, externalKey, true, time.Minute*5)
 	if err != nil {
 		return nil, err
 	}

@@ -37,8 +37,8 @@ func (r *mongodbRepository) UpdateName(ctx context.Context, get *go_block.User, 
 	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"first_name": updateUser.LastName,
-			"last_name":  updateUser.FirstName,
+			"first_name": updateUser.FirstName,
+			"last_name":  updateUser.LastName,
 			"updated_at": updateUser.UpdatedAt,
 		},
 	}

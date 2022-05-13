@@ -24,11 +24,11 @@ func TestCreateIEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 20)
 	user := &go_block.User{
-		OptionalId: uuid.NewV4().String(),
-		Email:      gofakeit.Email(),
-		Password:   password,
-		Image:      gofakeit.ImageURL(10, 10),
-		Metadata:   string(metadata),
+		Username: uuid.NewV4().String(),
+		Email:    gofakeit.Email(),
+		Password: password,
+		Image:    gofakeit.ImageURL(10, 10),
+		Metadata: string(metadata),
 	}
 	// act
 	createdUser, err := userRepository.Create(context.Background(), user)
@@ -58,11 +58,11 @@ func TestCreateIEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 20)
 	user := &go_block.User{
-		OptionalId: uuid.NewV4().String(),
-		Email:      gofakeit.Email(),
-		Password:   password,
-		Image:      gofakeit.ImageURL(10, 10),
-		Metadata:   string(metadata),
+		Username: uuid.NewV4().String(),
+		Email:    gofakeit.Email(),
+		Password: password,
+		Image:    gofakeit.ImageURL(10, 10),
+		Metadata: string(metadata),
 	}
 	createdUser, err := userRepository.Create(context.Background(), user)
 	assert.NoError(t, err)
@@ -90,11 +90,11 @@ func TestCreateEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 20)
 	user := &go_block.User{
-		OptionalId: uuid.NewV4().String(),
-		Email:      gofakeit.Email(),
-		Password:   password,
-		Image:      gofakeit.ImageURL(10, 10),
-		Metadata:   string(metadata),
+		Username: uuid.NewV4().String(),
+		Email:    gofakeit.Email(),
+		Password: password,
+		Image:    gofakeit.ImageURL(10, 10),
+		Metadata: string(metadata),
 	}
 	// act
 	createdUser, err := userRepository.Create(context.Background(), user)
@@ -123,11 +123,11 @@ func TestCreateNoEncryption(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 20)
 	user := &go_block.User{
-		OptionalId: uuid.NewV4().String(),
-		Email:      gofakeit.Email(),
-		Password:   password,
-		Image:      gofakeit.ImageURL(10, 10),
-		Metadata:   string(metadata),
+		Username: uuid.NewV4().String(),
+		Email:    gofakeit.Email(),
+		Password: password,
+		Image:    gofakeit.ImageURL(10, 10),
+		Metadata: string(metadata),
 	}
 	// act
 	createdUser, err := userRepository.Create(context.Background(), user)
@@ -155,11 +155,11 @@ func TestCreateInvalidPassword(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	user := &go_block.User{
-		OptionalId: uuid.NewV4().String(),
-		Email:      gofakeit.Email(),
-		Password:   "Test1234",
-		Image:      gofakeit.ImageURL(10, 10),
-		Metadata:   string(metadata),
+		Username: uuid.NewV4().String(),
+		Email:    gofakeit.Email(),
+		Password: "Test1234",
+		Image:    gofakeit.ImageURL(10, 10),
+		Metadata: string(metadata),
 	}
 	// act
 	createdUser, err := userRepository.Create(context.Background(), user)
@@ -178,11 +178,11 @@ func TestCreateInvalidEmail(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	user := &go_block.User{
-		OptionalId: uuid.NewV4().String(),
-		Email:      "info@@nuntio.io",
-		Password:   gofakeit.Password(true, true, true, true, true, 20),
-		Image:      gofakeit.ImageURL(10, 10),
-		Metadata:   string(metadata),
+		Username: uuid.NewV4().String(),
+		Email:    "info@@nuntio.io",
+		Password: gofakeit.Password(true, true, true, true, true, 20),
+		Image:    gofakeit.ImageURL(10, 10),
+		Metadata: string(metadata),
 	}
 	// act
 	createdUser, err := userRepository.Create(context.Background(), user)
@@ -195,11 +195,11 @@ func TestCreateInvalidMetadata(t *testing.T) {
 	userRepository, err := getTestUserRepository(context.Background(), false, true, "")
 	assert.NoError(t, err)
 	user := &go_block.User{
-		OptionalId: uuid.NewV4().String(),
-		Email:      "info@nuntio.io",
-		Password:   gofakeit.Password(true, true, true, true, true, 20),
-		Image:      gofakeit.ImageURL(10, 10),
-		Metadata:   "invalid metadata",
+		Username: uuid.NewV4().String(),
+		Email:    "info@nuntio.io",
+		Password: gofakeit.Password(true, true, true, true, true, 20),
+		Image:    gofakeit.ImageURL(10, 10),
+		Metadata: "invalid metadata",
 	}
 	// act
 	createdUser, err := userRepository.Create(context.Background(), user)

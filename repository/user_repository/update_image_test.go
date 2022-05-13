@@ -7,8 +7,8 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/nuntiodev/block-proto/go_block"
-	uuid "github.com/satori/go.uuid"
 	"github.com/nuntiodev/x/cryptox"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,11 +33,11 @@ func TestUpdateImageIdIEEncrypted(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 30)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)
@@ -83,11 +83,11 @@ func TestUpdateImageIdNilUpdate(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 30)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)
@@ -124,11 +124,11 @@ func TestUpdateImageNilGet(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 30)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)

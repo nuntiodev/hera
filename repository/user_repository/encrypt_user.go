@@ -105,6 +105,13 @@ func (r *mongodbRepository) encrypt(user *User, encryptionKey string) error {
 		}
 		user.Birthdate = encBirthdate
 	}
+	if user.PhoneNumber != "" {
+		encPhoneNumber, err := r.crypto.Encrypt(user.PhoneNumber, encryptionKey)
+		if err != nil {
+			return fmt.Errorf("cannot encrypt phone number: %v", err)
+		}
+		user.PhoneNumber = encPhoneNumber
+	}
 	user.EncryptedAt = time.Now()
 	return nil
 }

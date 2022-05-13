@@ -78,5 +78,12 @@ func (r *mongodbRepository) decrypt(user *User, encryptionKey string) error {
 		}
 		user.Birthdate = decBirthdate
 	}
+	if user.PhoneNumber != "" {
+		decPhoneNumber, err := r.crypto.Decrypt(user.PhoneNumber, encryptionKey)
+		if err != nil {
+			return fmt.Errorf("cannot decrypt phone number: %v", err)
+		}
+		user.PhoneNumber = decPhoneNumber
+	}
 	return nil
 }

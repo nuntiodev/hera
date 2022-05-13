@@ -19,6 +19,10 @@ func (r *mongodbRepository) Create(ctx context.Context, user *go_block.User) (*g
 	if user.Email != "" {
 		emailHash = fmt.Sprintf("%x", md5.Sum([]byte(user.Email)))
 	}
+	phoneNumberHash := ""
+	if user.PhoneNumber != "" {
+		phoneNumberHash = fmt.Sprintf("%x", md5.Sum([]byte(user.PhoneNumber)))
+	}
 	if user.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -28,6 +32,7 @@ func (r *mongodbRepository) Create(ctx context.Context, user *go_block.User) (*g
 	}
 	create := ProtoUserToUser(user)
 	create.EmailHash = emailHash
+	create.PhoneNumberHash = phoneNumberHash
 	if err := r.encryptUser(ctx, actionCreate, create); err != nil {
 		return nil, err
 	}

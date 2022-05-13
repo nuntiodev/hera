@@ -73,8 +73,8 @@ func compareUsers(one, two *go_block.User, validateLevel bool) error {
 		return errors.New("images are different")
 	} else if one.Metadata != two.Metadata {
 		return errors.New("metadata is different")
-	} else if one.OptionalId != two.OptionalId {
-		return errors.New("optionalIds are different")
+	} else if one.Username != two.Username {
+		return errors.New("usernames are different")
 	} else if one.Password != two.Password {
 		return errors.New("password are different")
 	} else if validateLevel && one.ExternalEncryptionLevel != two.ExternalEncryptionLevel {

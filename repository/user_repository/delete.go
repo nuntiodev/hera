@@ -19,8 +19,8 @@ func (r *mongodbRepository) Delete(ctx context.Context, user *go_block.User) err
 		filter = bson.M{"_id": user.Id}
 	} else if user.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email)))}
-	} else if user.OptionalId != "" {
-		filter = bson.M{"optional_id": user.OptionalId}
+	} else if user.Username != "" {
+		filter = bson.M{"username": user.Username}
 	}
 	result, err := r.collection.DeleteOne(ctx, filter)
 	if err != nil {

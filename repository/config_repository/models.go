@@ -47,22 +47,22 @@ type LoginText struct {
 }
 
 type Config struct {
-	Id                       string        `bson:"_id" json:"id"`
-	Name                     string        `bson:"name" json:"name"`
-	Logo                     string        `bson:"logo" json:"logo"`
-	EnableNuntioConnect      bool          `bson:"enable_nuntio_connect" json:"enable_nuntio_connect"`
-	DisableDefaultSignup     bool          `bson:"disable_default_signup" json:"disable_default_signup"`
-	DisableDefaultLogin      bool          `bson:"disable_default_login" json:"disable_default_login"`
-	GeneralText              *GeneralText  `bson:"general_text" json:"general_text"`
-	WelcomeText              *WelcomeText  `bson:"welcome_text" json:"welcome_text"`
-	LoginText                *LoginText    `bson:"login_text" json:"login_text"`
-	RegisterText             *RegisterText `bson:"register_text" json:"register_text"`
-	CreatedAt                time.Time     `bson:"created_at" json:"created_at"`
-	UpdatedAt                time.Time     `bson:"updated_at" json:"updated_at"`
-	InternalEncryptionLevel  int32         `bson:"internal_encryption_level" json:"internal_encryption_level"`
-	ValidatePassword         bool          `bson:"validate_password" json:"validate_password"`
-	NuntioConnectId          string        `bson:"nuntio_connect_id" json:"nuntio_connect_id"`
-	RequireEmailVerification bool          `bson:"require_email_verification" json:"require_email_verification"`
+	Id                       go_block.LanguageCode `bson:"_id" json:"id"`
+	Name                     string                `bson:"name" json:"name"`
+	Logo                     string                `bson:"logo" json:"logo"`
+	EnableNuntioConnect      bool                  `bson:"enable_nuntio_connect" json:"enable_nuntio_connect"`
+	DisableDefaultSignup     bool                  `bson:"disable_default_signup" json:"disable_default_signup"`
+	DisableDefaultLogin      bool                  `bson:"disable_default_login" json:"disable_default_login"`
+	GeneralText              *GeneralText          `bson:"general_text" json:"general_text"`
+	WelcomeText              *WelcomeText          `bson:"welcome_text" json:"welcome_text"`
+	LoginText                *LoginText            `bson:"login_text" json:"login_text"`
+	RegisterText             *RegisterText         `bson:"register_text" json:"register_text"`
+	CreatedAt                time.Time             `bson:"created_at" json:"created_at"`
+	UpdatedAt                time.Time             `bson:"updated_at" json:"updated_at"`
+	InternalEncryptionLevel  int32                 `bson:"internal_encryption_level" json:"internal_encryption_level"`
+	ValidatePassword         bool                  `bson:"validate_password" json:"validate_password"`
+	NuntioConnectId          string                `bson:"nuntio_connect_id" json:"nuntio_connect_id"`
+	RequireEmailVerification bool                  `bson:"require_email_verification" json:"require_email_verification"`
 }
 
 func ProtoConfigToConfig(config *go_block.Config) *Config {

@@ -30,7 +30,7 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_block.UserRequ
 		return &go_block.UserResponse{}, errors.New("verification email has expired, send a new one or login again")
 	}
 	// provide exponential backoff
-	time.Sleep(helpers.GetExponentialBackoff(float64(get.VerifyEmailAttempts)))
+	time.Sleep(helpers.GetExponentialBackoff(float64(get.VerifyEmailAttempts), helpers.BackoffFactorTwo))
 	bcryptErr := bcrypt.CompareHashAndPassword([]byte(get.EmailVerificationCode), []byte(strings.TrimSpace(req.EmailVerificationCode)))
 	users, err := h.repository.Users().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {

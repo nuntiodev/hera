@@ -16,7 +16,7 @@ const (
 	actionCreate = iota
 	actionUpdatePassword
 	actionUpdateEmail
-	actionUpdateOptionalId
+	actionUpdateUsername
 	actionUpdateImage
 	actionUpdateMetadata
 	actionUpdateNamespace
@@ -30,6 +30,7 @@ const (
 	actionGet
 	actionGetAll
 	actionUpgradeEncryption
+	actionUpdatePhoneNumber
 )
 
 const (
@@ -37,7 +38,7 @@ const (
 	maxFieldLength  = 150
 	minEntropy      = 60
 	emailHashIndex  = "block_email_hash_index"
-	optionalIdIndex = "block_optional_id_index"
+	usernameIndex   = "block_username_index"
 )
 
 var (
@@ -49,7 +50,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *go_block.User) (*go_block.User, error)
 	UpdatePassword(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateEmail(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
-	UpdateOptionalId(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdateUsername(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateName(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
@@ -58,7 +59,7 @@ type UserRepository interface {
 	UpdateVerificationEmailSent(ctx context.Context, get *go_block.User) (*go_block.User, error)
 	UpdateResetPasswordEmailSent(ctx context.Context, user *go_block.User) (*go_block.User, error)
 	UpdateEmailVerified(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
-	UpdateEnableBiometrics(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdatePhoneNumber(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	Get(ctx context.Context, user *go_block.User, upgrade bool) (*go_block.User, error)
 	GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*go_block.User, error)
 	Count(ctx context.Context) (int64, error)
@@ -97,23 +98,23 @@ func newMongodbUserRepository(ctx context.Context, collection *mongo.Collection,
 	if _, err := collection.Indexes().CreateOne(ctx, emailNamespaceIndexModel); err != nil {
 		return nil, err
 	}
-	optionalIdIndexModel := mongo.IndexModel{
+	usernameIndexModel := mongo.IndexModel{
 		Keys: bson.D{
-			{Key: "optional_id", Value: 1},
+			{Key: "username", Value: 1},
 		},
 		Options: options.Index().SetUnique(true).SetPartialFilterExpression(
 			bson.D{
 				{
-					"optional_id", bson.D{
+					"username", bson.D{
 						{
 							"$gt", "",
 						},
 					},
 				},
 			},
-		).SetName(optionalIdIndex),
+		).SetName(usernameIndex),
 	}
-	if _, err := collection.Indexes().CreateOne(ctx, optionalIdIndexModel); err != nil {
+	if _, err := collection.Indexes().CreateOne(ctx, usernameIndexModel); err != nil {
 		return nil, err
 	}
 	return &mongodbRepository{

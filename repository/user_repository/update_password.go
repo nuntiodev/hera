@@ -37,8 +37,8 @@ func (r *mongodbRepository) UpdatePassword(ctx context.Context, get *go_block.Us
 		filter = bson.M{"_id": get.Id}
 	} else if get.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(get.Email)))}
-	} else if get.OptionalId != "" {
-		filter = bson.M{"optional_id": get.OptionalId}
+	} else if get.Username != "" {
+		filter = bson.M{"username": get.Username}
 	}
 	updateResult, err := r.collection.UpdateOne(
 		ctx,

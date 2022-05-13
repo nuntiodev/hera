@@ -13,7 +13,7 @@ import (
 func (r *mongodbRepository) DeleteBatch(ctx context.Context, userBatch []*go_block.User) error {
 	var ids []string
 	var emails []string
-	var optionalIds []string
+	var usernames []string
 	for _, user := range userBatch {
 		if user == nil {
 			return errors.New("a user is nil")
@@ -23,27 +23,27 @@ func (r *mongodbRepository) DeleteBatch(ctx context.Context, userBatch []*go_blo
 			ids = append(ids, user.Id)
 		} else if user.Email != "" {
 			emails = append(emails, fmt.Sprintf("%x", md5.Sum([]byte(user.Email))))
-		} else if user.OptionalId != "" {
-			ids = append(optionalIds, user.OptionalId)
+		} else if user.Username != "" {
+			ids = append(usernames, user.Username)
 		}
 	}
 	var idsFilter bson.D
 	var emailsFilter bson.D
-	var optionalIdsFilter bson.D
+	var usernamesFilter bson.D
 	if len(ids) > 0 {
 		idsFilter = bson.D{{"$in", ids}}
 	}
 	if len(emails) > 0 {
 		emailsFilter = bson.D{{"$in", emails}}
 	}
-	if len(optionalIds) > 0 {
-		optionalIdsFilter = bson.D{{"$in", optionalIds}}
+	if len(usernames) > 0 {
+		usernamesFilter = bson.D{{"$in", usernames}}
 	}
 	filter := bson.D{
 		{"$or", bson.A{
 			bson.D{{"_id", idsFilter}},
 			bson.D{{"email", emailsFilter}},
-			bson.D{{"optional_id", optionalIdsFilter}},
+			bson.D{{"username", usernamesFilter}},
 		},
 		},
 	}

@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	Id                          string    `bson:"_id" json:"id"`
-	OptionalId                  string    `bson:"optional_id" json:"optional_id"`
+	Username                    string    `bson:"username" json:"username"`
 	Email                       string    `bson:"email" json:"email"`
 	Password                    string    `bson:"password" json:"password"`
 	Image                       string    `bson:"image" json:"image"`
@@ -18,7 +18,6 @@ type User struct {
 	CreatedAt                   time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt                   time.Time `bson:"updated_at" json:"updated_at"`
 	EncryptedAt                 time.Time `bson:"encrypted_at" json:"encrypted_at"`
-	RequireEmailVerification    bool      `bson:"require_email_verification" json:"require_email_verification"`
 	FirstName                   string    `bson:"first_name" json:"first_name"`
 	LastName                    string    `bson:"last_name" json:"last_name"`
 	Birthdate                   string    `bson:"birthdate" json:"birthdate"`
@@ -34,7 +33,11 @@ type User struct {
 	ResetPasswordAttempts       int32     `bson:"reset_password_attempts" json:"reset_password_attempts"`
 	VerifiedEmails              []string  `bson:"verified_emails" json:"verified_emails"`
 	EmailHash                   string    `bson:"email_hash" json:"email_hash"`
-	EnableBiometrics            bool      `bson:"enable_biometrics" json:"enable_biometrics"`
+	PhoneNumber                 string    `bson:"phone_number" json:"phone_number"`
+	PhoneNumberHash             string    `bson:"phone_number_hash" json:"phone_number_hash"`
+	PhoneNumberIsVerified       bool      `bson:"phone_number_is_verified" json:"phone_number_is_verified"`
+	VerificationTextSentAt      time.Time `bson:"verification_text_sent_at" json:"verification_text_sent_at"`
+	VerifiedPhoneNumbers        []string  `bson:"verified_phone_numbers" json:"verified_phone_numbers"`
 }
 
 func UserToProtoUser(user *User) *go_block.User {
@@ -50,7 +53,7 @@ func UserToProtoUser(user *User) *go_block.User {
 	}
 	return &go_block.User{
 		Id:                          user.Id,
-		OptionalId:                  user.OptionalId,
+		Username:                    user.Username,
 		Email:                       user.Email,
 		Password:                    user.Password,
 		Image:                       user.Image,
@@ -65,7 +68,6 @@ func UserToProtoUser(user *User) *go_block.User {
 		InternalEncryptionLevel:     int32(user.InternalEncryptionLevel),
 		VerificationEmailSentAt:     ts.New(user.VerificationEmailSentAt),
 		EmailVerifiedAt:             ts.New(user.EmailVerifiedAt),
-		RequireEmailVerification:    user.RequireEmailVerification,
 		EmailIsVerified:             user.EmailIsVerified,
 		EmailVerificationCode:       user.EmailVerificationCode,
 		VerificationEmailExpiresAt:  ts.New(user.VerificationEmailExpiresAt),
@@ -76,7 +78,11 @@ func UserToProtoUser(user *User) *go_block.User {
 		VerifyEmailAttempts:         user.VerifyEmailAttempts,
 		VerifiedEmails:              user.VerifiedEmails,
 		EmailHash:                   user.EmailHash,
-		EnableBiometrics:            user.EnableBiometrics,
+		PhoneNumber:                 user.PhoneNumber,
+		PhoneNumberHash:             user.PhoneNumberHash,
+		PhoneNumberIsVerified:       user.PhoneNumberIsVerified,
+		VerificationTextSentAt:      ts.New(user.VerificationTextSentAt),
+		VerifiedPhoneNumbers:        user.VerifiedPhoneNumbers,
 	}
 }
 
@@ -90,7 +96,7 @@ func ProtoUserToUser(user *go_block.User) *User {
 	}
 	return &User{
 		Id:                          user.Id,
-		OptionalId:                  user.OptionalId,
+		Username:                    user.Username,
 		Email:                       user.Email,
 		Password:                    user.Password,
 		Image:                       user.Image,
@@ -106,7 +112,6 @@ func ProtoUserToUser(user *go_block.User) *User {
 		VerificationEmailSentAt:     user.VerificationEmailSentAt.AsTime(),
 		EmailVerifiedAt:             user.EmailVerifiedAt.AsTime(),
 		EmailIsVerified:             user.EmailIsVerified,
-		RequireEmailVerification:    user.RequireEmailVerification,
 		EmailVerificationCode:       user.EmailVerificationCode,
 		VerificationEmailExpiresAt:  user.VerificationEmailExpiresAt.AsTime(),
 		ResetPasswordCode:           user.ResetPasswordCode,
@@ -116,6 +121,10 @@ func ProtoUserToUser(user *go_block.User) *User {
 		VerifyEmailAttempts:         user.VerifyEmailAttempts,
 		VerifiedEmails:              user.VerifiedEmails,
 		EmailHash:                   user.EmailHash,
-		EnableBiometrics:            user.EnableBiometrics,
+		PhoneNumber:                 user.PhoneNumber,
+		PhoneNumberHash:             user.PhoneNumberHash,
+		PhoneNumberIsVerified:       user.PhoneNumberIsVerified,
+		VerificationTextSentAt:      user.VerificationTextSentAt.AsTime(),
+		VerifiedPhoneNumbers:        user.VerifiedPhoneNumbers,
 	}
 }

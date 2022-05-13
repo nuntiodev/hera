@@ -22,8 +22,6 @@ func (h *defaultHandler) Create(ctx context.Context, req *go_block.UserRequest) 
 	} else if namespaceConfig.RequireEmailVerification && req.User.Email == "" {
 		return &go_block.UserResponse{}, errors.New("require email verification is enabled and user email is empty")
 	}
-	// set default fields
-	req.User.RequireEmailVerification = namespaceConfig.RequireEmailVerification
 	// create user in db
 	users, err := h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).WithPasswordValidation(namespaceConfig.ValidatePassword).Build(ctx)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	formvalidators "github.com/nuntiodev/x/form_validators"
 	"go.mongodb.org/mongo-driver/bson"
 	"strings"
 	"unicode"
@@ -32,9 +33,9 @@ func prepare(action int, user *go_block.User) {
 		}
 	case actionUpdatePassword, actionUpdateImage, actionUpdateMetadata,
 		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,
-		actionUpdateOptionalId, actionUpdateName, actionUpdateBirthdate,
+		actionUpdateUsername, actionUpdateName, actionUpdateBirthdate,
 		actionUpdateEmailVerified, actionUpdateVerificationEmailSent, actionUpdateResetPasswordEmailSent,
-		actionUpdateEnableBiometrics:
+		actionUpdateEnableBiometrics, actionUpdatePhoneNumber:
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
@@ -42,10 +43,12 @@ func prepare(action int, user *go_block.User) {
 	user.FirstName = strings.TrimSpace(user.FirstName)
 	user.LastName = strings.TrimSpace(user.LastName)
 	user.Image = strings.TrimSpace(user.Image)
-	user.OptionalId = strings.TrimSpace(user.OptionalId)
+	user.Username = strings.TrimSpace(user.Username)
 	user.Metadata = strings.TrimSpace(user.Metadata)
 	user.EmailVerificationCode = strings.TrimSpace(user.EmailVerificationCode)
 	user.EmailHash = strings.TrimSpace(user.EmailHash)
+	user.PhoneNumber = strings.TrimSpace(user.PhoneNumber)
+	user.PhoneNumberHash = strings.TrimSpace(user.PhoneNumberHash)
 }
 
 func (r *mongodbRepository) validate(action int, user *go_block.User) error {
@@ -54,7 +57,7 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 	}
 	switch action {
 	case actionGet:
-		if user.Id == "" && user.Email == "" && user.OptionalId == "" {
+		if user.Id == "" && user.Email == "" && user.Username == "" {
 			return errors.New("missing required search parameter")
 		}
 	case actionCreate:
@@ -70,6 +73,8 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 			return errors.New("invalid updated at date")
 		} else if !json.Valid([]byte(user.Metadata)) && user.Metadata != "" {
 			return errors.New("invalid json type")
+		} else if formvalidators.ValidatePhoneNumber(user.PhoneNumber) == false && user.PhoneNumber != "" {
+			return errors.New("invalid phone number")
 		}
 	case actionUpdatePassword:
 		if err := validatePassword(user.Password); err != nil && r.validatePassword {
@@ -100,23 +105,27 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 			return errors.New("missing required email hash")
 		}
 	case actionUpdateVerificationEmailSent:
-		if user.Id == "" && user.Email == "" && user.OptionalId == "" {
+		if user.Id == "" && user.Email == "" && user.Username == "" {
 			return errors.New("missing required search parameter")
 		} else if user.EmailVerificationCode == "" {
 			return errors.New("missing required verification code")
 		}
 	case actionUpdateResetPasswordEmailSent:
-		if user.Id == "" && user.Email == "" && user.OptionalId == "" {
+		if user.Id == "" && user.Email == "" && user.Username == "" {
 			return errors.New("missing required search parameter")
 		} else if user.ResetPasswordCode == "" {
 			return errors.New("missing required reset password code")
 		}
-	case actionGetAll, actionUpdateOptionalId, actionUpdateEnableBiometrics:
+	case actionUpdatePhoneNumber:
+		if formvalidators.ValidatePhoneNumber(user.PhoneNumber) == false {
+			return errors.New("invalid phone number")
+		}
+	case actionGetAll, actionUpdateUsername, actionUpdateEnableBiometrics:
 		return nil
 	}
 	if len(user.Email) > maxFieldLength {
 		return errors.New("email field is too long")
-	} else if len(user.OptionalId) > maxFieldLength {
+	} else if len(user.Username) > maxFieldLength {
 		return errors.New("optional id field is too long")
 	} else if len(user.Metadata) > 10*maxFieldLength {
 		return errors.New("metadata field is too long")
@@ -168,8 +177,8 @@ func getUserFilter(user *go_block.User) (bson.M, error) {
 		filter = bson.M{"_id": user.Id}
 	} else if user.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email)))}
-	} else if user.OptionalId != "" {
-		filter = bson.M{"optional_id": user.OptionalId}
+	} else if user.Username != "" {
+		filter = bson.M{"username": user.Username}
 	} else {
 		return nil, errors.New("missing search filter")
 	}

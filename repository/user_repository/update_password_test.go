@@ -33,11 +33,11 @@ func TestUpdatePasswordIEEncryptedById(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)
@@ -45,7 +45,7 @@ func TestUpdatePasswordIEEncryptedById(t *testing.T) {
 		// act
 		newPassword := "My@Secure3NewPassword1234!"
 		createdUser.Password = newPassword
-		createdUser.OptionalId = ""
+		createdUser.Username = ""
 		createdUser.Email = ""
 		updatedUser, err := userRepository.UpdatePassword(context.Background(), createdUser, createdUser)
 		assert.NoError(t, err)
@@ -81,11 +81,11 @@ func TestUpdatePasswordIEEncryptedByEmail(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)
@@ -93,7 +93,7 @@ func TestUpdatePasswordIEEncryptedByEmail(t *testing.T) {
 		// act
 		newPassword := "My@Secure3NewPassword1234!"
 		createdUser.Password = newPassword
-		createdUser.OptionalId = ""
+		createdUser.Username = ""
 		createdUser.Id = ""
 		updatedUser, err := userRepository.UpdatePassword(context.Background(), createdUser, createdUser)
 		assert.NoError(t, err)
@@ -103,7 +103,7 @@ func TestUpdatePasswordIEEncryptedByEmail(t *testing.T) {
 	}
 }
 
-func TestUpdatePasswordIEEncryptedByOptionalId(t *testing.T) {
+func TestUpdatePasswordIEEncryptedByUsername(t *testing.T) {
 	// setup available clients
 	var clients []*mongodbRepository
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
@@ -124,11 +124,11 @@ func TestUpdatePasswordIEEncryptedByOptionalId(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)
@@ -167,11 +167,11 @@ func TestUpdatePasswordWeakPassword(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)
@@ -206,11 +206,11 @@ func TestUpdatePasswordNoUpdate(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)
@@ -218,7 +218,7 @@ func TestUpdatePasswordNoUpdate(t *testing.T) {
 		// act
 		createdUser.Id = ""
 		createdUser.Email = ""
-		createdUser.OptionalId = ""
+		createdUser.Username = ""
 		updatedUser, err := userRepository.UpdatePassword(context.Background(), createdUser, createdUser)
 		assert.Error(t, err)
 		assert.Nil(t, updatedUser)
@@ -246,11 +246,11 @@ func TestUpdatePasswordNilUpdate(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)
@@ -283,11 +283,11 @@ func TestUpdatePasswordNilGet(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			OptionalId: uuid.NewV4().String(),
-			Email:      gofakeit.Email(),
-			Password:   password,
-			Image:      gofakeit.ImageURL(10, 10),
-			Metadata:   string(metadata),
+			Username: uuid.NewV4().String(),
+			Email:    gofakeit.Email(),
+			Password: password,
+			Image:    gofakeit.ImageURL(10, 10),
+			Metadata: string(metadata),
 		}
 		createdUser, err := userRepository.Create(context.Background(), user)
 		assert.NoError(t, err)

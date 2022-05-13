@@ -278,6 +278,8 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWb
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/nuntiodev/block-proto v0.2.23 h1:rI6rLU/J8+o6Zjm8r0Yoy+hy5FTBlZX4HIK0P+A6kvM=
 github.com/nuntiodev/block-proto v0.2.23/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
+github.com/nuntiodev/block-proto v0.2.24 h1:oqGfnFraccF6G9vc2OSRdB2fZr0mTx/99PbySU9DLS8=
+github.com/nuntiodev/block-proto v0.2.24/go.mod h1:KkqHw6hbsrjCLSbe1/WvqBHGEiZ1bl3qCGgc4xQnYXU=
 github.com/nuntiodev/x v0.2.20 h1:/aJt54YlhxSH/patb2hm0TwKwr20qvY6ypY98Y/ikjI=
 github.com/nuntiodev/x v0.2.20/go.mod h1:jaFmwyUkU2G1Mtvn+YlvmVpg+SEEc/v/NxRhueZ7p9Q=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=

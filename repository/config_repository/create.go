@@ -11,8 +11,8 @@ func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.C
 	prepare(actionCreate, config)
 	if config == nil {
 		return nil, errors.New("missing required config")
-	} else if config.Id == go_block.LanguageCode_INVALID_LANGUAGE_CODE {
-		return nil, errors.New("invalid config id")
+	} else if config.Id == "" {
+		return nil, errors.New("missing required config")
 	}
 	// set default fields
 	config.EnableNuntioConnect = true

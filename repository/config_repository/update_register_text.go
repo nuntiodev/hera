@@ -11,8 +11,8 @@ import (
 func (c *defaultConfigRepository) UpdateRegisterText(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
 	if config == nil {
 		return nil, errors.New("missing required config")
-	} else if config.Id == go_block.LanguageCode_INVALID_LANGUAGE_CODE {
-		return nil, errors.New("missing required config id")
+	} else if config.Id == "" {
+		return nil, errors.New("missing required config")
 	}
 	get, err := c.GetNamespaceConfig(ctx)
 	if err != nil {

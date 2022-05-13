@@ -14,7 +14,7 @@ const (
 )
 
 type Token interface {
-	GenerateToken(privateKey *rsa.PrivateKey, userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_block.CustomClaims, error)
+	GenerateToken(privateKey *rsa.PrivateKey, tokenId, userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_block.CustomClaims, error)
 	ValidateToken(publicKey *rsa.PublicKey, jwtToken string) (*go_block.CustomClaims, error)
 }
 

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	uuid "github.com/satori/go.uuid"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
@@ -52,7 +53,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		}); err != nil {
 			return nil, err
 		}
-		newRefreshToken, newRefreshclaims, err := h.token.GenerateToken(privateKey, refreshClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
+		newRefreshToken, newRefreshclaims, err := h.token.GenerateToken(privateKey, uuid.NewV4().String(), refreshClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
 		if err != nil {
 			return nil, err
 		}
@@ -71,7 +72,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		}
 	}
 	// generate new access token from refresh token
-	newAccessToken, newAccessClaims, err := h.token.GenerateToken(privateKey, refreshClaims.UserId, refreshClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
+	newAccessToken, newAccessClaims, err := h.token.GenerateToken(privateKey, uuid.NewV4().String(), refreshClaims.UserId, refreshClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
 	if err != nil {
 		return nil, err
 	}

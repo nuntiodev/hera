@@ -20,6 +20,7 @@ const (
 	UpdateUsername           = "UpdateUsername"
 	UpdateImage              = "UpdateImage"
 	UpdateName               = "UpdateName"
+	UpdatePhoneNumber        = "UpdatePhoneNumber"
 	UpdateBirthdate          = "UpdateBirthdate"
 	UpdateSecurity           = "UpdateSecurity"
 	Get                      = "Get"
@@ -47,7 +48,6 @@ const (
 	UpdateConfigWelcomeText  = "UpdateConfigWelcomeText"
 	UpdateConfigRegisterText = "UpdateConfigRegisterText"
 	UpdateConfigLoginText    = "UpdateConfigLoginText"
-	UpdateEnableBiometrics   = "UpdateEnableBiometrics"
 	GetConfig                = "GetConfig"
 	DeleteConfig             = "DeleteConfig"
 )
@@ -95,7 +95,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		}
 	case UpdatePassword, UpdateMetadata,
 		UpdateImage, UpdateEmail, UpdateUsername,
-		UpdateName, UpdateBirthdate, UpdateEnableBiometrics:
+		UpdateName, UpdateBirthdate, UpdatePhoneNumber:
 		if translatedReq.Update == nil {
 			return &go_block.UserResponse{}, UpdateIsNil
 		} else if translatedReq.User == nil {

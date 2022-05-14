@@ -29,12 +29,13 @@ The Nuntio User Block is a fully fledged user-management system, designed to be 
 | INITIALIZE_SECRETS                 | Bool            | If set to true, the service will automatically create encryption secrsts and RSA public/private keys.                                                                                                                                                                                                                   | false  | No       |
 | INITIALIZE_ENGINE                  | String          | If set to "kubernetes", the service will create secrets used when the system starts up again. If set to "memory" the system will create new secrets when starting up again - do not use this option in production. This is only relevant if you initialize encryption secrtets.                                         | memory | No       |
 | NEW_ENCRYPTION_KEY                 | String          | If provided, the system will automatically add a new encryption key to the system and encrypt users under that new key.                                                                                                                                                                                                 | ""     | No       |
-| ACTIVE_MEASUREMENT_EXPIRES_AT      | Duration | If frontend is sending data to the server about user active engagement, this can be used to save the data for a specific amount of time. | 3 days | No |
-| EMAIL_VERIFICATION_TEMPLATE_PATH   | String | You can provide a custom email template that we will use to send the email. | /var/verify_email.html | No |
-| EMAIL_RESET_PASSWORD_TEMPLATE_PATH | String | Same as above. | /var/reset_password.html | No |
-| EMAIL_FROM                         | String | The email you want as sender.                                | ""                       | No |
-| POSTMARK_SERVER_TOKEN              | String | Your Postmark server token. | "" | No |
-| POSTMARK_ACCOUNT_TOKEN             | String | Your Postmark account token. | "" | No |
+| ACTIVE_MEASUREMENT_EXPIRES_AT      | Duration        | If frontend is sending data to the server about user active engagement, this can be used to save the data for a specific amount of time. | 3 days | No |
+| EMAIL_VERIFICATION_TEMPLATE_PATH   | String          | You can provide a custom email template that we will use to send the email. | /var/verify_email.html | No |
+| EMAIL_RESET_PASSWORD_TEMPLATE_PATH | String          | Same as above. | /var/reset_password.html | No |
+| EMAIL_FROM                         | String          | The email you want as sender.                                | ""                       | No |
+| POSTMARK_SERVER_TOKEN              | String          | Your Postmark server token. | "" | No |
+| POSTMARK_ACCOUNT_TOKEN             | String          | Your Postmark account token. | "" | No |
+| MAX_EMAIL_VERIFICATION_AGE | Duration | Define how long the email verification code is valid. | 5m | No |
 
 ## Contributing
 

@@ -104,8 +104,9 @@ func ProtoWelcomeTextToWelcomeText(text *go_block.WelcomeText) *WelcomeText {
 		return nil
 	}
 	return &WelcomeText{
-		WelcomeTitle:   text.WelcomeTitle,
-		WelcomeDetails: text.WelcomeDetails,
+		WelcomeTitle:       text.WelcomeTitle,
+		WelcomeDetails:     text.WelcomeDetails,
+		ContinueWithNuntio: text.ContinueWithNuntio,
 	}
 }
 
@@ -114,8 +115,9 @@ func WelcomeTextToProtoWelcomeText(text *WelcomeText) *go_block.WelcomeText {
 		return nil
 	}
 	return &go_block.WelcomeText{
-		WelcomeTitle:   text.WelcomeTitle,
-		WelcomeDetails: text.WelcomeDetails,
+		WelcomeTitle:       text.WelcomeTitle,
+		WelcomeDetails:     text.WelcomeDetails,
+		ContinueWithNuntio: text.ContinueWithNuntio,
 	}
 }
 

@@ -46,7 +46,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	// create verification email
 	if _, err := emails.Create(ctx, &go_block.Email{
 		Id:             email_repository.VerificationEmail,
-		Logo:           "",
+		Logo:           createdConfig.Logo,
 		WelcomeMessage: "Hello",
 		BodyMessage:    fmt.Sprintf("Thank you for signing up to %s. In order to get started, we ask of you to confirm your email by entering the following numbers in your %s app.", createdConfig.Name, createdConfig.Name),
 		FooterMessage:  fmt.Sprintf("All the best from %s team", createdConfig.Name),
@@ -59,7 +59,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	// create reset password email
 	if _, err := emails.Create(ctx, &go_block.Email{
 		Id:             email_repository.ResetPasswordEmail,
-		Logo:           "",
+		Logo:           createdConfig.Logo,
 		WelcomeMessage: "Hello",
 		BodyMessage:    fmt.Sprintf("Thank you for signing up to %s. In order to reset your password, enter the following numbers in your %s app together with your new password.", createdConfig.Name, createdConfig.Name),
 		FooterMessage:  fmt.Sprintf("All the best from %s team", createdConfig.Name),

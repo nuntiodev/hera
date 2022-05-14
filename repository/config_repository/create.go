@@ -11,8 +11,6 @@ func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.C
 	prepare(actionCreate, config)
 	if config == nil {
 		return nil, errors.New("missing required config")
-	} else if config.Id == "" {
-		return nil, errors.New("missing required config")
 	}
 	// set default fields
 	config.EnableNuntioConnect = false
@@ -25,6 +23,7 @@ func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.C
 	config.DefaultLanguage = go_block.LanguageCode_EN
 	config.LoginType = go_block.LoginType_LOGIN_TYPE_EMAIL_PASSWORD
 	config.RequirePhoneNumberVerification = true
+	config.Id = namespaceConfigName
 	create := ProtoConfigToConfig(config)
 	if len(c.internalEncryptionKeys) > 0 {
 		if err := c.EncryptConfig(actionCreate, create); err != nil {

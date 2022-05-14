@@ -76,7 +76,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	}
 	engText, err := text.Create(ctx, &go_block.Text{Id: go_block.LanguageCode_EN})
 	if err != nil {
-		return nil, err
+		return &go_block.UserResponse{}, err
 	}
 	return &go_block.UserResponse{
 		Config: createdConfig,

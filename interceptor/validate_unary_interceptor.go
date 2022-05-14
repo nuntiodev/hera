@@ -11,45 +11,52 @@ import (
 )
 
 const (
-	ProjectName              = "/BlockUser.UserService/"
-	Heartbeat                = "Heartbeat"
-	Create                   = "Create"
-	UpdatePassword           = "UpdatePassword"
-	UpdateMetadata           = "UpdateMetadata"
-	UpdateEmail              = "UpdateEmail"
-	UpdateUsername           = "UpdateUsername"
-	UpdateImage              = "UpdateImage"
-	UpdateName               = "UpdateName"
-	UpdatePhoneNumber        = "UpdatePhoneNumber"
-	UpdateBirthdate          = "UpdateBirthdate"
-	UpdateSecurity           = "UpdateSecurity"
-	Get                      = "Get"
-	GetAll                   = "GetAll"
-	ValidateCredentials      = "ValidateCredentials"
-	Login                    = "Login"
-	ValidateToken            = "ValidateToken"
-	BlockToken               = "BlockToken"
-	BlockTokenById           = "BlockTokenById"
-	RefreshToken             = "RefreshToken"
-	GetTokens                = "GetTokens"
-	PublicKeys               = "PublicKeys"
-	RecordActiveMeasurement  = "RecordActiveMeasurement"
-	NamespaceActiveHistory   = "NamespaceActiveHistory"
-	UserActiveHistory        = "UserActiveHistory"
-	VerifyEmail              = "VerifyEmail"
-	SendVerificationEmail    = "SendVerificationEmail"
-	Delete                   = "Delete"
-	DeleteNamespace          = "DeleteNamespace"
-	DeleteBatch              = "DeleteBatch"
-	CreateNamespaceConfig    = "CreateNamespaceConfig"
-	UpdateConfigSettings     = "UpdateConfigSettings"
-	UpdateConfigDetails      = "UpdateConfigDetails"
-	UpdateConfigGeneralText  = "UpdateGeneralText"
-	UpdateConfigWelcomeText  = "UpdateConfigWelcomeText"
-	UpdateConfigRegisterText = "UpdateRegisterText"
-	UpdateConfigLoginText    = "UpdateLoginText"
-	GetConfig                = "GetConfig"
-	DeleteConfig             = "DeleteConfig"
+	ProjectName             = "/BlockUser.UserService/"
+	Heartbeat               = "Heartbeat"
+	Create                  = "Create"
+	UpdatePassword          = "UpdatePassword"
+	UpdateMetadata          = "UpdateMetadata"
+	UpdateImage             = "UpdateImage"
+	UpdateEmail             = "UpdateEmail"
+	UpdatePhoneNumber       = "UpdatePhoneNumber"
+	UpdateName              = "UpdateName"
+	UpdateBirthdate         = "UpdateBirthdate"
+	UpdateUsername          = "UpdateUsername"
+	UpdatePreferredLanguage = "UpdatePreferredLanguage"
+	UpdateSecurity          = "UpdateSecurity"
+	Get                     = "Get"
+	GetAll                  = "GetAll"
+	ValidateCredentials     = "ValidateCredentials"
+	Login                   = "Login"
+	ValidateToken           = "ValidateToken"
+	BlockToken              = "BlockToken"
+	BlockTokenById          = "BlockTokenById"
+	RefreshToken            = "RefreshToken"
+	GetTokens               = "GetTokens"
+	PublicKeys              = "PublicKeys"
+	RecordActiveMeasurement = "RecordActiveMeasurement"
+	UserActiveHistory       = "UserActiveHistory"
+	NamespaceActiveHistory  = "NamespaceActiveHistory"
+	SendVerificationEmail   = "SendVerificationEmail"
+	VerifyEmail             = "VerifyEmail"
+	SendResetPasswordEmail  = "SendResetPasswordEmail"
+	ResetPassword           = "ResetPassword"
+	Delete                  = "Delete"
+	DeleteBatch             = "DeleteBatch"
+	DeleteNamespace         = "DeleteNamespace"
+	CreateNamespaceConfig   = "CreateNamespaceConfig"
+	UpdateConfigSettings    = "UpdateConfigSettings"
+	UpdateConfigDetails     = "UpdateConfigDetails"
+	GetConfig               = "GetConfig"
+	DeleteConfig            = "DeleteConfig"
+	CreateText              = "CreateText"
+	UpdateGeneralText       = "UpdateGeneralText"
+	UpdateWelcomeText       = "UpdateWelcomeText"
+	UpdateRegisterText      = "UpdateRegisterText"
+	UpdateLoginText         = "UpdateLoginText"
+	UpdateProfileText       = "UpdateProfileText"
+	DeleteText              = "DeleteText"
+	InitializeApplication   = "InitializeApplication"
 )
 
 var (
@@ -62,6 +69,7 @@ var (
 	MeasurementIsNil    = errors.New("measurement is nil")
 	ConfigIsNil         = errors.New("config is nil")
 	AuthConfigIsNil     = errors.New("auth config is nil")
+	TextIsNil           = errors.New("text is nil")
 )
 
 func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -78,7 +86,8 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 	}
 	switch method[1] {
 	case Heartbeat, GetAll, PublicKeys,
-		NamespaceActiveHistory, GetConfig, DeleteConfig:
+		NamespaceActiveHistory, GetConfig, DeleteConfig,
+		InitializeApplication:
 		break
 	case BlockToken:
 		if translatedReq.TokenPointer == "" {
@@ -89,13 +98,14 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 			return &go_block.UserResponse{}, MeasurementIsNil
 		}
 	case Get, Create, VerifyEmail,
-		SendVerificationEmail:
+		SendVerificationEmail, SendResetPasswordEmail, ResetPassword:
 		if translatedReq.User == nil {
 			return &go_block.UserResponse{}, UserIsNil
 		}
 	case UpdatePassword, UpdateMetadata,
 		UpdateImage, UpdateEmail, UpdateUsername,
-		UpdateName, UpdateBirthdate, UpdatePhoneNumber:
+		UpdateName, UpdateBirthdate, UpdatePhoneNumber,
+		UpdatePreferredLanguage:
 		if translatedReq.Update == nil {
 			return &go_block.UserResponse{}, UpdateIsNil
 		} else if translatedReq.User == nil {
@@ -122,10 +132,15 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 			return nil, UserBatchIsNil
 		}
 	case CreateNamespaceConfig, UpdateConfigSettings,
-		UpdateConfigDetails, UpdateConfigGeneralText, UpdateConfigWelcomeText,
-		UpdateConfigRegisterText, UpdateConfigLoginText:
+		UpdateConfigDetails:
 		if translatedReq.Config == nil {
 			return nil, ConfigIsNil
+		}
+	case UpdateGeneralText, UpdateWelcomeText, UpdateRegisterText,
+		UpdateLoginText, CreateText, UpdateProfileText,
+		DeleteText:
+		if translatedReq.Text == nil {
+			return nil, TextIsNil
 		}
 	default:
 		return &go_block.UserResponse{}, errors.New(fmt.Sprintf("invalid request: %s", info.FullMethod))

@@ -39,7 +39,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 		return &go_block.UserResponse{}, fmt.Errorf("could not create config with err: %v", err)
 	}
 	// setup default emails
-	emails, err := h.repository.Emails(ctx, req.Namespace)
+	emails, err := h.repository.Email(ctx, req.Namespace)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
@@ -56,7 +56,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	// create verification email
+	// create reset password email
 	if _, err := emails.Create(ctx, &go_block.Email{
 		Id:             email_repository.ResetPasswordEmail,
 		Logo:           "",
@@ -69,7 +69,17 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}
+	// create default text
+	text, err := h.repository.Text(ctx, req.Namespace)
+	if err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	engText, err := text.Create(ctx, &go_block.Text{Id: go_block.LanguageCode_EN})
+	if err != nil {
+		return nil, err
+	}
 	return &go_block.UserResponse{
 		Config: createdConfig,
+		Text:   engText,
 	}, nil
 }

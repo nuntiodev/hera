@@ -5,11 +5,16 @@ import (
 	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/email_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/measurement_repository"
+	"github.com/nuntiodev/nuntio-user-block/repository/text_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"time"
+)
+
+const (
+	defaultDb = "nuntio-blocks-db"
 )
 
 type Repository interface {
@@ -18,7 +23,8 @@ type Repository interface {
 	Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error)
 	Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error)
 	Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error)
-	Emails(ctx context.Context, namespace string) (email_repository.EmailRepository, error)
+	Text(ctx context.Context, namespace string) (text_repository.TextRepository, error)
+	Email(ctx context.Context, namespace string) (email_repository.EmailRepository, error)
 }
 
 type defaultRepository struct {
@@ -38,7 +44,7 @@ func (r *defaultRepository) Liveness(ctx context.Context) error {
 
 func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error) {
 	if namespace == "" {
-		namespace = "blocks-db"
+		namespace = defaultDb
 	}
 	collection := r.mongodbClient.Database(namespace).Collection("user_tokens")
 	tokenRepository, err := token_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
@@ -50,7 +56,7 @@ func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token
 
 func (r *defaultRepository) Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error) {
 	if namespace == "" {
-		namespace = "blocks-db"
+		namespace = defaultDb
 	}
 	db := r.mongodbClient.Database(namespace)
 	userActiveMeasurementCollection := db.Collection("user_active_measurements")
@@ -64,7 +70,7 @@ func (r *defaultRepository) Measurements(ctx context.Context, namespace string) 
 
 func (r *defaultRepository) Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error) {
 	if namespace == "" {
-		namespace = "blocks-db"
+		namespace = defaultDb
 	}
 	collection := r.mongodbClient.Database(namespace).Collection("user_config")
 	configRepository, err := config_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
@@ -74,9 +80,21 @@ func (r *defaultRepository) Config(ctx context.Context, namespace string) (confi
 	return configRepository, nil
 }
 
-func (r *defaultRepository) Emails(ctx context.Context, namespace string) (email_repository.EmailRepository, error) {
+func (r *defaultRepository) Text(ctx context.Context, namespace string) (text_repository.TextRepository, error) {
 	if namespace == "" {
-		namespace = "blocks-db"
+		namespace = defaultDb
+	}
+	collection := r.mongodbClient.Database(namespace).Collection("user_text")
+	textRepository, err := text_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
+	if err != nil {
+		return nil, err
+	}
+	return textRepository, nil
+}
+
+func (r *defaultRepository) Email(ctx context.Context, namespace string) (email_repository.EmailRepository, error) {
+	if namespace == "" {
+		namespace = defaultDb
 	}
 	collection := r.mongodbClient.Database(namespace).Collection("user_emails")
 	emailRepository, err := email_repository.New(collection, r.crypto, r.internalEncryptionKeys)

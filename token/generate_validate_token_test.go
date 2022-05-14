@@ -26,7 +26,7 @@ func TestGenerateValidateToken(t *testing.T) {
 	refreshId := uuid.NewV4().String()
 	expiresAfter := time.Second * 10
 	// act one - generate token
-	token, claims, err := to.GenerateToken(privateKey, userId, refreshId, TokenTypeAccess, expiresAfter)
+	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), userId, refreshId, TokenTypeAccess, expiresAfter)
 	assert.NoError(t, err)
 	assert.NotNil(t, claims)
 	assert.NotEmpty(t, token)
@@ -57,7 +57,7 @@ func TestGenerateValidateTokenInvalidKey(t *testing.T) {
 	refreshId := uuid.NewV4().String()
 	expiresAfter := time.Second * 10
 	// act one - generate token
-	token, claims, err := to.GenerateToken(privateKey, userId, refreshId, TokenTypeAccess, expiresAfter)
+	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), userId, refreshId, TokenTypeAccess, expiresAfter)
 	assert.NoError(t, err)
 	assert.NotNil(t, claims)
 	assert.NotEmpty(t, token)
@@ -85,7 +85,7 @@ func TestGenerateTokenEmptyRefreshId(t *testing.T) {
 	// data to validate
 	expiresAfter := time.Second * 10
 	// act one - generate token
-	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), "", TokenTypeAccess, expiresAfter)
+	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), uuid.NewV4().String(), "", TokenTypeAccess, expiresAfter)
 	assert.Error(t, err)
 	assert.Nil(t, claims)
 	assert.Empty(t, token)
@@ -104,7 +104,7 @@ func TestGenerateTokenInvalidType(t *testing.T) {
 	// data to validate
 	expiresAfter := time.Second * 10
 	// act one - generate token
-	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), uuid.NewV4().String(), "invalid", expiresAfter)
+	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), uuid.NewV4().String(), uuid.NewV4().String(), "invalid", expiresAfter)
 	assert.Error(t, err)
 	assert.Nil(t, claims)
 	assert.Empty(t, token)

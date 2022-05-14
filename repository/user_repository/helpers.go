@@ -35,7 +35,7 @@ func prepare(action int, user *go_block.User) {
 		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,
 		actionUpdateUsername, actionUpdateName, actionUpdateBirthdate,
 		actionUpdateEmailVerified, actionUpdateVerificationEmailSent, actionUpdateResetPasswordEmailSent,
-		actionUpdateEnableBiometrics, actionUpdatePhoneNumber:
+		actionUpdatePreferredLanguage, actionUpdatePhoneNumber:
 		user.UpdatedAt = ts.Now()
 	}
 	user.Id = strings.TrimSpace(user.Id)
@@ -120,7 +120,7 @@ func (r *mongodbRepository) validate(action int, user *go_block.User) error {
 		if formvalidators.ValidatePhoneNumber(user.PhoneNumber) == false {
 			return errors.New("invalid phone number")
 		}
-	case actionGetAll, actionUpdateUsername, actionUpdateEnableBiometrics:
+	case actionGetAll, actionUpdateUsername, actionUpdatePreferredLanguage:
 		return nil
 	}
 	if len(user.Email) > maxFieldLength {

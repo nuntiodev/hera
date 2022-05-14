@@ -17,8 +17,10 @@ func (e *defaultEmailRepository) Create(ctx context.Context, email *go_block.Ema
 	if email.Id == "" {
 		email.Id = uuid.NewV4().String()
 	}
+	// set default fields
 	email.CreatedAt = ts.Now()
 	email.UpdatedAt = ts.Now()
+	email.LanguageCode = go_block.LanguageCode_EN
 	create := ProtoEmailToEmail(email)
 	if len(e.internalEncryptionKeys) > 0 {
 		if err := e.EncryptEmail(actionCreate, create); err != nil {

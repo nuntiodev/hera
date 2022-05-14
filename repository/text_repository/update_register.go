@@ -1,4 +1,4 @@
-package config_repository
+package text_repository
 
 import (
 	"context"
@@ -8,25 +8,27 @@ import (
 	"time"
 )
 
-func (c *defaultConfigRepository) UpdateRegisterText(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
-	if config == nil {
-		return nil, errors.New("missing required config")
-	} else if config.Id == "" {
-		return nil, errors.New("missing required config")
+func (t *defaultTextRepository) UpdateRegister(ctx context.Context, text *go_block.Text) (*go_block.Text, error) {
+	if text == nil {
+		return nil, errors.New("missing required text")
+	} else if text.Id == go_block.LanguageCode_INVALID_LANGUAGE_CODE {
+		return nil, errors.New("missing required text language code id")
 	}
-	get, err := c.GetNamespaceConfig(ctx)
+	get, err := t.Get(ctx, text.Id)
 	if err != nil {
 		return nil, err
 	}
-	update := ProtoConfigToConfig(config)
+	update := ProtoTextToText(&go_block.Text{
+		RegisterText: text.RegisterText,
+	})
 	if get.InternalEncryptionLevel > 0 {
 		update.InternalEncryptionLevel = get.InternalEncryptionLevel
-		if err := c.EncryptConfig(actionUpdate, update); err != nil {
+		if err := t.EncryptText(actionUpdate, update); err != nil {
 			return nil, err
 		}
 	}
 	updateRegisterText := bson.M{}
-	if config.RegisterText != nil {
+	if text.RegisterText != nil {
 		updateRegisterText = bson.M{
 			"register_button":               update.RegisterText.RegisterButton,
 			"register_title":                update.RegisterText.RegisterTitle,
@@ -46,10 +48,10 @@ func (c *defaultConfigRepository) UpdateRegisterText(ctx context.Context, config
 			"updated_at":    time.Now(),
 		},
 	}
-	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {
+	if _, err := t.collection.UpdateOne(ctx, bson.M{"_id": text.Id}, mongoUpdate); err != nil {
 		return nil, err
 	}
 	// set updated fields
-	get.WelcomeText = config.WelcomeText
+	get.RegisterText = text.RegisterText
 	return get, nil
 }

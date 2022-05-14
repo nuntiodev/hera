@@ -7,18 +7,19 @@ import (
 )
 
 type Email struct {
-	Id                      string    `bson:"_id" json:"_id"`
-	Logo                    string    `bson:"logo" json:"logo"`
-	WelcomeMessage          string    `bson:"welcome_message" json:"welcome_message"`
-	BodyMessage             string    `bson:"body_message" json:"body_message"`
-	FooterMessage           string    `bson:"footer_message" json:"footer_message"`
-	CreatedAt               time.Time `bson:"created_at" json:"created_at"`
-	UpdatedAt               time.Time `bson:"updated_at" json:"updated_at"`
-	EncryptedAt             time.Time `bson:"encrypted_at" json:"encrypted_at"`
-	TriggerOnCreate         bool      `bson:"trigger_on_create" json:"trigger_on_create"`
-	InternalEncryptionLevel int32     `bson:"internal_encryption_level" json:"internal_encryption_level"`
-	Subject                 string    `bson:"subject" json:"subject"`
-	TemplatePath            string    `bson:"template_path" json:"template_path"`
+	Id                      string                `bson:"_id" json:"_id"`
+	Logo                    string                `bson:"logo" json:"logo"`
+	WelcomeMessage          string                `bson:"welcome_message" json:"welcome_message"`
+	BodyMessage             string                `bson:"body_message" json:"body_message"`
+	FooterMessage           string                `bson:"footer_message" json:"footer_message"`
+	CreatedAt               time.Time             `bson:"created_at" json:"created_at"`
+	UpdatedAt               time.Time             `bson:"updated_at" json:"updated_at"`
+	EncryptedAt             time.Time             `bson:"encrypted_at" json:"encrypted_at"`
+	TriggerOnCreate         bool                  `bson:"trigger_on_create" json:"trigger_on_create"`
+	InternalEncryptionLevel int32                 `bson:"internal_encryption_level" json:"internal_encryption_level"`
+	Subject                 string                `bson:"subject" json:"subject"`
+	TemplatePath            string                `bson:"template_path" json:"template_path"`
+	LanguageCode            go_block.LanguageCode `bson:"language_code" json:"language_code"`
 }
 
 func EmailToProtoEmail(email *Email) *go_block.Email {
@@ -38,6 +39,7 @@ func EmailToProtoEmail(email *Email) *go_block.Email {
 		InternalEncryptionLevel: email.InternalEncryptionLevel,
 		Subject:                 email.Subject,
 		TemplatePath:            email.TemplatePath,
+		LanguageCode:            email.LanguageCode,
 	}
 }
 
@@ -58,5 +60,6 @@ func ProtoEmailToEmail(email *go_block.Email) *Email {
 		InternalEncryptionLevel: email.InternalEncryptionLevel,
 		Subject:                 email.Subject,
 		TemplatePath:            email.TemplatePath,
+		LanguageCode:            email.LanguageCode,
 	}
 }

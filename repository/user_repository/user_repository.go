@@ -26,7 +26,7 @@ const (
 	actionUpdateEmailVerified
 	actionUpdateVerificationEmailSent
 	actionUpdateResetPasswordEmailSent
-	actionUpdateEnableBiometrics
+	actionUpdatePreferredLanguage
 	actionGet
 	actionGetAll
 	actionUpgradeEncryption
@@ -55,6 +55,7 @@ type UserRepository interface {
 	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateName(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateBirthdate(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
+	UpdatePreferredLanguage(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error)
 	UpdateSecurity(ctx context.Context, get *go_block.User) (*go_block.User, error)
 	UpdateVerificationEmailSent(ctx context.Context, get *go_block.User) (*go_block.User, error)
 	UpdateResetPasswordEmailSent(ctx context.Context, user *go_block.User) (*go_block.User, error)

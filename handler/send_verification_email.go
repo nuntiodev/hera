@@ -28,7 +28,7 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_bloc
 		return &go_block.UserResponse{}, errors.New("email is already verified")
 	}
 	// generate verification code and send it to the user
-	emails, err := h.repository.Emails(ctx, req.Namespace) // email config containing text to send
+	emails, err := h.repository.Email(ctx, req.Namespace) // email config containing text to send
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}

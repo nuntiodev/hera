@@ -1,4 +1,4 @@
-package config_repository
+package text_repository
 
 import (
 	"context"
@@ -8,30 +8,31 @@ import (
 	"time"
 )
 
-func (c *defaultConfigRepository) UpdateGeneralText(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
-	if config == nil {
-		return nil, errors.New("missing required config")
-	} else if config.Id == "" {
-		return nil, errors.New("missing required config")
+func (t *defaultTextRepository) UpdateGeneral(ctx context.Context, text *go_block.Text) (*go_block.Text, error) {
+	if text == nil {
+		return nil, errors.New("missing required text")
+	} else if text.Id == go_block.LanguageCode_INVALID_LANGUAGE_CODE {
+		return nil, errors.New("missing required text language code id")
 	}
-	get, err := c.GetNamespaceConfig(ctx)
+	get, err := t.Get(ctx, text.Id)
 	if err != nil {
 		return nil, err
 	}
-	update := ProtoConfigToConfig(config)
+	update := ProtoTextToText(&go_block.Text{
+		GeneralText: text.GeneralText,
+	})
 	if get.InternalEncryptionLevel > 0 {
 		update.InternalEncryptionLevel = get.InternalEncryptionLevel
-		if err := c.EncryptConfig(actionUpdate, update); err != nil {
+		if err := t.EncryptText(actionUpdate, update); err != nil {
 			return nil, err
 		}
 	}
 	updateGeneralText := bson.M{}
-	if config.GeneralText != nil {
+	if text.GeneralText != nil {
 		updateGeneralText = bson.M{
 			"missing_password_title":   update.GeneralText.MissingPasswordTitle,
 			"missing_password_details": update.GeneralText.MissingPasswordDetails,
 			"missing_email_title":      update.GeneralText.MissingEmailTitle,
-			"missing_email_details":    update.GeneralText.MissingEmailDetails,
 			"created_by":               update.GeneralText.CreatedBy,
 			"password_hint":            update.GeneralText.PasswordHint,
 			"email_hint":               update.GeneralText.EmailHint,
@@ -47,10 +48,10 @@ func (c *defaultConfigRepository) UpdateGeneralText(ctx context.Context, config 
 			"updated_at":   time.Now(),
 		},
 	}
-	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {
+	if _, err := t.collection.UpdateOne(ctx, bson.M{"_id": text.Id}, mongoUpdate); err != nil {
 		return nil, err
 	}
 	// set updated fields
-	get.WelcomeText = config.WelcomeText
+	get.RegisterText = text.RegisterText
 	return get, nil
 }

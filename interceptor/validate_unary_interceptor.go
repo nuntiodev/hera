@@ -44,10 +44,10 @@ const (
 	CreateNamespaceConfig    = "CreateNamespaceConfig"
 	UpdateConfigSettings     = "UpdateConfigSettings"
 	UpdateConfigDetails      = "UpdateConfigDetails"
-	UpdateConfigGeneralText  = "UpdateConfigGeneralText"
+	UpdateConfigGeneralText  = "UpdateGeneralText"
 	UpdateConfigWelcomeText  = "UpdateConfigWelcomeText"
-	UpdateConfigRegisterText = "UpdateConfigRegisterText"
-	UpdateConfigLoginText    = "UpdateConfigLoginText"
+	UpdateConfigRegisterText = "UpdateRegisterText"
+	UpdateConfigLoginText    = "UpdateLoginText"
 	GetConfig                = "GetConfig"
 	DeleteConfig             = "DeleteConfig"
 )

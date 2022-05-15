@@ -12,7 +12,7 @@ func (t *defaultTextRepository) Delete(ctx context.Context, id go_block.Language
 		return errors.New("invalid language code")
 	}
 	filter := bson.M{}
-	filter = bson.M{"_id": id.String()}
+	filter = bson.M{"_id": id}
 	result, err := t.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return err

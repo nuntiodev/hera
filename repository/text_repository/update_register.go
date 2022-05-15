@@ -48,7 +48,7 @@ func (t *defaultTextRepository) UpdateRegister(ctx context.Context, text *go_blo
 			"updated_at":    time.Now(),
 		},
 	}
-	if _, err := t.collection.UpdateOne(ctx, bson.M{"_id": text.Id.String()}, mongoUpdate); err != nil {
+	if _, err := t.collection.UpdateOne(ctx, bson.M{"_id": text.Id}, mongoUpdate); err != nil {
 		return nil, err
 	}
 	// set updated fields

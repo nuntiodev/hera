@@ -37,7 +37,10 @@ func (r *mongodbRepository) encryptUser(ctx context.Context, action int, user *U
 	case actionUpdateEmail, actionUpdateImage, actionUpdateSecurity,
 		actionUpdateMetadata, actionUpdateName, actionUpdateBirthdate,
 		actionUpdatePhoneNumber:
-		if user.ExternalEncryptionLevel > 0 && r.externalEncryptionKey != "" {
+		if user.ExternalEncryptionLevel > 0 {
+			if r.externalEncryptionKey == "" {
+				return errors.New("external encryption is enabled on the user but the external encryption key is missing")
+			}
 			if err := r.encrypt(user, r.externalEncryptionKey); err != nil {
 				return err
 			}

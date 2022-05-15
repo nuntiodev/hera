@@ -50,6 +50,7 @@ const (
 	GetConfig               = "GetConfig"
 	DeleteConfig            = "DeleteConfig"
 	CreateText              = "CreateText"
+	GetText                 = "GetText"
 	UpdateGeneralText       = "UpdateGeneralText"
 	UpdateWelcomeText       = "UpdateWelcomeText"
 	UpdateRegisterText      = "UpdateRegisterText"
@@ -138,7 +139,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		}
 	case UpdateGeneralText, UpdateWelcomeText, UpdateRegisterText,
 		UpdateLoginText, CreateText, UpdateProfileText,
-		DeleteText:
+		DeleteText, GetText:
 		if translatedReq.Text == nil {
 			return nil, TextIsNil
 		}

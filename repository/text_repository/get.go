@@ -8,6 +8,9 @@ import (
 )
 
 func (t *defaultTextRepository) Get(ctx context.Context, id go_block.LanguageCode) (*go_block.Text, error) {
+	if id == go_block.LanguageCode_INVALID_LANGUAGE_CODE {
+		return nil, errors.New("cannot get text with invalid language code")
+	}
 	resp := Text{}
 	result := t.collection.FindOne(ctx, bson.M{"_id": id})
 	if err := result.Err(); err != nil {

@@ -52,6 +52,10 @@ func (r *mongodbRepository) UpdateSecurity(ctx context.Context, get *go_block.Us
 		"$set": bson.M{
 			"email":                     update.Email,
 			"image":                     update.Image,
+			"first_name":                update.FirstName,
+			"last_name":                 update.LastName,
+			"birthdate":                 update.Birthdate,
+			"phone_number":              update.PhoneNumber,
 			"external_encryption_level": update.ExternalEncryptionLevel,
 			"internal_encryption_level": update.InternalEncryptionLevel,
 			"metadata":                  update.Metadata,

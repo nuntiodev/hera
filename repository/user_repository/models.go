@@ -1,7 +1,6 @@
 package user_repository
 
 import (
-	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
@@ -48,11 +47,9 @@ func UserToProtoUser(user *User) *go_block.User {
 	}
 	birthdate := &ts.Timestamp{}
 	if user.Birthdate != "" {
-		t, err := time.Parse(time.RFC3339, user.Birthdate)
+		t, err := time.Parse("2006-01-02", user.Birthdate)
 		if err == nil {
 			birthdate = ts.New(t)
-		} else {
-			fmt.Println("could not decode timestamp: " + user.Birthdate + " with err: " + err.Error())
 		}
 	}
 	return &go_block.User{
@@ -98,8 +95,6 @@ func ProtoUserToUser(user *go_block.User) *User {
 	birthdate := ""
 	if user.Birthdate != nil {
 		birthdate = user.Birthdate.AsTime().String()
-	} else {
-		fmt.Println("could not encode timestamp")
 	}
 	return &User{
 		Id:                          user.Id,

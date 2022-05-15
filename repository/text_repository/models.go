@@ -52,13 +52,13 @@ type ProfileText struct {
 }
 
 type Text struct {
-	Id                      go_block.LanguageCode `bson:"_id" json:"id"`
-	GeneralText             *GeneralText          `bson:"general_text" json:"general_text"`
-	WelcomeText             *WelcomeText          `bson:"welcome_text" json:"welcome_text"`
-	LoginText               *LoginText            `bson:"login_text" json:"login_text"`
-	RegisterText            *RegisterText         `bson:"register_text" json:"register_text"`
-	ProfileText             *ProfileText          `bson:"profile_text" json:"profile_text"`
-	InternalEncryptionLevel int32                 `bson:"internal_encryption_level" json:"internal_encryption_level"`
+	Id                      string        `bson:"_id" json:"id"`
+	GeneralText             *GeneralText  `bson:"general_text" json:"general_text"`
+	WelcomeText             *WelcomeText  `bson:"welcome_text" json:"welcome_text"`
+	LoginText               *LoginText    `bson:"login_text" json:"login_text"`
+	RegisterText            *RegisterText `bson:"register_text" json:"register_text"`
+	ProfileText             *ProfileText  `bson:"profile_text" json:"profile_text"`
+	InternalEncryptionLevel int32         `bson:"internal_encryption_level" json:"internal_encryption_level"`
 }
 
 func ProtoGeneralTextToGeneralText(text *go_block.GeneralText) *GeneralText {
@@ -214,7 +214,7 @@ func ProtoTextToText(text *go_block.Text) *Text {
 		return nil
 	}
 	return &Text{
-		Id:           text.Id,
+		Id:           ProtoToLanguageCode(text.Id),
 		GeneralText:  ProtoGeneralTextToGeneralText(text.GeneralText),
 		WelcomeText:  ProtoWelcomeTextToWelcomeText(text.WelcomeText),
 		LoginText:    ProtoLoginTextToLoginText(text.LoginText),
@@ -228,12 +228,34 @@ func TextToProtoText(text *Text) *go_block.Text {
 		return nil
 	}
 	return &go_block.Text{
-		Id:                      text.Id,
+		Id:                      LanguageCodeToProto(text.Id),
 		GeneralText:             GeneralTextToProtoGeneralText(text.GeneralText),
 		WelcomeText:             WelcomeTextToProtoWelcomeText(text.WelcomeText),
 		LoginText:               LoginTextToProtoLoginText(text.LoginText),
 		RegisterText:            RegisterTextToProtoRegisterText(text.RegisterText),
 		ProfileText:             ProfileTextToProtoProfileText(text.ProfileText),
 		InternalEncryptionLevel: text.InternalEncryptionLevel,
+	}
+}
+
+func LanguageCodeToProto(id string) go_block.LanguageCode {
+	switch id {
+	case go_block.LanguageCode_EN.String():
+		return go_block.LanguageCode_EN
+	case go_block.LanguageCode_DK.String():
+		return go_block.LanguageCode_DK
+	default:
+		return go_block.LanguageCode_INVALID_LANGUAGE_CODE
+	}
+}
+
+func ProtoToLanguageCode(id go_block.LanguageCode) string {
+	switch id {
+	case go_block.LanguageCode_EN:
+		return go_block.LanguageCode_EN.String()
+	case go_block.LanguageCode_DK:
+		return go_block.LanguageCode_DK.String()
+	default:
+		return go_block.LanguageCode_INVALID_LANGUAGE_CODE.String()
 	}
 }

@@ -11,7 +11,7 @@ import (
 func (t *defaultTextRepository) upgradeEncryptionLevel(ctx context.Context, text Text) error {
 	if len(t.internalEncryptionKeys) <= 0 {
 		return errors.New("length of internal encryption keys is 0")
-	} else if text.Id == go_block.LanguageCode_INVALID_LANGUAGE_CODE {
+	} else if text.Id == go_block.LanguageCode_INVALID_LANGUAGE_CODE.String() {
 		return errors.New("invalid language code")
 	}
 	if err := t.EncryptText(actionCreate, &text); err != nil {

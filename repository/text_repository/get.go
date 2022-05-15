@@ -3,11 +3,13 @@ package text_repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (t *defaultTextRepository) Get(ctx context.Context, id go_block.LanguageCode) (*go_block.Text, error) {
+	fmt.Println(id.String())
 	resp := Text{}
 	result := t.collection.FindOne(ctx, bson.M{"_id": id.String()})
 	if err := result.Err(); err != nil {

@@ -21,14 +21,14 @@ func (r *mongodbRepository) UpdatePhoneNumber(ctx context.Context, get *go_block
 	if err := r.validate(actionUpdatePhoneNumber, update); err != nil {
 		return nil, err
 	}
-	phoneNumberHash := fmt.Sprintf("%x", md5.Sum([]byte(update.Email)))
+	phoneNumberHash := fmt.Sprintf("%x", md5.Sum([]byte(update.PhoneNumber)))
 	get, err := r.Get(ctx, get, true) // check if user encryption is turned on
 	if err != nil {
 		return nil, err
 	}
 	// validate update is required
 	if get.PhoneNumberHash == phoneNumberHash {
-		return nil, errors.New("email is identical to current email")
+		return nil, errors.New("phone number is identical to current phone number")
 	}
 	updateUser := ProtoUserToUser(&go_block.User{
 		PhoneNumber: update.PhoneNumber,
@@ -41,11 +41,11 @@ func (r *mongodbRepository) UpdatePhoneNumber(ctx context.Context, get *go_block
 	updateUser.VerificationTextSentAt = time.Time{}
 	// encrypt user if user has previously been encrypted
 	if updateUser.InternalEncryptionLevel > 0 || updateUser.ExternalEncryptionLevel > 0 {
-		if err := r.encryptUser(ctx, actionUpdateEmail, updateUser); err != nil {
+		if err := r.encryptUser(ctx, actionUpdatePhoneNumber, updateUser); err != nil {
 			return nil, err
 		}
 	}
-	// check if new email already is verified previously; if so -> set to true
+	// check if new phone number already is verified previously; if so -> set to true
 	for _, verifiedPhoneNumber := range get.VerifiedPhoneNumbers {
 		if verifiedPhoneNumber == phoneNumberHash {
 			updateUser.PhoneNumberIsVerified = true
@@ -73,8 +73,9 @@ func (r *mongodbRepository) UpdatePhoneNumber(ctx context.Context, get *go_block
 		return nil, errors.New("could not find get")
 	}
 	// set updated fields
-	get.Email = update.Email
+	get.PhoneNumber = update.PhoneNumber
 	get.UpdatedAt = ts.New(updateUser.UpdatedAt)
-	get.EmailIsVerified = false
+	get.PhoneNumberIsVerified = false
+	get.PhoneNumberHash = phoneNumberHash
 	return get, nil
 }

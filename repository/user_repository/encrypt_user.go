@@ -34,7 +34,9 @@ func (r *mongodbRepository) encryptUser(ctx context.Context, action int, user *U
 			user.InternalEncryptionLevel = len(r.internalEncryptionKeys)
 			user.EncryptedAt = time.Now()
 		}
-	case actionUpdateEmail, actionUpdateImage, actionUpdateSecurity, actionUpdateMetadata, actionUpdateName, actionUpdateBirthdate:
+	case actionUpdateEmail, actionUpdateImage, actionUpdateSecurity,
+		actionUpdateMetadata, actionUpdateName, actionUpdateBirthdate,
+		actionUpdatePhoneNumber:
 		if user.ExternalEncryptionLevel > 0 && r.externalEncryptionKey != "" {
 			if err := r.encrypt(user, r.externalEncryptionKey); err != nil {
 				return err

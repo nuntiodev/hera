@@ -9,7 +9,7 @@ import (
 
 func (t *defaultTextRepository) Get(ctx context.Context, id go_block.LanguageCode) (*go_block.Text, error) {
 	resp := Text{}
-	result := t.collection.FindOne(ctx, bson.M{"_id": id})
+	result := t.collection.FindOne(ctx, bson.M{"_id": id.Number()})
 	if err := result.Err(); err != nil {
 		return nil, err
 	}

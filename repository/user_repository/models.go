@@ -1,6 +1,7 @@
 package user_repository
 
 import (
+	"github.com/araddon/dateparse"
 	"github.com/nuntiodev/block-proto/go_block"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
@@ -47,7 +48,7 @@ func UserToProtoUser(user *User) *go_block.User {
 	}
 	birthdate := &ts.Timestamp{}
 	if user.Birthdate != "" {
-		t, err := time.Parse("2006-01-02", user.Birthdate)
+		t, err := dateparse.ParseAny(user.Birthdate)
 		if err == nil {
 			birthdate = ts.New(t)
 		}

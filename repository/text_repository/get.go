@@ -7,9 +7,20 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+func getId(id go_block.LanguageCode) int32 {
+	switch id {
+	case go_block.LanguageCode_EN:
+		return 1
+	case go_block.LanguageCode_DK:
+		return 2
+	default:
+		return 0
+	}
+}
+
 func (t *defaultTextRepository) Get(ctx context.Context, id go_block.LanguageCode) (*go_block.Text, error) {
 	resp := Text{}
-	result := t.collection.FindOne(ctx, bson.M{"_id": id.Number()})
+	result := t.collection.FindOne(ctx, bson.M{"_id": getId(id)})
 	if err := result.Err(); err != nil {
 		return nil, err
 	}

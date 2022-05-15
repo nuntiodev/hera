@@ -11,7 +11,7 @@ func (h *defaultHandler) UpdatePhoneNumber(ctx context.Context, req *go_block.Us
 		return &go_block.UserResponse{}, err
 	}
 	// perform update
-	updatedUser, err := users.UpdateUsername(ctx, req.User, req.Update)
+	updatedUser, err := users.UpdatePhoneNumber(ctx, req.User, req.Update)
 	if err != nil {
 		return nil, err
 	}

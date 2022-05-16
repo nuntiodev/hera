@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/x/cryptox"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +29,7 @@ func TestUpdateSecurityIEEncrypted(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 30)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),
@@ -64,7 +64,7 @@ func TestUpdateSecurityUnencryptedUser(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 30)
 	user := &go_block.User{
-		Username: uuid.NewV4().String(),
+		Username: uuid.NewString(),
 		Email:    gofakeit.Email(),
 		Password: password,
 		Image:    gofakeit.ImageURL(10, 10),
@@ -106,7 +106,7 @@ func TestUpdateSecurityNilUpdate(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 30)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),

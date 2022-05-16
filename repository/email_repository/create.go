@@ -3,8 +3,8 @@ package email_repository
 import (
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
-	uuid "github.com/satori/go.uuid"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
@@ -15,7 +15,7 @@ func (e *defaultEmailRepository) Create(ctx context.Context, email *go_block.Ema
 	}
 	prepare(actionCreate, email)
 	if email.Id == "" {
-		email.Id = uuid.NewV4().String()
+		email.Id = uuid.NewString()
 	}
 	// set default fields
 	email.CreatedAt = ts.Now()

@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
-	uuid "github.com/satori/go.uuid"
 	"github.com/nuntiodev/x/cryptox"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +19,7 @@ func TestIsBlockedIEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
-		userId := uuid.NewV4().String()
+		userId := uuid.NewString()
 		device := gofakeit.Phone()
 		token := getToken(&go_block.Token{
 			UserId:     userId,
@@ -58,7 +58,7 @@ func TestIsNotBlockedIEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
-		userId := uuid.NewV4().String()
+		userId := uuid.NewString()
 		device := gofakeit.Phone()
 		token := getToken(&go_block.Token{
 			UserId:     userId,
@@ -90,7 +90,7 @@ func TestIsBlockedEmptyId(t *testing.T) {
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
-		userId := uuid.NewV4().String()
+		userId := uuid.NewString()
 		device := gofakeit.Phone()
 		token := getToken(&go_block.Token{
 			UserId:     userId,
@@ -126,7 +126,7 @@ func TestIsBlockedNil(t *testing.T) {
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
-		userId := uuid.NewV4().String()
+		userId := uuid.NewString()
 		device := gofakeit.Phone()
 		token := getToken(&go_block.Token{
 			UserId:     userId,

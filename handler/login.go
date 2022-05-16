@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
-	uuid "github.com/satori/go.uuid"
 	"golang.org/x/sync/errgroup"
 	"time"
 
@@ -63,7 +63,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 		return &go_block.UserResponse{}, fmt.Errorf("could setup tokens with err: %v", err)
 	}
 	// build data for tokens
-	refreshTokenId := uuid.NewV4().String()
+	refreshTokenId := uuid.NewString()
 	loggedInFrom := &go_block.Location{}
 	deviceInfo := ""
 	if req.Token != nil {
@@ -112,7 +112,7 @@ func (h *defaultHandler) generateRefreshToken(ctx context.Context, refreshId, us
 }
 
 func (h *defaultHandler) generateAccessToken(ctx context.Context, refreshTokenId, userId, deviceInfo string, loggedInFrom *go_block.Location, tokens token_repository.TokenRepository) (string, error) {
-	accessToken, accessClaims, err := h.token.GenerateToken(privateKey, uuid.NewV4().String(), userId, refreshTokenId, token.TokenTypeAccess, accessTokenExpiry)
+	accessToken, accessClaims, err := h.token.GenerateToken(privateKey, uuid.NewString(), userId, refreshTokenId, token.TokenTypeAccess, accessTokenExpiry)
 	if err != nil {
 		return "", fmt.Errorf("could generate access token with err: %v", err)
 	}

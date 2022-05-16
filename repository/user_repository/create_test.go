@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -24,7 +24,7 @@ func TestCreateIEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 20)
 	user := &go_block.User{
-		Username: uuid.NewV4().String(),
+		Username: uuid.NewString(),
 		Email:    gofakeit.Email(),
 		Password: password,
 		Image:    gofakeit.ImageURL(10, 10),
@@ -58,7 +58,7 @@ func TestCreateIEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 20)
 	user := &go_block.User{
-		Username: uuid.NewV4().String(),
+		Username: uuid.NewString(),
 		Email:    gofakeit.Email(),
 		Password: password,
 		Image:    gofakeit.ImageURL(10, 10),
@@ -90,7 +90,7 @@ func TestCreateEEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 20)
 	user := &go_block.User{
-		Username: uuid.NewV4().String(),
+		Username: uuid.NewString(),
 		Email:    gofakeit.Email(),
 		Password: password,
 		Image:    gofakeit.ImageURL(10, 10),
@@ -123,7 +123,7 @@ func TestCreateNoEncryption(t *testing.T) {
 	assert.NoError(t, err)
 	password := gofakeit.Password(true, true, true, true, true, 20)
 	user := &go_block.User{
-		Username: uuid.NewV4().String(),
+		Username: uuid.NewString(),
 		Email:    gofakeit.Email(),
 		Password: password,
 		Image:    gofakeit.ImageURL(10, 10),
@@ -155,7 +155,7 @@ func TestCreateInvalidPassword(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	user := &go_block.User{
-		Username: uuid.NewV4().String(),
+		Username: uuid.NewString(),
 		Email:    gofakeit.Email(),
 		Password: "Test1234",
 		Image:    gofakeit.ImageURL(10, 10),
@@ -178,7 +178,7 @@ func TestCreateInvalidEmail(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	user := &go_block.User{
-		Username: uuid.NewV4().String(),
+		Username: uuid.NewString(),
 		Email:    "info@@nuntio.io",
 		Password: gofakeit.Password(true, true, true, true, true, 20),
 		Image:    gofakeit.ImageURL(10, 10),
@@ -195,7 +195,7 @@ func TestCreateInvalidMetadata(t *testing.T) {
 	userRepository, err := getTestUserRepository(context.Background(), false, true, "")
 	assert.NoError(t, err)
 	user := &go_block.User{
-		Username: uuid.NewV4().String(),
+		Username: uuid.NewString(),
 		Email:    "info@nuntio.io",
 		Password: gofakeit.Password(true, true, true, true, true, 20),
 		Image:    gofakeit.ImageURL(10, 10),

@@ -5,16 +5,16 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/x/cryptox"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCountIEEncrypted(t *testing.T) {
 	// setup available clients
 	var clients []*mongodbRepository
-	ns := uuid.NewV4().String()
+	ns := uuid.NewString()
 	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, ns)
 	assert.NoError(t, err)
 	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, ns)

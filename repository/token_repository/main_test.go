@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/x/cryptox"
 	"github.com/nuntiodev/x/mockx/mongo_mock"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
@@ -59,10 +59,10 @@ func getToken(token *go_block.Token) *go_block.Token {
 		token = &go_block.Token{}
 	}
 	if strings.TrimSpace(token.Id) == "" {
-		token.Id = uuid.NewV4().String()
+		token.Id = uuid.NewString()
 	}
 	if strings.TrimSpace(token.UserId) == "" {
-		token.UserId = uuid.NewV4().String()
+		token.UserId = uuid.NewString()
 	}
 	if strings.TrimSpace(token.DeviceInfo) == "" {
 		token.DeviceInfo = gofakeit.Phone()

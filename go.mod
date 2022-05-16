@@ -3,15 +3,16 @@ module github.com/nuntiodev/nuntio-user-block
 go 1.18
 
 require (
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/badoux/checkmail v1.2.1
 	github.com/brianvoe/gofakeit/v6 v6.15.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/keighl/postmark v0.0.0-20190821160221-28358b1a94e3
 	github.com/nuntiodev/block-proto v0.2.60
 	github.com/nuntiodev/x v0.2.20
-	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.7.1
 	go.mongodb.org/mongo-driver v1.9.1
 	go.uber.org/zap v1.21.0
@@ -24,7 +25,6 @@ require (
 )
 
 require (
-	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de // indirect
 	github.com/go-logr/logr v1.2.0 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect

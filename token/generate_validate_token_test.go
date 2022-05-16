@@ -1,8 +1,8 @@
 package token
 
 import (
+	"github.com/google/uuid"
 	"github.com/nuntiodev/x/cryptox"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -22,11 +22,11 @@ func TestGenerateValidateToken(t *testing.T) {
 	privateKey, publicKey, err := c.GenerateRsaKeyPair(2048)
 	assert.NoError(t, err)
 	// data to validate
-	userId := uuid.NewV4().String()
-	refreshId := uuid.NewV4().String()
+	userId := uuid.NewString()
+	refreshId := uuid.NewString()
 	expiresAfter := time.Second * 10
 	// act one - generate token
-	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), userId, refreshId, TokenTypeAccess, expiresAfter)
+	token, claims, err := to.GenerateToken(privateKey, uuid.NewString(), userId, refreshId, TokenTypeAccess, expiresAfter)
 	assert.NoError(t, err)
 	assert.NotNil(t, claims)
 	assert.NotEmpty(t, token)
@@ -53,11 +53,11 @@ func TestGenerateValidateTokenInvalidKey(t *testing.T) {
 	privateKey, _, err := c.GenerateRsaKeyPair(2048)
 	assert.NoError(t, err)
 	// data to validate
-	userId := uuid.NewV4().String()
-	refreshId := uuid.NewV4().String()
+	userId := uuid.NewString()
+	refreshId := uuid.NewString()
 	expiresAfter := time.Second * 10
 	// act one - generate token
-	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), userId, refreshId, TokenTypeAccess, expiresAfter)
+	token, claims, err := to.GenerateToken(privateKey, uuid.NewString(), userId, refreshId, TokenTypeAccess, expiresAfter)
 	assert.NoError(t, err)
 	assert.NotNil(t, claims)
 	assert.NotEmpty(t, token)
@@ -85,7 +85,7 @@ func TestGenerateTokenEmptyRefreshId(t *testing.T) {
 	// data to validate
 	expiresAfter := time.Second * 10
 	// act one - generate token
-	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), uuid.NewV4().String(), "", TokenTypeAccess, expiresAfter)
+	token, claims, err := to.GenerateToken(privateKey, uuid.NewString(), uuid.NewString(), "", TokenTypeAccess, expiresAfter)
 	assert.Error(t, err)
 	assert.Nil(t, claims)
 	assert.Empty(t, token)
@@ -104,7 +104,7 @@ func TestGenerateTokenInvalidType(t *testing.T) {
 	// data to validate
 	expiresAfter := time.Second * 10
 	// act one - generate token
-	token, claims, err := to.GenerateToken(privateKey, uuid.NewV4().String(), uuid.NewV4().String(), uuid.NewV4().String(), "invalid", expiresAfter)
+	token, claims, err := to.GenerateToken(privateKey, uuid.NewString(), uuid.NewString(), uuid.NewString(), "invalid", expiresAfter)
 	assert.Error(t, err)
 	assert.Nil(t, claims)
 	assert.Empty(t, token)

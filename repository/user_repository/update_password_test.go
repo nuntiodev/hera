@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -33,7 +33,7 @@ func TestUpdatePasswordIEEncryptedById(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),
@@ -81,7 +81,7 @@ func TestUpdatePasswordIEEncryptedByEmail(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),
@@ -124,7 +124,7 @@ func TestUpdatePasswordIEEncryptedByUsername(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),
@@ -167,7 +167,7 @@ func TestUpdatePasswordWeakPassword(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),
@@ -206,7 +206,7 @@ func TestUpdatePasswordNoUpdate(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),
@@ -246,7 +246,7 @@ func TestUpdatePasswordNilUpdate(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),
@@ -283,7 +283,7 @@ func TestUpdatePasswordNilGet(t *testing.T) {
 		assert.NoError(t, err)
 		password := gofakeit.Password(true, true, true, true, true, 20)
 		user := &go_block.User{
-			Username: uuid.NewV4().String(),
+			Username: uuid.NewString(),
 			Email:    gofakeit.Email(),
 			Password: password,
 			Image:    gofakeit.ImageURL(10, 10),

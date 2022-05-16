@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/x/cryptox"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +20,7 @@ func TestGetTokensIEncrypted(t *testing.T) {
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
-		userId := uuid.NewV4().String()
+		userId := uuid.NewString()
 		device := gofakeit.Phone()
 		tokenOne := getToken(&go_block.Token{
 			UserId:     userId,
@@ -31,7 +31,7 @@ func TestGetTokensIEncrypted(t *testing.T) {
 			DeviceInfo: device,
 		})
 		tokenThree := getToken(&go_block.Token{
-			UserId:     uuid.NewV4().String(),
+			UserId:     uuid.NewString(),
 			DeviceInfo: device,
 		})
 		// create tokens
@@ -79,7 +79,7 @@ func TestCannotGetUserTokensExpired(t *testing.T) {
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
-		userId := uuid.NewV4().String()
+		userId := uuid.NewString()
 		device := gofakeit.Phone()
 		tokenOne := getToken(&go_block.Token{
 			UserId:     userId,
@@ -126,7 +126,7 @@ func TestGetUserTokensNoUserId(t *testing.T) {
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
-		userId := uuid.NewV4().String()
+		userId := uuid.NewString()
 		device := gofakeit.Phone()
 		tokenOne := getToken(&go_block.Token{
 			UserId:     userId,
@@ -169,7 +169,7 @@ func TestGetUserTokensNil(t *testing.T) {
 	assert.NoError(t, err)
 	clients := []*mongodbRepository{tokenRepositoryWithEncryption, tokenRepositoryNoEncryption}
 	for _, tokenRepository := range clients {
-		userId := uuid.NewV4().String()
+		userId := uuid.NewString()
 		device := gofakeit.Phone()
 		tokenOne := getToken(&go_block.Token{
 			UserId:     userId,

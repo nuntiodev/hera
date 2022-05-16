@@ -11,8 +11,8 @@ import (
 	"unicode"
 
 	"github.com/badoux/checkmail"
+	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
-	uuid "github.com/satori/go.uuid"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -29,7 +29,7 @@ func prepare(action int, user *go_block.User) {
 		user.EmailIsVerified = false
 		user.VerifiedEmails = []string{}
 		if strings.TrimSpace(user.Id) == "" {
-			user.Id = uuid.NewV4().String()
+			user.Id = uuid.NewString()
 		}
 	case actionUpdatePassword, actionUpdateImage, actionUpdateMetadata,
 		actionUpdateNamespace, actionUpdateSecurity, actionUpdateEmail,

@@ -18,5 +18,5 @@ func (i *DefaultInterceptor) WithAuthenticateUnaryInterceptor(ctx context.Contex
 	if err := i.authenticator.AuthenticateRequest(ctx, translatedReq); err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	return handler(ctx, req)
+	return handler(ctx, translatedReq)
 }

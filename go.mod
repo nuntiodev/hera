@@ -11,7 +11,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/keighl/postmark v0.0.0-20190821160221-28358b1a94e3
-	github.com/nuntiodev/block-proto v0.2.60
+	github.com/nuntiodev/block-proto v0.2.61
 	github.com/nuntiodev/x v0.2.20
 	github.com/stretchr/testify v1.7.1
 	go.mongodb.org/mongo-driver v1.9.1

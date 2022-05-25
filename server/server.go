@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/nuntiodev/nuntio-user-block/authenticator"
 	"github.com/nuntiodev/nuntio-user-block/email"
 	"github.com/nuntiodev/nuntio-user-block/handler"
 	"github.com/nuntiodev/nuntio-user-block/interceptor"
@@ -94,7 +95,8 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myInterceptor, err := interceptor.New(zapLog)
+	myAuthenticator := authenticator.New()
+	myInterceptor, err := interceptor.New(zapLog, myAuthenticator)
 	if err != nil {
 		return nil, err
 	}

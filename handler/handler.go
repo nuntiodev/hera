@@ -66,14 +66,6 @@ type Handler interface {
 	UpdateConfigDetails(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	DeleteConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	CreateText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	GetText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateGeneralText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateWelcomeText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateRegisterText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateLoginText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateProfileText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	DeleteText(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	InitializeApplication(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 }
 

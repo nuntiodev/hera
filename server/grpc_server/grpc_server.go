@@ -57,6 +57,7 @@ func (s *Server) Run() error {
 			grpc_middleware.ChainUnaryServer(
 				s.interceptor.WithLogUnaryInterceptor,
 				s.interceptor.WithValidateUnaryInterceptor,
+				s.interceptor.WithAuthenticateUnaryInterceptor,
 			),
 		),
 		grpc.StreamInterceptor(

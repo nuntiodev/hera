@@ -10,56 +10,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	ProjectName             = "/BlockUser.UserService/"
-	Heartbeat               = "Heartbeat"
-	Create                  = "Create"
-	UpdatePassword          = "UpdatePassword"
-	UpdateMetadata          = "UpdateMetadata"
-	UpdateImage             = "UpdateImage"
-	UpdateEmail             = "UpdateEmail"
-	UpdatePhoneNumber       = "UpdatePhoneNumber"
-	UpdateName              = "UpdateName"
-	UpdateBirthdate         = "UpdateBirthdate"
-	UpdateUsername          = "UpdateUsername"
-	UpdatePreferredLanguage = "UpdatePreferredLanguage"
-	UpdateSecurity          = "UpdateSecurity"
-	Get                     = "Get"
-	GetAll                  = "GetAll"
-	ValidateCredentials     = "ValidateCredentials"
-	Login                   = "Login"
-	ValidateToken           = "ValidateToken"
-	BlockToken              = "BlockToken"
-	BlockTokenById          = "BlockTokenById"
-	RefreshToken            = "RefreshToken"
-	GetTokens               = "GetTokens"
-	PublicKeys              = "PublicKeys"
-	RecordActiveMeasurement = "RecordActiveMeasurement"
-	UserActiveHistory       = "UserActiveHistory"
-	NamespaceActiveHistory  = "NamespaceActiveHistory"
-	SendVerificationEmail   = "SendVerificationEmail"
-	VerifyEmail             = "VerifyEmail"
-	SendResetPasswordEmail  = "SendResetPasswordEmail"
-	ResetPassword           = "ResetPassword"
-	Delete                  = "Delete"
-	DeleteBatch             = "DeleteBatch"
-	DeleteNamespace         = "DeleteNamespace"
-	CreateNamespaceConfig   = "CreateNamespaceConfig"
-	UpdateConfigSettings    = "UpdateConfigSettings"
-	UpdateConfigDetails     = "UpdateConfigDetails"
-	GetConfig               = "GetConfig"
-	DeleteConfig            = "DeleteConfig"
-	CreateText              = "CreateText"
-	GetText                 = "GetText"
-	UpdateGeneralText       = "UpdateGeneralText"
-	UpdateWelcomeText       = "UpdateWelcomeText"
-	UpdateRegisterText      = "UpdateRegisterText"
-	UpdateLoginText         = "UpdateLoginText"
-	UpdateProfileText       = "UpdateProfileText"
-	DeleteText              = "DeleteText"
-	InitializeApplication   = "InitializeApplication"
-)
-
 var (
 	TokenIsNil          = errors.New("token is nil")
 	TokenPointerIsEmpty = errors.New("token pointer is nil")
@@ -137,15 +87,8 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.Config == nil {
 			return nil, ConfigIsNil
 		}
-	case UpdateGeneralText, UpdateWelcomeText, UpdateRegisterText,
-		UpdateLoginText, CreateText, UpdateProfileText,
-		DeleteText, GetText:
-		if translatedReq.Text == nil {
-			return nil, TextIsNil
-		}
 	default:
 		return &go_block.UserResponse{}, errors.New(fmt.Sprintf("invalid request: %s", info.FullMethod))
 	}
-	h, err := handler(ctx, req) // make actual request
-	return h, err
+	return handler(ctx, req) // make actual request
 }

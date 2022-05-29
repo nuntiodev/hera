@@ -3,12 +3,12 @@ entries:
   nuntio-user-block:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-05-04T18:35:16.699309771Z"
+    created: "2022-05-25T12:55:22.964995331Z"
     description: A Helm chart for the nuntio-user-block
-    digest: c59ebf4cb2f5fb8bb5618a9c23cf58d7088f83990088a55d54880dad31a53beb
+    digest: a6770cc649a3808a365de351bcaa851c3781121b55d1d457c8d5249f6604b184
     name: nuntio-user-block
     type: application
     urls:
-    - charts/nuntio-user-block-0.0.32.tgz
-    version: 0.0.32
-generated: "2022-05-04T18:35:16.698667063Z"
+    - charts/nuntio-user-block-0.0.33.tgz
+    version: 0.0.33
+generated: "2022-05-25T12:55:22.964390724Z"

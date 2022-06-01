@@ -2,20 +2,26 @@ package handler
 
 import (
 	"context"
+	"github.com/nuntiodev/nuntio-user-block/repository/measurement_repository"
 
 	"github.com/nuntiodev/block-proto/go_block"
 )
 
+/*
+	RecordActiveMeasurement - record active measurement is used by the client SDKs to record average and total screen time for every user.
+*/
 func (h *defaultHandler) RecordActiveMeasurement(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	measurements, err := h.repository.Measurements(ctx, req.Namespace)
+	var (
+		measurementRepo   measurement_repository.MeasurementRepository
+		activeMeasurement *go_block.ActiveMeasurement
+		err               error
+	)
+	measurementRepo, err = h.repository.Measurements(ctx, req.Namespace)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := measurements.RecordActive(ctx, req.ActiveMeasurement)
-	if err != nil {
-		return nil, err
-	}
+	activeMeasurement, err = measurementRepo.RecordActive(ctx, req.ActiveMeasurement)
 	return &go_block.UserResponse{
-		ActiveMeasurement: resp,
-	}, nil
+		ActiveMeasurement: activeMeasurement,
+	}, err
 }

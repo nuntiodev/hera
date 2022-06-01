@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
+	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
+	"golang.org/x/sync/errgroup"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
@@ -11,95 +13,118 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
+/*
+	RefreshToken - this method provides a new access / refresh token pair given a valid refresh token.
+*/
 func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	refreshClaims, err := h.token.ValidateToken(publicKey, req.Token.RefreshToken)
-	if err != nil {
-		return nil, err
-	}
-	// validate if blocked in db
-	tokens, err := h.repository.Tokens(ctx, req.Namespace)
-	if err != nil {
-		return nil, err
-	}
-	// we can only use a refresh token to generate a new one
-	if refreshClaims.Type != token.TokenTypeRefresh {
-		return nil, errors.New("invalid refresh token")
-	}
-	// else we always validate if id of token is blocked
-	isBlocked, err := tokens.IsBlocked(ctx, &go_block.Token{
-		Id:     refreshClaims.Id,
-		UserId: refreshClaims.UserId,
+	var (
+		tokenRepo     token_repository.TokenRepository
+		refreshClaims *go_block.CustomClaims
+		refreshToken  string
+		accessClaims  *go_block.CustomClaims
+		accessToken   string
+		errGroup      = &errgroup.Group{}
+		err           error
+	)
+	// async action 1 - validate that the refresh token is signed by Nuntio.
+	errGroup.Go(func() error {
+		refreshClaims, err = h.token.ValidateToken(publicKey, req.Token.RefreshToken)
+		if err != nil {
+			return err
+		}
+		if refreshClaims.Type != token.TokenTypeRefresh {
+			return errors.New("invalid refresh token")
+		}
+		return nil
 	})
-	if err != nil {
-		return nil, err
+	// async action 2 - check if token is blocked.
+	errGroup.Go(func() error {
+		// check if token is blocked in db
+		tokenRepo, err = h.repository.Tokens(ctx, req.Namespace)
+		if err != nil {
+			return err
+		}
+		isBlocked, err := tokenRepo.IsBlocked(ctx, &go_block.Token{
+			Id:     refreshClaims.Id,
+			UserId: refreshClaims.UserId,
+		})
+		if err != nil {
+			return err
+		}
+		if isBlocked {
+			return errors.New("token is blocked")
+		}
+		return nil
+	})
+	if err = errGroup.Wait(); err != nil {
+		return &go_block.UserResponse{}, err
 	}
-	if isBlocked {
-		return nil, errors.New("token is blocked")
-	}
-	// build data for token
+	// build metadata for token
 	loggedInFrom := &go_block.Location{}
 	deviceInfo := ""
 	if req.Token != nil {
 		loggedInFrom = req.Token.LoggedInFrom
 		deviceInfo = req.Token.DeviceInfo
 	}
+	// create new refresh token if the token is expired.
 	// if refresh token is about to expire (in less than 10 hours), create a new one and block the old one
-	refreshToken := req.Token.RefreshToken
+	refreshToken = req.Token.RefreshToken
 	if time.Unix(refreshClaims.ExpiresAt, 0).Sub(time.Now()) < time.Hour*10 {
 		if _, err := h.BlockToken(ctx, &go_block.UserRequest{
 			Token: &go_block.Token{
 				RefreshToken: refreshToken,
 			},
 		}); err != nil {
-			return nil, err
+			return &go_block.UserResponse{}, err
 		}
-		newRefreshToken, newRefreshclaims, err := h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
+		refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
 		if err != nil {
-			return nil, err
+			return &go_block.UserResponse{}, err
 		}
-		refreshToken = newRefreshToken
-		refreshClaims = newRefreshclaims
 		// create refresh token in database
-		if _, err := tokens.Create(ctx, &go_block.Token{
-			Id:           newRefreshclaims.Id,
-			UserId:       newRefreshclaims.UserId,
+		if _, err := tokenRepo.Create(ctx, &go_block.Token{
+			Id:           refreshClaims.Id,
+			UserId:       refreshClaims.UserId,
 			Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
 			LoggedInFrom: loggedInFrom,
 			DeviceInfo:   deviceInfo,
-			ExpiresAt:    ts.New(time.Unix(newRefreshclaims.ExpiresAt, 0)),
+			ExpiresAt:    ts.New(time.Unix(refreshClaims.ExpiresAt, 0)),
 		}); err != nil {
 			return &go_block.UserResponse{}, err
 		}
 	}
 	// generate new access token from refresh token
-	newAccessToken, newAccessClaims, err := h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, refreshClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
+	accessToken, accessClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, refreshClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
 	if err != nil {
-		return nil, err
-	}
-	// add new access token to database
-	if _, err := tokens.Create(ctx, &go_block.Token{
-		Id:           newAccessClaims.Id,
-		UserId:       newAccessClaims.UserId,
-		Type:         go_block.TokenType_TOKEN_TYPE_ACCESS,
-		LoggedInFrom: loggedInFrom,
-		DeviceInfo:   deviceInfo,
-		ExpiresAt:    ts.New(time.Unix(newAccessClaims.ExpiresAt, 0)),
-	}); err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	// set refresh token used at
-	if _, err := tokens.UpdateUsedAt(ctx, &go_block.Token{
-		Id:           refreshClaims.Id,
-		UserId:       refreshClaims.UserId,
-		LoggedInFrom: loggedInFrom,
-		DeviceInfo:   deviceInfo,
-	}); err != nil {
-		return &go_block.UserResponse{}, err
-	}
+	// async action 3 - add new access token info to database
+	errGroup.Go(func() error {
+		_, err := tokenRepo.Create(ctx, &go_block.Token{
+			Id:           accessClaims.Id,
+			UserId:       accessClaims.UserId,
+			Type:         go_block.TokenType_TOKEN_TYPE_ACCESS,
+			LoggedInFrom: loggedInFrom,
+			DeviceInfo:   deviceInfo,
+			ExpiresAt:    ts.New(time.Unix(accessClaims.ExpiresAt, 0)),
+		})
+		return err
+	})
+	// async action 4 - set refresh token used at to now
+	errGroup.Go(func() error {
+		_, err = tokenRepo.UpdateUsedAt(ctx, &go_block.Token{
+			Id:           refreshClaims.Id,
+			UserId:       refreshClaims.UserId,
+			LoggedInFrom: loggedInFrom,
+			DeviceInfo:   deviceInfo,
+		})
+		return err
+	})
+	err = errGroup.Wait()
 	return &go_block.UserResponse{
 		Token: &go_block.Token{
-			AccessToken:  newAccessToken,
+			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
-	}, nil
+	}, err
 }

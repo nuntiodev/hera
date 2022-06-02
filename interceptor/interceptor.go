@@ -64,6 +64,7 @@ type Interceptor interface {
 
 func New(zapLog *zap.Logger, authenticator authenticator.Authenticator) (Interceptor, error) {
 	return &DefaultInterceptor{
-		zapLog: zapLog,
+		zapLog:        zapLog,
+		authenticator: authenticator,
 	}, nil
 }

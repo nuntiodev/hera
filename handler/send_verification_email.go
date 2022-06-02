@@ -7,77 +7,96 @@ import (
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/nuntio-user-block/email"
 	"github.com/nuntiodev/nuntio-user-block/repository/email_repository"
+	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
+	"golang.org/x/sync/errgroup"
 	"strings"
 )
 
+/*
+	SendVerificationEmail - this method sends a verification email to the user with a code used to verify the email.
+*/
 func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+	var (
+		userRepo          user_repository.UserRepository
+		emailRepo         email_repository.EmailRepository
+		user              *go_block.User
+		nameOfUser        string
+		verificationCode  []byte
+		verificationEmail *go_block.Email
+		errGroup          = &errgroup.Group{}
+		err               error
+	)
 	if !h.emailEnabled {
 		return nil, errors.New("email provider is not enabled")
 	}
-	// get requested user and check if the email is already verified
-	userResp, err := h.Get(ctx, req)
-	if err != nil {
-		return &go_block.UserResponse{}, err
-	}
-	get := userResp.User
-	if get.Email == "" {
-		return &go_block.UserResponse{}, errors.New("user do not have an email - set the email for the user")
-	}
-	if get.EmailIsVerified {
-		return &go_block.UserResponse{}, errors.New("email is already verified")
-	}
-	// generate verification code and send it to the user
-	emails, err := h.repository.Email(ctx, req.Namespace) // email config containing text to send
-	if err != nil {
-		return &go_block.UserResponse{}, err
-	}
-	randomCode, err := h.crypto.GenerateSymmetricKey(6, cryptox.Numeric)
-	if err != nil {
-		return &go_block.UserResponse{}, err
-	}
-	verificationCode, err := hex.DecodeString(randomCode)
-	if err != nil {
-		return &go_block.UserResponse{}, err
-	}
-	emailConfig, err := emails.Get(ctx, &go_block.Email{
-		Id: email_repository.VerificationEmail,
-	})
-	if err != nil {
-		return nil, err
-	}
-	nameOfUser := get.Email
-	if get.FirstName != "" {
-		nameOfUser = strings.TrimSpace(get.FirstName + " " + get.LastName)
-	}
-	if err := h.email.SendVerificationEmail(get.Email, emailConfig.Subject, emailConfig.TemplatePath, &email.VerificationData{
-		Code: string(verificationCode),
-		TemplateData: email.TemplateData{
-			LogoUrl:        emailConfig.Logo,
-			WelcomeMessage: emailConfig.WelcomeMessage,
-			NameOfUser:     nameOfUser,
-			BodyMessage:    emailConfig.BodyMessage,
-			FooterMessage:  emailConfig.FooterMessage,
-		},
-	}); err != nil {
+	// async action 1 - get user and check if his email is verified
+	errGroup.Go(func() error {
+		userRepo, err = h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
 		if err != nil {
-			return &go_block.UserResponse{}, err
+			return err
 		}
-	}
-	// set verification code and timestamp in repository
-	users, err := h.repository.Users().SetNamespace(req.Namespace).Build(ctx)
-	if err != nil {
-		return &go_block.UserResponse{}, err
-	}
-	get.EmailVerificationCode = string(verificationCode)
-	updatedUser, err := users.UpdateVerificationEmailSent(ctx, &go_block.User{
-		EmailVerificationCode: string(verificationCode),
-		Id:                    get.Id,
+		user, err = userRepo.Get(ctx, req.User, true)
+		if err != nil {
+			return err
+		}
+		if user.Email == "" {
+			return errors.New("user do not have an email - set the email for the user")
+		}
+		if user.EmailIsVerified {
+			return errors.New("email is already verified")
+		}
+		nameOfUser = user.Email
+		if user.FirstName != "" {
+			nameOfUser = strings.TrimSpace(user.FirstName + " " + user.LastName)
+		}
+		return err
 	})
-	if err != nil {
+	// async action 2 - setup email repository and generate verification code
+	errGroup.Go(func() error {
+		emailRepo, err = h.repository.Email(ctx, req.Namespace)
+		if err != nil {
+			return err
+		}
+		randomCode, err := h.crypto.GenerateSymmetricKey(6, cryptox.Numeric)
+		if err != nil {
+			return err
+		}
+		verificationCode, err = hex.DecodeString(randomCode)
+		if err != nil {
+			return err
+		}
+		verificationEmail, err = emailRepo.Get(ctx, &go_block.Email{
+			Id: email_repository.VerificationEmail,
+		})
+		return err
+	})
+	if err = errGroup.Wait(); err != nil {
 		return &go_block.UserResponse{}, err
 	}
+	// async action 3 - send verification email
+	errGroup.Go(func() error {
+		return h.email.SendVerificationEmail(user.Email, verificationEmail.Subject, verificationEmail.TemplatePath, &email.VerificationData{
+			Code: string(verificationCode),
+			TemplateData: email.TemplateData{
+				LogoUrl:        verificationEmail.Logo,
+				WelcomeMessage: verificationEmail.WelcomeMessage,
+				NameOfUser:     nameOfUser,
+				BodyMessage:    verificationEmail.BodyMessage,
+				FooterMessage:  verificationEmail.FooterMessage,
+			},
+		})
+	})
+	// async action 4  update verification email sent at
+	errGroup.Go(func() error {
+		_, err = userRepo.UpdateVerificationEmailSent(ctx, &go_block.User{
+			EmailVerificationCode: string(verificationCode),
+			Id:                    user.Id,
+		})
+		return err
+	})
+	err = errGroup.Wait()
 	return &go_block.UserResponse{
-		User: updatedUser,
-	}, nil
+		User: user,
+	}, err
 }

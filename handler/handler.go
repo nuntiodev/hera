@@ -1,3 +1,7 @@
+/*
+	handler - the handler is the brain of this application. It has access to almost all other packages
+	and uses these packages to answer API requests from the client. It is build on top of the gRPC framework.
+*/
 package handler
 
 import (

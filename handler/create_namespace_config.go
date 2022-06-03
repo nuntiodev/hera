@@ -46,6 +46,9 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 		config, err = configRepo.Create(ctx, req.Config)
 		return err
 	})
+	if err = errGroup.Wait(); err != nil {
+		return &go_block.UserResponse{}, err
+	}
 	// create default emails
 	emailRepo, err = h.repository.Email(ctx, req.Namespace)
 	if err != nil {

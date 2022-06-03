@@ -39,16 +39,7 @@ func (h *defaultHandler) Create(ctx context.Context, req *go_block.UserRequest) 
 		return &go_block.UserResponse{}, err
 	}
 	user, err = userRepo.Create(ctx, req.User)
-	if err != nil {
-		return &go_block.UserResponse{}, err
-	}
-	if h.emailEnabled && config.RequireEmailVerification { // email is enabled, and we require email verification
-		req.User.Id = user.Id
-		if _, err := h.SendVerificationEmail(ctx, req); err != nil {
-			return nil, err
-		}
-	}
 	return &go_block.UserResponse{
 		User: user,
-	}, nil
+	}, err
 }

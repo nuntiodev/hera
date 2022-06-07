@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
 	"golang.org/x/sync/errgroup"
@@ -22,8 +23,8 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	var (
 		configRepo    config_repository.ConfigRepository
 		userRepo      user_repository.UserRepository
-		config        *go_block.Config
-		user          *go_block.User
+		config        *models.Config
+		user          *models.User
 		refreshToken  string
 		refreshClaims *go_block.CustomClaims
 		accessToken   string
@@ -33,7 +34,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	)
 	// async action 1 - get namespace config.
 	errGroup.Go(func() error {
-		configRepo, err = h.repository.Config(ctx, req.Namespace)
+		configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
 		if err != nil {
 			return err
 		}
@@ -42,11 +43,11 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	})
 	// async action 2 - validate a users credentials and fetch user info.
 	errGroup.Go(func() error {
-		userRepo, err = h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
+		userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
 		if err != nil {
 			return err
 		}
-		user, err = userRepo.Get(ctx, req.User, true)
+		user, err = userRepo.Get(ctx, req.User)
 		if err != nil {
 			return err
 		}
@@ -59,24 +60,24 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 	// if email validation is required and email is not verified; return error
 	if config.RequireEmailVerification && user.EmailIsVerified == false {
 		// check if we should send a new email
-		if user.VerificationEmailExpiresAt.AsTime().Sub(time.Now()).Seconds() <= 0 {
+		if user.VerificationEmailExpiresAt.Sub(time.Now()).Seconds() <= 0 {
 			// sent new email
 			verificationEmail, err := h.SendVerificationEmail(ctx, req)
 			if err != nil {
 				return &go_block.UserResponse{}, fmt.Errorf("could not send email with err: %v", err)
 			}
-			user = verificationEmail.User
+			user = models.ProtoUserToUser(verificationEmail.User)
 		}
 		return &go_block.UserResponse{
 			LoginSession: &go_block.LoginSession{
 				LoginStatus:    go_block.LoginStatus_EMAIL_IS_NOT_VERIFIED,
-				EmailSentAt:    user.VerificationEmailSentAt,
-				EmailExpiresAt: user.VerificationEmailExpiresAt,
+				EmailSentAt:    ts.New(user.VerificationEmailSentAt),
+				EmailExpiresAt: ts.New(user.VerificationEmailExpiresAt),
 			},
 		}, nil
 	}
 	// step 3: generate and save refresh and access tokens
-	tokens, err := h.repository.Tokens(ctx, req.Namespace)
+	tokens, err := h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could setup tokens with err: %v", err)
 	}
@@ -128,6 +129,6 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
-		User: user,
+		User: models.UserToProtoUser(user),
 	}, err
 }

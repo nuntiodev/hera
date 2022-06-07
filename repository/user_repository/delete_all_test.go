@@ -4,49 +4,31 @@ import (
 	"context"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/x/cryptox"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDeleteAllIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongodbRepository
-	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
+	clients, err := getUserRepositories()
 	assert.NoError(t, err)
-	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
-	assert.NoError(t, err)
-	userRepositoryExternalEncryption, err := getTestUserRepository(context.Background(), false, true, "")
-	assert.NoError(t, err)
-	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
-	assert.NoError(t, err)
-	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	// delete all users from other tests (we use the same collection)
-	err = userRepositoryExternalEncryption.DeleteAll(context.Background())
-	assert.NoError(t, err)
+	assert.NoError(t, clients[0].DeleteAll(context.Background()))
 	for index, userRepository := range clients {
+		// create user one
+		userOne := getTestUser()
+		dbUserOne, err := userRepository.Create(context.Background(), &userOne)
 		assert.NoError(t, err)
-		password := gofakeit.Password(true, true, true, true, true, 30)
-		createdUserOne, err := userRepository.Create(context.Background(), &go_block.User{
-			Password: password,
-		})
+		assert.NotNil(t, dbUserOne)
+		// create user two
+		userTwo := getTestUser()
+		dbUserTwo, err := userRepository.Create(context.Background(), &userTwo)
 		assert.NoError(t, err)
-		assert.NotNil(t, createdUserOne)
-		createdUserTwo, err := userRepository.Create(context.Background(), &go_block.User{
-			Password: password,
-		})
+		assert.NotNil(t, dbUserTwo)
+		// create user three
+		userThree := getTestUser()
+		dbUserThree, err := userRepository.Create(context.Background(), &userThree)
 		assert.NoError(t, err)
-		assert.NotNil(t, createdUserTwo)
-		createdUserThree, err := userRepository.Create(context.Background(), &go_block.User{
-			Password: password,
-		})
-		assert.NoError(t, err)
-		assert.NotNil(t, createdUserThree)
-		// set new encryption key
-		encryptionKey, err := userRepository.crypto.GenerateSymmetricKey(32, cryptox.AlphaNum)
-		assert.NoError(t, err)
-		userRepository.internalEncryptionKeys = append(userRepository.internalEncryptionKeys, encryptionKey)
+		assert.NotNil(t, dbUserThree)
 		// act
 		err = userRepository.DeleteAll(context.Background())
 		// validate

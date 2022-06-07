@@ -3,27 +3,38 @@ package handler
 import (
 	"context"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
 )
 
+/*
+	UpdatePassword - this method updates a users password and validates that password if setting is present in config.
+*/
 func (h *defaultHandler) UpdatePassword(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+	var (
+		configRepo config_repository.ConfigRepository
+		config     *models.Config
+		user       *models.User
+		err        error
+	)
 	// get config
-	config, err := h.repository.Config(ctx, req.Namespace)
+	configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	namespaceConfig, err := config.GetNamespaceConfig(ctx)
+	config, err = configRepo.GetNamespaceConfig(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	users, err := h.repository.Users().SetNamespace(req.Namespace).WithPasswordValidation(namespaceConfig.ValidatePassword).Build(ctx)
+	users, err := h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).WithPasswordValidation(config.ValidatePassword).Build(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	updatedUser, err := users.UpdatePassword(ctx, req.User, req.Update)
+	user, err = users.UpdatePassword(ctx, req.User, req.Update)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	return &go_block.UserResponse{
-		User: updatedUser,
+		User: models.UserToProtoUser(user),
 	}, nil
 }

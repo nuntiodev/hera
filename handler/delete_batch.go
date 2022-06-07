@@ -15,7 +15,7 @@ func (h *defaultHandler) DeleteBatch(ctx context.Context, req *go_block.UserRequ
 		userRepo user_repository.UserRepository
 		err      error
 	)
-	userRepo, err = h.repository.Users().SetNamespace(req.Namespace).Build(ctx)
+	userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}

@@ -3,11 +3,12 @@ package user_repository
 import (
 	"context"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongodbRepository) UpdateEmailVerified(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) UpdateEmailVerified(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error) {
 	prepare(actionGet, get)
 	prepare(actionUpdateEmailVerified, update)
 	if err := r.validate(actionUpdateEmailVerified, update); err != nil {
@@ -20,7 +21,7 @@ func (r *mongodbRepository) UpdateEmailVerified(ctx context.Context, get *go_blo
 	if update.EmailIsVerified {
 		update.EmailVerifiedAt = ts.Now()
 	}
-	updateUser := ProtoUserToUser(&go_block.User{
+	updateUser := models.ProtoUserToUser(&go_block.User{
 		EmailIsVerified: update.EmailIsVerified,
 		EmailVerifiedAt: update.EmailVerifiedAt,
 		UpdatedAt:       update.UpdatedAt,
@@ -36,16 +37,24 @@ func (r *mongodbRepository) UpdateEmailVerified(ctx context.Context, get *go_blo
 	if update.EmailIsVerified {
 		mongoUpdate["$addToSet"] = bson.D{{"verified_emails", update.EmailHash}}
 	}
-	if _, err := r.collection.UpdateOne(
+	result := r.collection.FindOneAndUpdate(
 		ctx,
 		filter,
 		mongoUpdate,
-	); err != nil {
+	)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+	var resp models.User
+	if err := result.Decode(&resp); err != nil {
+		return nil, err
+	}
+	if err := r.crypto.Decrypt(&resp); err != nil {
 		return nil, err
 	}
 	// set updated fields
-	get.EmailVerifiedAt = ts.New(updateUser.EmailVerifiedAt)
-	get.EmailIsVerified = updateUser.EmailIsVerified
-	get.UpdatedAt = ts.New(updateUser.UpdatedAt)
-	return get, nil
+	resp.EmailVerifiedAt = updateUser.EmailVerifiedAt
+	resp.EmailIsVerified = updateUser.EmailIsVerified
+	resp.UpdatedAt = updateUser.UpdatedAt
+	return &resp, nil
 }

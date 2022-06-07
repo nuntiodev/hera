@@ -1,15 +1,16 @@
-package config_repository
+package models
 
 import (
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/x/cryptox"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
 type Config struct {
 	Id                             string                `bson:"_id" json:"id"`
-	Name                           string                `bson:"name" json:"name"`
-	Logo                           string                `bson:"logo" json:"logo"`
+	Name                           cryptox.Stringx       `bson:"name" json:"name"`
+	Logo                           cryptox.Stringx       `bson:"logo" json:"logo"`
 	EnableNuntioConnect            bool                  `bson:"enable_nuntio_connect" json:"enable_nuntio_connect"`
 	DisableDefaultSignup           bool                  `bson:"disable_default_signup" json:"disable_default_signup"`
 	DisableDefaultLogin            bool                  `bson:"disable_default_login" json:"disable_default_login"`
@@ -21,7 +22,6 @@ type Config struct {
 	LoginType                      go_block.LoginType    `bson:"login_type" json:"login_type"`
 	RequirePhoneNumberVerification bool                  `bson:"require_phone_number_verification" json:"require_phone_number_verification"`
 	DefaultLanguage                go_block.LanguageCode `bson:"default_language" json:"default_language"`
-	InternalEncryptionLevel        int32                 `bson:"internal_encryption_level" json:"internal_encryption_level"`
 }
 
 func ProtoConfigToConfig(config *go_block.Config) *Config {
@@ -30,8 +30,8 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 	}
 	return &Config{
 		Id:                             config.Id,
-		Name:                           config.Name,
-		Logo:                           config.Logo,
+		Name:                           cryptox.Stringx{Body: config.Name},
+		Logo:                           cryptox.Stringx{Body: config.Logo},
 		EnableNuntioConnect:            config.EnableNuntioConnect,
 		DisableDefaultSignup:           config.DisableDefaultSignup,
 		DisableDefaultLogin:            config.DisableDefaultLogin,
@@ -42,8 +42,6 @@ func ProtoConfigToConfig(config *go_block.Config) *Config {
 		RequireEmailVerification:       config.RequireEmailVerification,
 		LoginType:                      config.LoginType,
 		RequirePhoneNumberVerification: config.RequirePhoneNumberVerification,
-		DefaultLanguage:                config.DefaultLanguage,
-		InternalEncryptionLevel:        config.InternalEncryptionLevel,
 	}
 }
 
@@ -53,8 +51,8 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 	}
 	return &go_block.Config{
 		Id:                             config.Id,
-		Name:                           config.Name,
-		Logo:                           config.Logo,
+		Name:                           config.Name.Body,
+		Logo:                           config.Logo.Body,
 		EnableNuntioConnect:            config.EnableNuntioConnect,
 		DisableDefaultSignup:           config.DisableDefaultSignup,
 		DisableDefaultLogin:            config.DisableDefaultLogin,
@@ -65,7 +63,5 @@ func ConfigToProtoConfig(config *Config) *go_block.Config {
 		RequireEmailVerification:       config.RequireEmailVerification,
 		LoginType:                      config.LoginType,
 		RequirePhoneNumberVerification: config.RequirePhoneNumberVerification,
-		DefaultLanguage:                config.DefaultLanguage,
-		InternalEncryptionLevel:        config.InternalEncryptionLevel,
 	}
 }

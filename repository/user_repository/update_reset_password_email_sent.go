@@ -3,12 +3,13 @@ package user_repository
 import (
 	"context"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
-func (r *mongodbRepository) UpdateResetPasswordEmailSent(ctx context.Context, user *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) UpdateResetPasswordEmailSent(ctx context.Context, user *go_block.User) (*models.User, error) {
 	prepare(actionUpdateResetPasswordEmailSent, user)
 	if err := r.validate(actionUpdateResetPasswordEmailSent, user); err != nil {
 		return nil, err
@@ -39,12 +40,15 @@ func (r *mongodbRepository) UpdateResetPasswordEmailSent(ctx context.Context, us
 	if err := result.Err(); err != nil {
 		return nil, err
 	}
-	var resp User
+	var resp models.User
 	if err := result.Decode(&resp); err != nil {
+		return nil, err
+	}
+	if err := r.crypto.Decrypt(&resp); err != nil {
 		return nil, err
 	}
 	// set updated fields
 	resp.ResetPasswordEmailSentAt = time.Now()
 	resp.UpdatedAt = time.Now()
-	return UserToProtoUser(&resp), nil
+	return &resp, nil
 }

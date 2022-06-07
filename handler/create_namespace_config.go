@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/email_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
@@ -18,13 +19,13 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 		userRepo   user_repository.UserRepository
 		configRepo config_repository.ConfigRepository
 		emailRepo  email_repository.EmailRepository
-		config     *go_block.Config
+		config     *models.Config
 		errGroup   = &errgroup.Group{}
 		err        error
 	)
 	// async action 1 - setup user repository and create test user
 	errGroup.Go(func() error {
-		userRepo, err = h.repository.Users().SetNamespace(req.Namespace).Build(ctx)
+		userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 		if err != nil {
 			return fmt.Errorf("could not build user repository with err: %v", err)
 		}
@@ -39,7 +40,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	// async action 2 - setup config repository and create default config
 	errGroup.Go(func() error {
 		// create initial config
-		configRepo, err = h.repository.Config(ctx, req.Namespace)
+		configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
 		if err != nil {
 			return fmt.Errorf("could not build config with err: %v", err)
 		}
@@ -50,7 +51,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 		return &go_block.UserResponse{}, err
 	}
 	// create default emails
-	emailRepo, err = h.repository.Email(ctx, req.Namespace)
+	emailRepo, err = h.repository.Email(ctx, req.Namespace, req.EncryptionKey)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
@@ -58,7 +59,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	errGroup.Go(func() error {
 		_, err = emailRepo.Create(ctx, &go_block.Email{
 			Id:             email_repository.VerificationEmail,
-			Logo:           config.Logo,
+			Logo:           config.Logo.Body,
 			WelcomeMessage: "Hello",
 			BodyMessage:    fmt.Sprintf("Thank you for signing up to %s. In order to get started, we ask of you to confirm your email by entering the following numbers in your %s app.", config.Name, config.Name),
 			FooterMessage:  fmt.Sprintf("All the best from %s team", config.Name),
@@ -72,7 +73,7 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 	errGroup.Go(func() error {
 		_, err = emailRepo.Create(ctx, &go_block.Email{
 			Id:             email_repository.ResetPasswordEmail,
-			Logo:           config.Logo,
+			Logo:           config.Logo.Body,
 			WelcomeMessage: "Hello",
 			BodyMessage:    fmt.Sprintf("Thank you for signing up to %s. In order to reset your password, enter the following numbers in your %s app together with your new password.", config.Name, config.Name),
 			FooterMessage:  fmt.Sprintf("All the best from %s team", config.Name),
@@ -86,6 +87,6 @@ func (h *defaultHandler) CreateNamespaceConfig(ctx context.Context, req *go_bloc
 		return &go_block.UserResponse{}, nil
 	}
 	return &go_block.UserResponse{
-		Config: config,
+		Config: models.ConfigToProtoConfig(config),
 	}, nil
 }

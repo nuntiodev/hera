@@ -3,12 +3,13 @@ package user_repository
 import (
 	"context"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
-func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, user *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, user *go_block.User) (*models.User, error) {
 	prepare(actionUpdateVerificationEmailSent, user)
 	if err := r.validate(actionUpdateVerificationEmailSent, user); err != nil {
 		return nil, err
@@ -39,13 +40,15 @@ func (r *mongodbRepository) UpdateVerificationEmailSent(ctx context.Context, use
 	if err := result.Err(); err != nil {
 		return nil, err
 	}
-	var resp User
+	var resp models.User
 	if err := result.Decode(&resp); err != nil {
 		return nil, err
 	}
 	// set updated fields
+	resp.EmailVerificationCode = string(hashedCode)
 	resp.VerificationEmailSentAt = time.Now()
 	resp.VerificationEmailExpiresAt = time.Now().Add(r.maxEmailVerificationAge)
+	resp.VerifyEmailAttempts = int32(0)
 	resp.UpdatedAt = time.Now()
-	return UserToProtoUser(&resp), nil
+	return &resp, nil
 }

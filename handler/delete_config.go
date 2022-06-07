@@ -14,7 +14,7 @@ func (h *defaultHandler) DeleteConfig(ctx context.Context, req *go_block.UserReq
 		configRepo config_repository.ConfigRepository
 		err        error
 	)
-	configRepo, err = h.repository.Config(ctx, req.Namespace)
+	configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
 	if err != nil {
 		return nil, err
 	}

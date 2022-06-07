@@ -4,17 +4,18 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/sync/errgroup"
 )
 
-func (dmr *defaultMeasurementRepository) GetNamespaceActiveHistory(ctx context.Context, year int32) (*go_block.ActiveHistory, error) {
+func (dmr *defaultMeasurementRepository) GetNamespaceActiveHistory(ctx context.Context, year int32) (*models.ActiveHistory, error) {
 	if year == 0 {
 		return nil, errors.New("missing required year")
 	}
-	resp := ActiveHistory{
+	resp := models.ActiveHistory{
 		Year: year,
-		Data: map[int32]*ActiveHistoryData{},
+		Data: map[int32]*models.ActiveHistoryData{},
 	}
 	cursor, err := dmr.userActiveHistoryCollection.Find(ctx, bson.M{"year": year})
 	if err != nil {
@@ -22,7 +23,7 @@ func (dmr *defaultMeasurementRepository) GetNamespaceActiveHistory(ctx context.C
 	}
 	g := new(errgroup.Group)
 	for cursor.Next(ctx) {
-		temp := ActiveHistory{}
+		temp := models.ActiveHistory{}
 		if err := cursor.Decode(&temp); err != nil {
 			return nil, err
 		}
@@ -65,5 +66,5 @@ func (dmr *defaultMeasurementRepository) GetNamespaceActiveHistory(ctx context.C
 		return nil, err
 	}
 	resp.Year = year
-	return ActiveHistoryToProtoActiveHistory(&resp), nil
+	return &resp, nil
 }

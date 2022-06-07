@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 )
 
-func (r *mongodbRepository) Get(ctx context.Context, user *go_block.User, upgrade bool) (*go_block.User, error) {
+/*
+	Get - this method fetches a user either by id, username, or email.
+*/
+func (r *mongodbRepository) Get(ctx context.Context, user *go_block.User) (*models.User, error) {
 	prepare(actionGet, user)
 	if err := r.validate(actionGet, user); err != nil {
 		return nil, err
@@ -15,20 +19,18 @@ func (r *mongodbRepository) Get(ctx context.Context, user *go_block.User, upgrad
 	if err != nil {
 		return nil, err
 	}
-	resp := User{}
+	resp := models.User{}
 	if err := r.collection.FindOne(ctx, filter).Decode(&resp); err != nil {
 		return nil, fmt.Errorf("could not find user with id: %v and err: %v", filter, err)
 	}
-	if resp.InternalEncryptionLevel > 0 || resp.ExternalEncryptionLevel > 0 {
-		if err := r.decryptUser(&resp); err != nil {
-			return nil, err
-		}
+	if err := r.crypto.Decrypt(&resp); err != nil {
+		return nil, err
 	}
 	// check if we should upgrade the encryption level
-	if upgrade && r.isEncryptionLevelUpgradable(&resp) {
-		if err := r.upgradeInternalEncryptionLevel(ctx, &resp); err != nil {
+	if upgradable, _ := r.crypto.Upgradeble(&resp); upgradable {
+		if err := r.upgradeEncryptionLevel(ctx, &resp); err != nil {
 			return nil, err
 		}
 	}
-	return UserToProtoUser(&resp), nil
+	return &resp, nil
 }

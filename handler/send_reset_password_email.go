@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/nuntio-user-block/email"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/email_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
@@ -21,10 +22,10 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_blo
 	var (
 		userRepo          user_repository.UserRepository
 		emailRepo         email_repository.EmailRepository
-		user              *go_block.User
+		user              *models.User
 		nameOfUser        string
 		verificationCode  []byte
-		verificationEmail *go_block.Email
+		verificationEmail *models.Email
 		errGroup          = &errgroup.Group{}
 		err               error
 	)
@@ -33,33 +34,36 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_blo
 	}
 	// async action 1 - get user and check if his email is verified
 	errGroup.Go(func() error {
-		userRepo, err = h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
+		userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
 		if err != nil {
 			return err
 		}
-		user, err = userRepo.Get(ctx, req.User, true)
+		user, err = userRepo.Get(ctx, req.User)
 		if err != nil {
 			return err
 		}
-		if user.Email == "" {
+		if user.Email.Body == "" {
 			return errors.New("user do not have an email - set the email for the user")
 		}
 		if user.EmailIsVerified {
 			return errors.New("email is already verified")
 		}
-		nameOfUser = user.Email
-		if user.FirstName != "" {
-			nameOfUser = strings.TrimSpace(user.FirstName + " " + user.LastName)
+		nameOfUser = user.Email.Body
+		if user.FirstName.Body != "" {
+			nameOfUser = strings.TrimSpace(user.FirstName.Body)
+			if user.LastName.Body != "" {
+				nameOfUser += " " + user.LastName.Body
+			}
 		}
 		return err
 	})
 	// async action 2 - setup email repository and generate verification code
 	errGroup.Go(func() error {
-		emailRepo, err = h.repository.Email(ctx, req.Namespace)
+		emailRepo, err = h.repository.Email(ctx, req.Namespace, req.EncryptionKey)
 		if err != nil {
 			return err
 		}
-		randomCode, err := h.crypto.GenerateSymmetricKey(6, cryptox.Numeric)
+		randomCode, err := cryptox.GenerateSymmetricKey(6, cryptox.Numeric)
 		if err != nil {
 			return err
 		}
@@ -77,14 +81,14 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_blo
 	}
 	// async action 3 - send verification email
 	errGroup.Go(func() error {
-		return h.email.SendVerificationEmail(user.Email, verificationEmail.Subject, verificationEmail.TemplatePath, &email.VerificationData{
+		return h.email.SendVerificationEmail(user.Email.Body, verificationEmail.Subject.Body, verificationEmail.TemplatePath.Body, &email.VerificationData{
 			Code: string(verificationCode),
 			TemplateData: email.TemplateData{
-				LogoUrl:        verificationEmail.Logo,
-				WelcomeMessage: verificationEmail.WelcomeMessage,
+				LogoUrl:        verificationEmail.Logo.Body,
+				WelcomeMessage: verificationEmail.WelcomeMessage.Body,
 				NameOfUser:     nameOfUser,
-				BodyMessage:    verificationEmail.BodyMessage,
-				FooterMessage:  verificationEmail.FooterMessage,
+				BodyMessage:    verificationEmail.BodyMessage.Body,
+				FooterMessage:  verificationEmail.FooterMessage.Body,
 			},
 		})
 	})

@@ -3,6 +3,7 @@ package token_repository
 import (
 	"context"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,12 +20,12 @@ const (
 )
 
 type TokenRepository interface {
-	Create(ctx context.Context, token *go_block.Token) (*go_block.Token, error)
-	Block(ctx context.Context, token *go_block.Token) (*go_block.Token, error)
+	Create(ctx context.Context, token *go_block.Token) (*models.Token, error)
+	Block(ctx context.Context, token *go_block.Token) (*models.Token, error)
 	IsBlocked(ctx context.Context, token *go_block.Token) (bool, error)
-	UpdateUsedAt(ctx context.Context, token *go_block.Token) (*go_block.Token, error)
-	GetTokens(ctx context.Context, token *go_block.Token) ([]*go_block.Token, error)
-	Get(ctx context.Context, token *go_block.Token) (*go_block.Token, error)
+	UpdateUsedAt(ctx context.Context, token *go_block.Token) (*models.Token, error)
+	GetTokens(ctx context.Context, token *go_block.Token) ([]*models.Token, error)
+	Get(ctx context.Context, token *go_block.Token) (*models.Token, error)
 }
 
 type mongodbRepository struct {

@@ -2,25 +2,20 @@ package user_repository
 
 import (
 	"context"
-	"crypto/md5"
-	"fmt"
-
 	"github.com/nuntiodev/block-proto/go_block"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
+/*
+	Delete - this method deletes a specific user with id, email or username.
+*/
 func (r *mongodbRepository) Delete(ctx context.Context, user *go_block.User) error {
 	prepare(actionGet, user)
 	if err := r.validate(actionGet, user); err != nil {
 		return err
 	}
-	filter := bson.M{}
-	if user.Id != "" {
-		filter = bson.M{"_id": user.Id}
-	} else if user.Email != "" {
-		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email)))}
-	} else if user.Username != "" {
-		filter = bson.M{"username": user.Username}
+	filter, err := getUserFilter(user)
+	if err != nil {
+		return err
 	}
 	result, err := r.collection.DeleteOne(ctx, filter)
 	if err != nil {

@@ -3,16 +3,16 @@ package user_repository
 import (
 	"context"
 	"crypto/md5"
-	"errors"
 	"fmt"
+	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/x/cryptox"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -22,28 +22,15 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 		return nil, err
 	}
 	emailHash := fmt.Sprintf("%x", md5.Sum([]byte(update.Email)))
-	get, err := r.Get(ctx, get, true) // check if user encryption is turned on
-	if err != nil {
-		return nil, err
-	}
 	// validate update is required
-	if get.EmailHash == emailHash {
-		return nil, errors.New("email is identical to current email")
-	}
-	updateUser := ProtoUserToUser(&go_block.User{
+	updateUser := models.ProtoUserToUser(&go_block.User{
 		Email:     update.Email,
 		UpdatedAt: update.UpdatedAt,
 	})
-	// transfer data from get to update
-	updateUser.ExternalEncryptionLevel = int(get.ExternalEncryptionLevel)
-	updateUser.InternalEncryptionLevel = int(get.InternalEncryptionLevel)
 	updateUser.EmailIsVerified = false
 	updateUser.VerificationEmailSentAt = time.Time{}
-	// encrypt user if user has previously been encrypted
-	if updateUser.InternalEncryptionLevel > 0 || updateUser.ExternalEncryptionLevel > 0 {
-		if err := r.encryptUser(ctx, actionUpdateEmail, updateUser); err != nil {
-			return nil, err
-		}
+	if err := r.crypto.Encrypt(updateUser); err != nil {
+		return nil, err
 	}
 	// check if new email already is verified previously; if so -> set to true
 	for _, verifiedEmail := range get.VerifiedEmails {
@@ -61,20 +48,28 @@ func (r *mongodbRepository) UpdateEmail(ctx context.Context, get *go_block.User,
 			"updated_at":                 updateUser.UpdatedAt,
 		},
 	}
-	updateResult, err := r.collection.UpdateOne(
+	result := r.collection.FindOneAndUpdate(
 		ctx,
 		bson.M{"_id": get.Id},
 		mongoUpdate,
 	)
-	if err != nil {
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+	var resp models.User
+	if err := result.Decode(&resp); err != nil {
 		return nil, err
 	}
-	if updateResult.MatchedCount == 0 {
-		return nil, errors.New("could not find get")
+	if err := r.crypto.Decrypt(&resp); err != nil {
+		return nil, err
 	}
 	// set updated fields
-	get.Email = update.Email
-	get.UpdatedAt = ts.New(updateUser.UpdatedAt)
-	get.EmailIsVerified = false
-	return get, nil
+	resp.Email = cryptox.Stringx{
+		Body:                    update.Email,
+		InternalEncryptionLevel: resp.Email.InternalEncryptionLevel,
+		ExternalEncryptionLevel: resp.Email.ExternalEncryptionLevel,
+	}
+	resp.UpdatedAt = updateUser.UpdatedAt
+	resp.EmailIsVerified = false
+	return &resp, nil
 }

@@ -40,7 +40,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 	// async action 2 - check if the refresh token is blocked.
 	errGroup.Go(func() error {
 		// check if token is blocked in db
-		tokenRepo, err = h.repository.Tokens(ctx, req.Namespace)
+		tokenRepo, err = h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)
 		if err != nil {
 			return err
 		}

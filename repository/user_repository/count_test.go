@@ -2,50 +2,36 @@ package user_repository
 
 import (
 	"context"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/google/uuid"
 	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/x/cryptox"
 	"github.com/stretchr/testify/assert"
 )
 
+/*
+	TestCountIEEncrypted - this method creates three users and tests that the number of users in the database is 3.
+	It does so under multiple different configurations of the crypto object.
+*/
 func TestCountIEEncrypted(t *testing.T) {
-	// setup available clients
-	var clients []*mongodbRepository
-	ns := uuid.NewString()
-	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, ns)
+	clients, err := getUserRepositories()
 	assert.NoError(t, err)
-	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, ns)
-	assert.NoError(t, err)
-	userRepositoryExternalEncryption, err := getTestUserRepository(context.Background(), false, true, ns)
-	assert.NoError(t, err)
-	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, ns)
-	assert.NoError(t, err)
-	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
 	for index, userRepository := range clients {
+		// create the first user
+		userOne := getTestUser()
+		dbUserOne, err := userRepository.Create(context.Background(), &userOne)
 		assert.NoError(t, err)
-		password := gofakeit.Password(true, true, true, true, true, 30)
-		createdUserOne, err := userRepository.Create(context.Background(), &go_block.User{
-			Password: password,
-		})
+		assert.NotNil(t, dbUserOne)
+		// create the second user
+		userTwo := getTestUser()
+		dbUserTwo, err := userRepository.Create(context.Background(), &userTwo)
 		assert.NoError(t, err)
-		assert.NotNil(t, createdUserOne)
-		createdUserTwo, err := userRepository.Create(context.Background(), &go_block.User{
-			Password: password,
-		})
+		assert.NotNil(t, dbUserTwo)
+		// create the third user
+		userThree := getTestUser()
+		dbUserThree, err := userRepository.Create(context.Background(), &userThree)
 		assert.NoError(t, err)
-		assert.NotNil(t, createdUserTwo)
-		createdUserThree, err := userRepository.Create(context.Background(), &go_block.User{
-			Password: password,
-		})
-		assert.NoError(t, err)
-		assert.NotNil(t, createdUserThree)
-		// set new encryption key
-		encryptionKey, err := userRepository.crypto.GenerateSymmetricKey(32, cryptox.AlphaNum)
-		assert.NoError(t, err)
-		userRepository.internalEncryptionKeys = append(userRepository.internalEncryptionKeys, encryptionKey)
+		assert.NotNil(t, dbUserThree)
 		// act
 		count, err := userRepository.Count(context.Background())
 		// validate
@@ -53,9 +39,9 @@ func TestCountIEEncrypted(t *testing.T) {
 		assert.Equal(t, 3, int(count), index)
 		// delete all at the end
 		assert.NoError(t, userRepository.DeleteBatch(context.Background(), []*go_block.User{
-			createdUserOne,
-			createdUserTwo,
-			createdUserThree,
+			models.UserToProtoUser(dbUserOne),
+			models.UserToProtoUser(dbUserTwo),
+			models.UserToProtoUser(dbUserThree),
 		}))
 	}
 }

@@ -154,7 +154,7 @@ func initializeEmailTemplates() error {
 	return nil
 }
 
-func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Crypto, token token.Token, email email.Email, maxEmailVerificationAge time.Duration) (Handler, error) {
+func New(zapLog *zap.Logger, repository repository.Repository, token token.Token, email email.Email, maxEmailVerificationAge time.Duration) (Handler, error) {
 	zapLog.Info("creating handler")
 	if err := initialize(); err != nil {
 		return nil, err
@@ -168,7 +168,6 @@ func New(zapLog *zap.Logger, repository repository.Repository, crypto cryptox.Cr
 	}
 	handler := &defaultHandler{
 		repository:              repository,
-		crypto:                  crypto,
 		token:                   token,
 		zapLog:                  zapLog,
 		email:                   email,

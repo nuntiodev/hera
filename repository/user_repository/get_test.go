@@ -2,152 +2,49 @@ package user_repository
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/google/uuid"
-	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/x/cryptox"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetByIdIEEncrypted(t *testing.T) {
 	// setup available clients
-	var clients []*mongodbRepository
-	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
+	clients, err := getUserRepositories()
 	assert.NoError(t, err)
-	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
-	assert.NoError(t, err)
-	userRepositoryExternalEncryption, err := getTestUserRepository(context.Background(), false, true, "")
-	assert.NoError(t, err)
-	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
-	assert.NoError(t, err)
-	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
-	for index, userRepository := range clients {
-		internalLevel := len(userRepository.internalEncryptionKeys)
-		// create some metadata
-		metadata, err := json.Marshal(&CustomMetadata{
-			Name:      gofakeit.Name(),
-			ClassYear: 3,
-		})
-		assert.NoError(t, err)
-		password := gofakeit.Password(true, true, true, true, true, 30)
-		user := &go_block.User{
-			Username: uuid.NewString(),
-			Email:    gofakeit.Email(),
-			Password: password,
-			Image:    gofakeit.ImageURL(10, 10),
-			Metadata: string(metadata),
-		}
-		createdUser, err := userRepository.Create(context.Background(), user)
-		assert.NoError(t, err)
-		assert.NotNil(t, createdUser)
-		// set new encryption key
-		encryptionKey, err := userRepository.crypto.GenerateSymmetricKey(32, cryptox.AlphaNum)
-		assert.NoError(t, err)
-		userRepository.internalEncryptionKeys = append(userRepository.internalEncryptionKeys, encryptionKey)
-		// act
-		getUser, err := userRepository.Get(context.Background(), &go_block.User{
-			Id: createdUser.Id,
-		}, true)
-		// validate
-		assert.NoError(t, err)
-		assert.NotNil(t, getUser)
-		assert.NoError(t, compareUsers(createdUser, getUser, false))
-		// validate we are at level 3
-		getUser, err = userRepository.Get(context.Background(), &go_block.User{
-			Id: createdUser.Id,
-		}, true)
-		assert.NoError(t, err)
-		assert.Equal(t, int32(internalLevel+1), getUser.InternalEncryptionLevel, index)
-	}
-}
-
-func TestGetByEmailIEEncrypted(t *testing.T) {
-	// setup available clients
-	var clients []*mongodbRepository
-	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
-	assert.NoError(t, err)
-	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
-	assert.NoError(t, err)
-	userRepositoryExternalEncryption, err := getTestUserRepository(context.Background(), false, true, "")
-	assert.NoError(t, err)
-	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
-	assert.NoError(t, err)
-	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
+	// delete all users from other tests (we use the same collection)
+	err = clients[0].DeleteAll(context.Background())
 	for _, userRepository := range clients {
-		// create some metadata
-		metadata, err := json.Marshal(&CustomMetadata{
-			Name:      gofakeit.Name(),
-			ClassYear: 3,
-		})
+		// create a user
+		userOne := getTestUser()
+		copy := userOne
+		dbUserOne, err := userRepository.Create(context.Background(), &userOne)
 		assert.NoError(t, err)
-		password := gofakeit.Password(true, true, true, true, true, 30)
-		user := &go_block.User{
-			Username: uuid.NewString(),
-			Email:    gofakeit.Email(),
-			Password: password,
-			Image:    gofakeit.ImageURL(10, 10),
-			Metadata: string(metadata),
-		}
-		createdUser, err := userRepository.Create(context.Background(), user)
+		assert.NotNil(t, dbUserOne)
+		// set new internal and external encryption key
+		encryptionKey, err := cryptox.GenerateSymmetricKey(32, cryptox.AlphaNum)
 		assert.NoError(t, err)
-		assert.NotNil(t, createdUser)
-		// set new encryption key
-		encryptionKey, err := userRepository.crypto.GenerateSymmetricKey(32, cryptox.AlphaNum)
-		assert.NoError(t, err)
-		userRepository.internalEncryptionKeys = append(userRepository.internalEncryptionKeys, encryptionKey)
+		// internal
+		internalKeys, _ := userRepository.crypto.GetInternalEncryptionKeys()
+		internalKeys = append(internalKeys, encryptionKey)
+		assert.NoError(t, userRepository.crypto.SetInternalEncryptionKeys(internalKeys))
+		// external
+		externalKeys, _ := userRepository.crypto.GetExternalEncryptionKeys()
+		externalKeys = append(externalKeys, encryptionKey)
+		assert.NoError(t, userRepository.crypto.SetExternalEncryptionKeys(externalKeys))
 		// act
-		getUser, err := userRepository.Get(context.Background(), &go_block.User{
-			Email: createdUser.Email,
-		}, true)
-		assert.NoError(t, err)
-		assert.NotNil(t, getUser)
-		assert.NoError(t, compareUsers(createdUser, getUser, false))
-	}
-}
-
-func TestGetByUsernameIEEncrypted(t *testing.T) {
-	// setup available clients
-	var clients []*mongodbRepository
-	userRepositoryFullEncryption, err := getTestUserRepository(context.Background(), true, true, "")
-	assert.NoError(t, err)
-	userRepositoryInternalEncryption, err := getTestUserRepository(context.Background(), true, false, "")
-	assert.NoError(t, err)
-	userRepositoryExternalEncryption, err := getTestUserRepository(context.Background(), false, true, "")
-	assert.NoError(t, err)
-	userRepositoryNoEncryption, err := getTestUserRepository(context.Background(), false, false, "")
-	assert.NoError(t, err)
-	clients = []*mongodbRepository{userRepositoryFullEncryption, userRepositoryInternalEncryption, userRepositoryExternalEncryption, userRepositoryNoEncryption}
-	for _, userRepository := range clients {
-		// create some metadata
-		metadata, err := json.Marshal(&CustomMetadata{
-			Name:      gofakeit.Name(),
-			ClassYear: 3,
-		})
-		assert.NoError(t, err)
-		password := gofakeit.Password(true, true, true, true, true, 30)
-		user := &go_block.User{
-			Username: uuid.NewString(),
-			Email:    gofakeit.Email(),
-			Password: password,
-			Image:    gofakeit.ImageURL(10, 10),
-			Metadata: string(metadata),
+		users := []*models.User{{Email: dbUserOne.Email}, {Id: dbUserOne.Id}, {Username: dbUserOne.Username}}
+		for _, user := range users {
+			getUser, err := userRepository.Get(context.Background(), models.UserToProtoUser(user))
+			// validate
+			assert.NoError(t, err)
+			assert.NotNil(t, getUser)
+			assert.NoError(t, compareUsers(models.ProtoUserToUser(&copy), getUser))
+			// validate encryption level has been updated
+			internalOne, externalOne := userRepository.crypto.EncryptionLevel(getUser)
+			assert.Equal(t, int32(len(internalKeys)), internalOne)
+			assert.Equal(t, int32(len(externalKeys)), externalOne)
 		}
-		createdUser, err := userRepository.Create(context.Background(), user)
-		assert.NoError(t, err)
-		assert.NotNil(t, createdUser)
-		// set new encryption key
-		encryptionKey, err := userRepository.crypto.GenerateSymmetricKey(32, cryptox.AlphaNum)
-		assert.NoError(t, err)
-		userRepository.internalEncryptionKeys = append(userRepository.internalEncryptionKeys, encryptionKey)
-		// act
-		getUser, err := userRepository.Get(context.Background(), &go_block.User{
-			Username: createdUser.Username,
-		}, true)
-		assert.NoError(t, err)
-		assert.NotNil(t, getUser)
-		assert.NoError(t, compareUsers(createdUser, getUser, false))
 	}
 }

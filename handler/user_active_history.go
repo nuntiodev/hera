@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/measurement_repository"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 func (h *defaultHandler) UserActiveHistory(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	var (
 		measurementRepo measurement_repository.MeasurementRepository
-		activeHistory   *go_block.ActiveHistory
+		activeHistory   *models.ActiveHistory
 		err             error
 	)
 	measurementRepo, err = h.repository.Measurements(ctx, req.Namespace)
@@ -23,6 +24,6 @@ func (h *defaultHandler) UserActiveHistory(ctx context.Context, req *go_block.Us
 	}
 	activeHistory, _, err = measurementRepo.GetUserActiveHistory(ctx, int32(time.Now().Year()), req.ActiveMeasurement.UserId)
 	return &go_block.UserResponse{
-		ActiveHistory: activeHistory,
+		ActiveHistory: models.ActiveHistoryToProtoActiveHistory(activeHistory),
 	}, err
 }

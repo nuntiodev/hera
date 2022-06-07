@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
 
 	"github.com/nuntiodev/block-proto/go_block"
@@ -13,15 +14,15 @@ import (
 func (h *defaultHandler) UpdateBirthdate(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	var (
 		userRepo user_repository.UserRepository
-		user     *go_block.User
+		user     *models.User
 		err      error
 	)
-	userRepo, err = h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
+	userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
 	user, err = userRepo.UpdateBirthdate(ctx, req.User, req.Update)
 	return &go_block.UserResponse{
-		User: user,
+		User: models.UserToProtoUser(user),
 	}, err
 }

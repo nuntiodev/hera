@@ -4,35 +4,37 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (e *defaultEmailRepository) GetAll(ctx context.Context, email *go_block.Email) ([]*go_block.Email, error) {
+func (e *defaultEmailRepository) GetAll(ctx context.Context, email *go_block.Email) ([]*models.Email, error) {
 	if email == nil {
 		return nil, errors.New("email is nil")
 	} else if email.Id == "" {
 		return nil, errors.New("missing required id")
 	}
 	prepare(actionGet, email)
-	resp := []*go_block.Email{}
+	var resp []*models.Email
 	cursor, err := e.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
 	for cursor.Next(ctx) {
-		temp := Email{}
+		temp := models.Email{}
 		if err := cursor.Decode(&temp); err != nil {
 			return nil, err
 		}
-		if temp.InternalEncryptionLevel > 0 && len(e.internalEncryptionKeys) > 0 {
-			if temp.InternalEncryptionLevel > int32(len(e.internalEncryptionKeys)) {
-				return nil, errors.New("internal encryption level is illegally higher than amount of internal encryption keys")
-			}
-			if err := e.DecryptEmail(&temp); err != nil {
+		if err := e.crypto.Decrypt(&temp); err != nil {
+			return nil, err
+		}
+		// check if we should upgrade the encryption level
+		if upgradable, _ := e.crypto.Upgradeble(&temp); upgradable {
+			if err := e.upgradeEncryptionLevel(ctx, &temp); err != nil {
 				return nil, err
 			}
 		}
-		resp = append(resp, EmailToProtoEmail(&temp))
+		resp = append(resp, &temp)
 	}
 	return resp, nil
 }

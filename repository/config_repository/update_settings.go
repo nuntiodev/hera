@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"time"
 )
 
-func (c *defaultConfigRepository) UpdateSettings(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
+func (c *defaultConfigRepository) UpdateSettings(ctx context.Context, config *go_block.Config) (*models.Config, error) {
 	if config == nil {
 		return nil, errors.New("missing required config")
 	} else if config.Id == "" {
@@ -21,26 +22,26 @@ func (c *defaultConfigRepository) UpdateSettings(ctx context.Context, config *go
 			"disable_default_login":             config.DisableDefaultLogin,
 			"validate_password":                 config.ValidatePassword,
 			"require_email_verification":        config.RequireEmailVerification,
-			"default_language":                  config.DefaultLanguage,
 			"login_type":                        config.LoginType,
 			"require_phone_number_verification": config.RequireEmailVerification,
 			"updated_at":                        time.Now(),
 		},
 	}
-	var resp Config
+	var resp models.Config
 	if err := c.collection.FindOneAndUpdate(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate).Decode(&resp); err != nil {
 		return nil, err
 	}
-	if resp.InternalEncryptionLevel > 0 {
-		if err := c.DecryptConfig(&resp); err != nil {
-			return nil, err
-		}
+	if err := c.crypto.Decrypt(&resp); err != nil {
+		return nil, err
 	}
-	get := ConfigToProtoConfig(&resp)
 	// set updated fields
-	get.EnableNuntioConnect = config.EnableNuntioConnect
-	get.DisableDefaultSignup = config.DisableDefaultSignup
-	get.DisableDefaultLogin = config.DisableDefaultLogin
-	get.ValidatePassword = config.ValidatePassword
-	return get, nil
+	resp.EnableNuntioConnect = config.EnableNuntioConnect
+	resp.DisableDefaultSignup = config.DisableDefaultSignup
+	resp.DisableDefaultLogin = config.DisableDefaultLogin
+	resp.ValidatePassword = config.ValidatePassword
+	resp.RequireEmailVerification = config.RequireEmailVerification
+	resp.LoginType = config.LoginType
+	resp.RequirePhoneNumberVerification = config.RequirePhoneNumberVerification
+	resp.UpdatedAt = time.Now()
+	return &resp, nil
 }

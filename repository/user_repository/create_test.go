@@ -2,216 +2,90 @@ package user_repository
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/google/uuid"
-	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func TestCreateIEEncrypted(t *testing.T) {
-	// setup user client
-	userRepository, err := getTestUserRepository(context.Background(), true, true, "")
+	clients, err := getUserRepositories()
 	assert.NoError(t, err)
-	// create some metadata
-	metadata, err := json.Marshal(&CustomMetadata{
-		Name:      gofakeit.Name(),
-		ClassYear: 3,
-	})
-	assert.NoError(t, err)
-	password := gofakeit.Password(true, true, true, true, true, 20)
-	user := &go_block.User{
-		Username: uuid.NewString(),
-		Email:    gofakeit.Email(),
-		Password: password,
-		Image:    gofakeit.ImageURL(10, 10),
-		Metadata: string(metadata),
+	for _, userRepository := range clients {
+		user := getTestUser()
+		c := user
+		// act
+		createdUser, err := userRepository.Create(context.Background(), &user)
+		assert.NoError(t, err)
+		assert.NotNil(t, createdUser)
+		// assert new fields are present
+		assert.NotEmpty(t, createdUser.Id)
+		// assert that old fields are the same
+		assert.Equal(t, createdUser.Email.Body, c.Email)
+		assert.NotEqual(t, user.Password, c.Password)
+		assert.Equal(t, createdUser.Image.Body, c.Image)
+		assert.Equal(t, createdUser.Metadata.Body, c.Metadata)
+		assert.Equal(t, createdUser.FirstName.Body, c.FirstName)
+		assert.Equal(t, createdUser.LastName.Body, c.LastName)
+		assert.NoError(t, bcrypt.CompareHashAndPassword([]byte(createdUser.Password), []byte(c.Password)))
+		// delete all at the end
+		assert.NoError(t, userRepository.DeleteBatch(context.Background(), []*go_block.User{
+			models.UserToProtoUser(createdUser),
+		}))
 	}
-	// act
-	createdUser, err := userRepository.Create(context.Background(), user)
-	assert.NoError(t, err)
-	assert.NotNil(t, createdUser)
-	// assert new fields are present
-	assert.NotEmpty(t, createdUser.Id)
-	assert.Equal(t, createdUser.ExternalEncryptionLevel, int32(1))
-	assert.Equal(t, createdUser.InternalEncryptionLevel, int32(2))
-	// assert that old fields are the same
-	assert.Equal(t, createdUser.Email, user.Email)
-	assert.NotEqual(t, password, user.Password)
-	assert.Equal(t, createdUser.Image, user.Image)
-	assert.Equal(t, createdUser.Metadata, user.Metadata)
-	assert.NoError(t, bcrypt.CompareHashAndPassword([]byte(createdUser.Password), []byte(password)))
-}
-
-func TestCreateIEncrypted(t *testing.T) {
-	// setup user client
-	userRepository, err := getTestUserRepository(context.Background(), true, false, "")
-	assert.NoError(t, err)
-	// create some metadata
-	metadata, err := json.Marshal(&CustomMetadata{
-		Name:      gofakeit.Name(),
-		ClassYear: 3,
-	})
-	assert.NoError(t, err)
-	password := gofakeit.Password(true, true, true, true, true, 20)
-	user := &go_block.User{
-		Username: uuid.NewString(),
-		Email:    gofakeit.Email(),
-		Password: password,
-		Image:    gofakeit.ImageURL(10, 10),
-		Metadata: string(metadata),
-	}
-	createdUser, err := userRepository.Create(context.Background(), user)
-	assert.NoError(t, err)
-	assert.NotNil(t, createdUser)
-	// assert new fields are present
-	assert.NotEmpty(t, createdUser.Id)
-	assert.Equal(t, createdUser.ExternalEncryptionLevel, int32(0))
-	assert.Equal(t, createdUser.InternalEncryptionLevel, int32(2))
-	// assert that old fields are the same
-	assert.Equal(t, createdUser.Email, user.Email)
-	assert.NotEqual(t, password, user.Password)
-	assert.Equal(t, createdUser.Image, user.Image)
-	assert.Equal(t, createdUser.Metadata, user.Metadata)
-}
-
-func TestCreateEEncrypted(t *testing.T) {
-	// setup user client
-	userRepository, err := getTestUserRepository(context.Background(), false, true, "")
-	assert.NoError(t, err)
-	// create some metadata
-	metadata, err := json.Marshal(&CustomMetadata{
-		Name:      gofakeit.Name(),
-		ClassYear: 3,
-	})
-	assert.NoError(t, err)
-	password := gofakeit.Password(true, true, true, true, true, 20)
-	user := &go_block.User{
-		Username: uuid.NewString(),
-		Email:    gofakeit.Email(),
-		Password: password,
-		Image:    gofakeit.ImageURL(10, 10),
-		Metadata: string(metadata),
-	}
-	// act
-	createdUser, err := userRepository.Create(context.Background(), user)
-	assert.NoError(t, err)
-	assert.NotNil(t, createdUser)
-	// assert new fields are present
-	assert.NotEmpty(t, createdUser.Id)
-	assert.Equal(t, createdUser.ExternalEncryptionLevel, int32(1))
-	assert.Equal(t, createdUser.InternalEncryptionLevel, int32(0))
-	// assert that old fields are the same
-	assert.Equal(t, createdUser.Email, user.Email)
-	assert.NotEqual(t, password, user.Password)
-	assert.Equal(t, createdUser.Image, user.Image)
-	assert.Equal(t, createdUser.Metadata, user.Metadata)
-}
-
-func TestCreateNoEncryption(t *testing.T) {
-	// setup user client
-	userRepository, err := getTestUserRepository(context.Background(), false, false, "")
-	assert.NoError(t, err)
-	// create some metadata
-	metadata, err := json.Marshal(&CustomMetadata{
-		Name:      gofakeit.Name(),
-		ClassYear: 3,
-	})
-	assert.NoError(t, err)
-	password := gofakeit.Password(true, true, true, true, true, 20)
-	user := &go_block.User{
-		Username: uuid.NewString(),
-		Email:    gofakeit.Email(),
-		Password: password,
-		Image:    gofakeit.ImageURL(10, 10),
-		Metadata: string(metadata),
-	}
-	// act
-	createdUser, err := userRepository.Create(context.Background(), user)
-	assert.NoError(t, err)
-	assert.NotNil(t, createdUser)
-	// assert new fields are present
-	assert.NotEmpty(t, createdUser.Id)
-	assert.Equal(t, createdUser.ExternalEncryptionLevel, int32(0))
-	assert.Equal(t, createdUser.InternalEncryptionLevel, int32(0))
-	// assert that old fields are the same
-	assert.Equal(t, createdUser.Email, user.Email)
-	assert.NotEqual(t, password, user.Password)
-	assert.Equal(t, createdUser.Image, user.Image)
-	assert.Equal(t, createdUser.Metadata, user.Metadata)
 }
 
 func TestCreateInvalidPassword(t *testing.T) {
-	// setup user client
-	userRepository, err := getTestUserRepository(context.Background(), false, true, "")
+	clients, err := getUserRepositories()
 	assert.NoError(t, err)
-	// create some metadata
-	metadata, err := json.Marshal(&CustomMetadata{
-		Name:      gofakeit.Name(),
-		ClassYear: 3,
-	})
-	assert.NoError(t, err)
-	user := &go_block.User{
-		Username: uuid.NewString(),
-		Email:    gofakeit.Email(),
-		Password: "Test1234",
-		Image:    gofakeit.ImageURL(10, 10),
-		Metadata: string(metadata),
+	for _, userRepository := range clients {
+		user := getTestUser()
+		user.Password = "test1234"
+		// act
+		createdUser, err := userRepository.Create(context.Background(), &user)
+		assert.Error(t, err)
+		assert.Nil(t, createdUser)
 	}
-	// act
-	createdUser, err := userRepository.Create(context.Background(), user)
-	assert.Error(t, err)
-	assert.Nil(t, createdUser)
 }
 
 func TestCreateInvalidEmail(t *testing.T) {
 	// setup user client
-	userRepository, err := getTestUserRepository(context.Background(), false, true, "")
+	clients, err := getUserRepositories()
 	assert.NoError(t, err)
-	// create some metadata
-	metadata, err := json.Marshal(&CustomMetadata{
-		Name:      gofakeit.Name(),
-		ClassYear: 3,
-	})
-	assert.NoError(t, err)
-	user := &go_block.User{
-		Username: uuid.NewString(),
-		Email:    "info@@nuntio.io",
-		Password: gofakeit.Password(true, true, true, true, true, 20),
-		Image:    gofakeit.ImageURL(10, 10),
-		Metadata: string(metadata),
+	for _, userRepository := range clients {
+		user := getTestUser()
+		user.Email = "info@@nuntio.io"
+		// act
+		createdUser, err := userRepository.Create(context.Background(), &user)
+		assert.Error(t, err)
+		assert.Nil(t, createdUser)
 	}
-	// act
-	createdUser, err := userRepository.Create(context.Background(), user)
-	assert.Error(t, err)
-	assert.Nil(t, createdUser)
 }
 
 func TestCreateInvalidMetadata(t *testing.T) {
 	// setup user client
-	userRepository, err := getTestUserRepository(context.Background(), false, true, "")
+	clients, err := getUserRepositories()
 	assert.NoError(t, err)
-	user := &go_block.User{
-		Username: uuid.NewString(),
-		Email:    "info@nuntio.io",
-		Password: gofakeit.Password(true, true, true, true, true, 20),
-		Image:    gofakeit.ImageURL(10, 10),
-		Metadata: "invalid metadata",
+	for _, userRepository := range clients {
+		user := getTestUser()
+		user.Metadata = "some invalid metadata"
+		// act
+		createdUser, err := userRepository.Create(context.Background(), &user)
+		assert.Error(t, err)
+		assert.Nil(t, createdUser)
 	}
-	// act
-	createdUser, err := userRepository.Create(context.Background(), user)
-	assert.Error(t, err)
-	assert.Nil(t, createdUser)
 }
 
 func TestCreateNilUser(t *testing.T) {
 	// setup user client
-	userRepository, err := getTestUserRepository(context.Background(), false, true, "")
+	clients, err := getUserRepositories()
 	assert.NoError(t, err)
-	createdUser, err := userRepository.Create(context.Background(), nil)
-	assert.Error(t, err)
-	assert.Nil(t, createdUser)
+	for _, userRepository := range clients {
+		// act
+		createdUser, err := userRepository.Create(context.Background(), nil)
+		assert.Error(t, err)
+		assert.Nil(t, createdUser)
+	}
 }

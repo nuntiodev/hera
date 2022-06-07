@@ -2,16 +2,13 @@ package user_repository
 
 import (
 	"context"
-	"crypto/md5"
-	"errors"
-	"fmt"
-
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (r *mongodbRepository) UpdatePassword(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) UpdatePassword(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -25,31 +22,33 @@ func (r *mongodbRepository) UpdatePassword(ctx context.Context, get *go_block.Us
 		return nil, err
 	}
 	update.Password = string(hashedPassword)
-	updateUser := ProtoUserToUser(update)
+	updateUser := models.ProtoUserToUser(update)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"password":   updateUser.Password,
 			"updated_at": updateUser.UpdatedAt,
 		},
 	}
-	filter := bson.M{}
-	if get.Id != "" {
-		filter = bson.M{"_id": get.Id}
-	} else if get.Email != "" {
-		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(get.Email)))}
-	} else if get.Username != "" {
-		filter = bson.M{"username": get.Username}
+	filter, err := getUserFilter(get)
+	if err != nil {
+		return nil, err
 	}
-	updateResult, err := r.collection.UpdateOne(
+	result := r.collection.FindOneAndUpdate(
 		ctx,
 		filter,
 		mongoUpdate,
 	)
-	if err != nil {
+	if err := result.Err(); err != nil {
 		return nil, err
 	}
-	if updateResult.MatchedCount == 0 {
-		return nil, errors.New("could not find get")
+	var resp models.User
+	if err := result.Decode(&resp); err != nil {
+		return nil, err
 	}
-	return update, nil
+	if err := r.crypto.Decrypt(&resp); err != nil {
+		return nil, err
+	}
+	// set updated fields
+	resp.Password = string(hashedPassword)
+	return &resp, nil
 }

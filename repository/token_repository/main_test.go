@@ -1,5 +1,6 @@
 package token_repository
 
+/*
 import (
 	"context"
 	"os"
@@ -102,3 +103,5 @@ func TestCreateTokenRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, obj)
 }
+
+*/

@@ -1,20 +1,8 @@
 package token_repository
 
-import (
-	"context"
-	"testing"
-
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/google/uuid"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/x/cryptox"
-	"github.com/stretchr/testify/assert"
-)
-
 /*
-	TestBlockTokenIEncrypted - positive service test.
-	this test checks that we are actually able to block a token; both with encryption and without.
-*/
+//	TestBlockTokenIEncrypted - positive service test.
+//	this test checks that we are actually able to block a token; both with encryption and without.
 func TestBlockTokenIEncrypted(t *testing.T) {
 	// setup user client
 	tokenRepositoryWithEncryption, err := getTestTokenRepository(context.Background(), true, "")
@@ -56,10 +44,8 @@ func TestBlockTokenIEncrypted(t *testing.T) {
 	}
 }
 
-/*
-	TestBlockTokenIEncrypted - exploratory service test.
-	this test makes sure that we cannot block a token without an id.
-*/
+//	TestBlockTokenIEncrypted - exploratory service test.
+//	this test makes sure that we cannot block a token without an id.
 func TestBlockTokenNoId(t *testing.T) {
 	// setup user client
 	tokenRepositoryWithEncryption, err := getTestTokenRepository(context.Background(), true, "")
@@ -91,10 +77,8 @@ func TestBlockTokenNoId(t *testing.T) {
 	}
 }
 
-/*
-	TestBlockTokenIEncrypted - exploratory service test.
-	this test makes sure we throw a valid err when token is nil.
-*/
+//	TestBlockTokenIEncrypted - exploratory service test.
+//	this test makes sure we throw a valid err when token is nil.
 func TestBlockTokenNil(t *testing.T) {
 	// setup user client
 	tokenRepositoryWithEncryption, err := getTestTokenRepository(context.Background(), true, "")
@@ -125,3 +109,4 @@ func TestBlockTokenNil(t *testing.T) {
 		assert.Nil(t, blockedToken)
 	}
 }
+*/

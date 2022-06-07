@@ -17,10 +17,5 @@ func prepare(action int, email *go_block.Email) {
 	case actionUpdate:
 		email.UpdatedAt = ts.Now()
 	}
-	email.Subject = strings.TrimSpace(email.Subject)
-	email.Logo = strings.TrimSpace(email.Logo)
-	email.WelcomeMessage = strings.TrimSpace(email.WelcomeMessage)
-	email.BodyMessage = strings.TrimSpace(email.BodyMessage)
-	email.FooterMessage = strings.TrimSpace(email.FooterMessage)
 	email.Id = strings.TrimSpace(email.Id)
 }

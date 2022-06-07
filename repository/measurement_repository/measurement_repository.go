@@ -3,6 +3,7 @@ package measurement_repository
 import (
 	"context"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,9 +26,9 @@ type defaultMeasurementRepository struct {
 }
 
 type MeasurementRepository interface {
-	RecordActive(ctx context.Context, measurement *go_block.ActiveMeasurement) (*go_block.ActiveMeasurement, error)
-	GetNamespaceActiveHistory(ctx context.Context, year int32) (*go_block.ActiveHistory, error)
-	GetUserActiveHistory(ctx context.Context, year int32, userId string) (*go_block.ActiveHistory, bool, error)
+	RecordActive(ctx context.Context, measurement *go_block.ActiveMeasurement) (*models.ActiveMeasurement, error)
+	GetNamespaceActiveHistory(ctx context.Context, year int32) (*models.ActiveHistory, error)
+	GetUserActiveHistory(ctx context.Context, year int32, userId string) (*models.ActiveHistory, bool, error)
 }
 
 func initialize() error {

@@ -4,27 +4,28 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
-	"time"
 )
 
-func (e *defaultEmailRepository) Update(ctx context.Context, email *go_block.Email) (*go_block.Email, error) {
+func (e *defaultEmailRepository) Update(ctx context.Context, email *go_block.Email) (*models.Email, error) {
 	if email == nil {
 		return nil, errors.New("get is nil")
 	} else if email.Id == "" {
 		return nil, errors.New("missing required id")
 	}
 	prepare(actionUpdate, email)
-	get, err := e.Get(ctx, email)
-	if err != nil {
+	update := models.ProtoEmailToEmail(&go_block.Email{
+		Logo:           email.Logo,
+		WelcomeMessage: email.WelcomeMessage,
+		BodyMessage:    email.BodyMessage,
+		FooterMessage:  email.FooterMessage,
+		Subject:        email.Subject,
+		TemplatePath:   email.TemplatePath,
+	})
+	if err := e.crypto.Encrypt(update); err != nil {
 		return nil, err
-	}
-	update := ProtoEmailToEmail(email)
-	if get.InternalEncryptionLevel > 0 {
-		if err := e.EncryptEmail(actionUpdate, update); err != nil {
-			return nil, err
-		}
-		update.EncryptedAt = time.Now()
 	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
@@ -35,19 +36,49 @@ func (e *defaultEmailRepository) Update(ctx context.Context, email *go_block.Ema
 			"subject":         update.Subject,
 			"template_path":   update.TemplatePath,
 			"updated_at":      update.UpdatedAt,
-			"encrypted_at":    update.EncryptedAt,
 		},
 	}
-	if _, err := e.collection.UpdateOne(ctx, bson.M{"_id": get.Id}, mongoUpdate); err != nil {
+	result := e.collection.FindOneAndUpdate(ctx, bson.M{"_id": email.Id}, mongoUpdate)
+	if err := result.Err(); err != nil {
+		return nil, err
+	}
+	var resp models.Email
+	if err := result.Decode(&resp); err != nil {
+		return nil, err
+	}
+	if err := e.crypto.Decrypt(&resp); err != nil {
 		return nil, err
 	}
 	// set updated fields
-	get.Logo = email.Logo
-	get.WelcomeMessage = email.WelcomeMessage
-	get.BodyMessage = email.BodyMessage
-	get.FooterMessage = email.FooterMessage
-	get.Subject = email.Subject
-	get.UpdatedAt = email.UpdatedAt
-	get.EncryptedAt = email.EncryptedAt
-	return email, nil
+	resp.Logo = cryptox.Stringx{
+		Body:                    email.Logo,
+		InternalEncryptionLevel: update.Logo.InternalEncryptionLevel,
+		ExternalEncryptionLevel: update.Logo.ExternalEncryptionLevel,
+	}
+	resp.WelcomeMessage = cryptox.Stringx{
+		Body:                    email.WelcomeMessage,
+		InternalEncryptionLevel: update.WelcomeMessage.InternalEncryptionLevel,
+		ExternalEncryptionLevel: update.WelcomeMessage.ExternalEncryptionLevel,
+	}
+	resp.BodyMessage = cryptox.Stringx{
+		Body:                    email.BodyMessage,
+		InternalEncryptionLevel: update.BodyMessage.InternalEncryptionLevel,
+		ExternalEncryptionLevel: update.BodyMessage.ExternalEncryptionLevel,
+	}
+	resp.FooterMessage = cryptox.Stringx{
+		Body:                    email.FooterMessage,
+		InternalEncryptionLevel: update.FooterMessage.InternalEncryptionLevel,
+		ExternalEncryptionLevel: update.FooterMessage.ExternalEncryptionLevel,
+	}
+	resp.Subject = cryptox.Stringx{
+		Body:                    email.Subject,
+		InternalEncryptionLevel: update.Subject.InternalEncryptionLevel,
+		ExternalEncryptionLevel: update.Subject.ExternalEncryptionLevel,
+	}
+	resp.TemplatePath = cryptox.Stringx{
+		Body:                    email.TemplatePath,
+		InternalEncryptionLevel: update.TemplatePath.InternalEncryptionLevel,
+		ExternalEncryptionLevel: update.TemplatePath.ExternalEncryptionLevel,
+	}
+	return &resp, nil
 }

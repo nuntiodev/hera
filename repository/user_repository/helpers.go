@@ -178,7 +178,9 @@ func getUserFilter(user *go_block.User) (bson.M, error) {
 	} else if user.Email != "" {
 		filter = bson.M{"email_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Email)))}
 	} else if user.Username != "" {
-		filter = bson.M{"username": user.Username}
+		filter = bson.M{"username_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.Username)))}
+	} else if user.PhoneNumber != "" {
+		filter = bson.M{"phone_number_hash": fmt.Sprintf("%x", md5.Sum([]byte(user.PhoneNumber)))}
 	} else {
 		return nil, errors.New("missing search filter")
 	}

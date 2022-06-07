@@ -3,6 +3,7 @@ package token_repository
 import (
 	"context"
 	"errors"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"strings"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (*go_block.Token, error) {
+func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (*models.Token, error) {
 	// validate fields
 	if token == nil {
 		return nil, errors.New("token is nil")
@@ -26,7 +27,6 @@ func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (
 		return nil, errors.New("invalid token type")
 	}
 	// prepare fields
-	token.DeviceInfo = strings.TrimSpace(token.DeviceInfo)
 	token.Id = strings.TrimSpace(token.Id)
 	token.UserId = strings.TrimSpace(token.UserId)
 	if token.DeviceInfo == "" {
@@ -36,18 +36,15 @@ func (r *mongodbRepository) Create(ctx context.Context, token *go_block.Token) (
 	token.CreatedAt = ts.Now()
 	token.UsedAt = ts.Now()
 	// convert
-	create := ProtoTokenToToken(token)
-	if len(r.internalEncryptionKeys) > 0 {
-		if err := r.EncryptToken(actionCreate, create); err != nil {
-			return nil, err
-		}
-		create.InternalEncryptionLevel = len(r.internalEncryptionKeys)
+	create := models.ProtoTokenToToken(token)
+	copy := *create
+	if err := r.crypto.Encrypt(create); err != nil {
+		return nil, err
 	}
 	_, err := r.collection.InsertOne(ctx, create)
 	if err != nil {
 		return nil, err
 	}
 	// set updated fields
-	token.InternalEncryptionLevel = int32(create.InternalEncryptionLevel)
-	return token, nil
+	return &copy, nil
 }

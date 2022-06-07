@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-type UsersBuilder interface {
-	SetNamespace(namespace string) UsersBuilder
-	SetEncryptionKey(encryptionKey string) UsersBuilder
-	WithPasswordValidation(validatePassword bool) UsersBuilder
+type UserRepositoryBuilder interface {
+	SetNamespace(namespace string) UserRepositoryBuilder
+	SetEncryptionKey(encryptionKey string) UserRepositoryBuilder
+	WithPasswordValidation(validatePassword bool) UserRepositoryBuilder
 	Build(ctx context.Context) (user_repository.UserRepository, error)
 }
 
@@ -21,21 +21,21 @@ type usersBuilder struct {
 	validatePassword        bool
 	internalEncryptionKeys  []string
 	client                  *mongo.Client
-	crypto                  cryptox.Crypto
 	maxEmailVerificationAge time.Duration
 }
 
-func (ub *usersBuilder) SetNamespace(namespace string) UsersBuilder {
+func (ub *usersBuilder) SetNamespace(namespace string) UserRepositoryBuilder {
 	ub.namespace = namespace
 	return ub
 }
 
-func (ub *usersBuilder) SetEncryptionKey(encryptionKey string) UsersBuilder {
+func (ub *usersBuilder) SetEncryptionKey(encryptionKey string) UserRepositoryBuilder {
 	ub.externalEncryptionKey = encryptionKey
+
 	return ub
 }
 
-func (ub *usersBuilder) WithPasswordValidation(validatePassword bool) UsersBuilder {
+func (ub *usersBuilder) WithPasswordValidation(validatePassword bool) UserRepositoryBuilder {
 	ub.validatePassword = validatePassword
 	return ub
 }
@@ -44,17 +44,20 @@ func (ub *usersBuilder) Build(ctx context.Context) (user_repository.UserReposito
 	if ub.namespace == "" {
 		ub.namespace = "nuntio-blocks-db"
 	}
+	crypto, err := cryptox.New(ub.internalEncryptionKeys, []string{ub.externalEncryptionKey})
+	if err != nil {
+		return nil, err
+	}
 	collection := ub.client.Database(ub.namespace).Collection("users")
-	userRepository, err := user_repository.New(ctx, collection, ub.crypto, ub.internalEncryptionKeys, ub.externalEncryptionKey, ub.validatePassword, ub.maxEmailVerificationAge)
+	userRepository, err := user_repository.New(ctx, collection, crypto, ub.validatePassword, ub.maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}
 	return userRepository, nil
 }
 
-func (r *defaultRepository) Users() UsersBuilder {
+func (r *defaultRepository) UserRepositoryBuilder() UserRepositoryBuilder {
 	return &usersBuilder{
-		crypto:                  r.crypto,
 		client:                  r.mongodbClient,
 		internalEncryptionKeys:  r.internalEncryptionKeys,
 		maxEmailVerificationAge: r.maxEmailVerificationAge,

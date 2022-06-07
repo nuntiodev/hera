@@ -10,7 +10,6 @@ import (
 	"github.com/nuntiodev/nuntio-user-block/repository"
 	"github.com/nuntiodev/nuntio-user-block/server/grpc_server"
 	"github.com/nuntiodev/nuntio-user-block/token"
-	"github.com/nuntiodev/x/cryptox"
 	database "github.com/nuntiodev/x/repositoryx"
 	"go.uber.org/zap"
 	"os"
@@ -70,15 +69,11 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myCrypto, err := cryptox.New()
-	if err != nil {
-		return nil, err
-	}
 	myToken, err := token.New()
 	if err != nil {
 		return nil, err
 	}
-	myRepository, err := repository.New(mongoClient, myCrypto, encryptionKeys, zapLog, maxEmailVerificationAge)
+	myRepository, err := repository.New(mongoClient, encryptionKeys, zapLog, maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +86,7 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		zapLog.Warn("email is not enabled with err: " + err.Error())
 	}
-	myHandler, err := handler.New(zapLog, myRepository, myCrypto, myToken, myEmail, maxEmailVerificationAge)
+	myHandler, err := handler.New(zapLog, myRepository, myToken, myEmail, maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}

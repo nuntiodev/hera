@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
 
@@ -17,10 +18,10 @@ func (h *defaultHandler) UpdateEmail(ctx context.Context, req *go_block.UserRequ
 	var (
 		configRepo config_repository.ConfigRepository
 		userRepo   user_repository.UserRepository
-		config     *go_block.Config
+		config     *models.Config
 		err        error
 	)
-	configRepo, err = h.repository.Config(ctx, req.Namespace)
+	configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not build config repository with err: %v", err)
 	}
@@ -34,7 +35,7 @@ func (h *defaultHandler) UpdateEmail(ctx context.Context, req *go_block.UserRequ
 	} else if config.RequireEmailVerification && req.Update.Email == "" {
 		return &go_block.UserResponse{}, errors.New("require email is enabled and email is empty")
 	}
-	userRepo, err = h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
+	userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, fmt.Errorf("could not build user repository with err: %v", err)
 	}
@@ -43,6 +44,6 @@ func (h *defaultHandler) UpdateEmail(ctx context.Context, req *go_block.UserRequ
 		return &go_block.UserResponse{}, fmt.Errorf("could not update user email with err: %v", err)
 	}
 	return &go_block.UserResponse{
-		User: updatedUser,
+		User: models.UserToProtoUser(updatedUser),
 	}, nil
 }

@@ -30,7 +30,6 @@ type defaultInitializer struct {
 	namespace string
 	zapLog    *zap.Logger
 	k8s       *kubernetes.Clientset
-	crypto    cryptox.Crypto
 }
 
 func New(zapLog *zap.Logger, engine string) (*defaultInitializer, error) {
@@ -55,15 +54,10 @@ func New(zapLog *zap.Logger, engine string) (*defaultInitializer, error) {
 	if err != nil {
 		return nil, err
 	}
-	crypto, err := cryptox.New()
-	if err != nil {
-		return nil, err
-	}
 	return &defaultInitializer{
 		zapLog:    zapLog,
 		k8s:       clientSet,
 		namespace: string(bytesNamespace),
-		crypto:    crypto,
 	}, nil
 }
 
@@ -76,7 +70,7 @@ func (i *defaultInitializer) CreateSecrets(ctx context.Context) error {
 	if cryptoSecret, err := i.k8s.CoreV1().Secrets(i.namespace).Get(ctx, blockUserSecretName, metav1.GetOptions{}); err != nil {
 		i.zapLog.Info("block user secret does not exist... creating....")
 		// create public private keys
-		rsaPrivateKey, rsaPublicKey, err := i.crypto.GenerateRsaKeyPair(2048)
+		rsaPrivateKey, rsaPublicKey, err := cryptox.GenerateRsaKeyPair(2048)
 		if err != nil {
 			return err
 		}
@@ -89,7 +83,7 @@ func (i *defaultInitializer) CreateSecrets(ctx context.Context) error {
 			Bytes: x509.MarshalPKCS1PublicKey(rsaPublicKey),
 		}))
 		// create encryption secret
-		encryptionSecret, err := i.crypto.GenerateSymmetricKey(32, cryptox.AlphaNum)
+		encryptionSecret, err := cryptox.GenerateSymmetricKey(32, cryptox.AlphaNum)
 		if err != nil {
 			return err
 		}

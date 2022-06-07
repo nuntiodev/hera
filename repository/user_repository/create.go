@@ -4,13 +4,16 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"github.com/nuntiodev/nuntio-user-block/models"
 
 	"github.com/nuntiodev/block-proto/go_block"
 	"golang.org/x/crypto/bcrypt"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongodbRepository) Create(ctx context.Context, user *go_block.User) (*go_block.User, error) {
+/*
+	Create - this method creates a user and encrypts it if keys are present.
+*/
+func (r *mongodbRepository) Create(ctx context.Context, user *go_block.User) (*models.User, error) {
 	prepare(actionCreate, user)
 	if err := r.validate(actionCreate, user); err != nil {
 		return nil, err
@@ -23,6 +26,10 @@ func (r *mongodbRepository) Create(ctx context.Context, user *go_block.User) (*g
 	if user.PhoneNumber != "" {
 		phoneNumberHash = fmt.Sprintf("%x", md5.Sum([]byte(user.PhoneNumber)))
 	}
+	usernameHash := ""
+	if user.Username != "" {
+		usernameHash = fmt.Sprintf("%x", md5.Sum([]byte(user.Username)))
+	}
 	if user.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -30,18 +37,17 @@ func (r *mongodbRepository) Create(ctx context.Context, user *go_block.User) (*g
 		}
 		user.Password = string(hashedPassword)
 	}
-	create := ProtoUserToUser(user)
+	create := models.ProtoUserToUser(user)
 	create.EmailHash = emailHash
 	create.PhoneNumberHash = phoneNumberHash
-	if err := r.encryptUser(ctx, actionCreate, create); err != nil {
+	create.UsernameHash = usernameHash
+	copy := *create
+	if err := r.crypto.Encrypt(create); err != nil {
 		return nil, err
 	}
 	if _, err := r.collection.InsertOne(ctx, create); err != nil {
 		return nil, err
 	}
 	// set new data for user created
-	user.EncryptedAt = ts.New(create.EncryptedAt)
-	user.ExternalEncryptionLevel = int32(create.ExternalEncryptionLevel)
-	user.InternalEncryptionLevel = int32(create.InternalEncryptionLevel)
-	return user, nil
+	return &copy, nil
 }

@@ -3,16 +3,16 @@ package user_repository
 import (
 	"context"
 	"crypto/md5"
-	"errors"
 	"fmt"
+	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/x/cryptox"
 	"time"
 
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (r *mongodbRepository) UpdatePhoneNumber(ctx context.Context, get *go_block.User, update *go_block.User) (*go_block.User, error) {
+func (r *mongodbRepository) UpdatePhoneNumber(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err
@@ -22,36 +22,23 @@ func (r *mongodbRepository) UpdatePhoneNumber(ctx context.Context, get *go_block
 		return nil, err
 	}
 	phoneNumberHash := fmt.Sprintf("%x", md5.Sum([]byte(update.PhoneNumber)))
-	get, err := r.Get(ctx, get, true) // check if user encryption is turned on
-	if err != nil {
-		return nil, err
-	}
-	// validate update is required
-	if get.PhoneNumberHash == phoneNumberHash {
-		return nil, errors.New("phone number is identical to current phone number")
-	}
-	updateUser := ProtoUserToUser(&go_block.User{
-		PhoneNumber: update.PhoneNumber,
-		UpdatedAt:   update.UpdatedAt,
+	updateUser := models.ProtoUserToUser(&go_block.User{
+		PhoneNumber:     update.PhoneNumber,
+		PhoneNumberHash: phoneNumberHash,
+		UpdatedAt:       update.UpdatedAt,
 	})
-	// transfer data from get to update
-	updateUser.ExternalEncryptionLevel = int(get.ExternalEncryptionLevel)
-	updateUser.InternalEncryptionLevel = int(get.InternalEncryptionLevel)
 	updateUser.PhoneNumberIsVerified = false
 	updateUser.VerificationTextSentAt = time.Time{}
-	// encrypt user if user has previously been encrypted
-	if updateUser.InternalEncryptionLevel > 0 || updateUser.ExternalEncryptionLevel > 0 {
-		if err := r.encryptUser(ctx, actionUpdatePhoneNumber, updateUser); err != nil {
-			return nil, err
-		}
-	}
 	// check if new phone number already is verified previously; if so -> set to true
 	for _, verifiedPhoneNumber := range get.VerifiedPhoneNumbers {
 		if verifiedPhoneNumber == phoneNumberHash {
 			updateUser.PhoneNumberIsVerified = true
 		}
 	}
-	updateUser.PhoneNumberHash = phoneNumberHash
+	// encrypt user if user has previously been encrypted
+	if err := r.crypto.Encrypt(updateUser); err != nil {
+		return nil, err
+	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"phone_number":              updateUser.PhoneNumber,
@@ -61,21 +48,29 @@ func (r *mongodbRepository) UpdatePhoneNumber(ctx context.Context, get *go_block
 			"updated_at":                updateUser.UpdatedAt,
 		},
 	}
-	updateResult, err := r.collection.UpdateOne(
+	result := r.collection.FindOneAndUpdate(
 		ctx,
 		bson.M{"_id": get.Id},
 		mongoUpdate,
 	)
-	if err != nil {
+	if err := result.Err(); err != nil {
 		return nil, err
 	}
-	if updateResult.MatchedCount == 0 {
-		return nil, errors.New("could not find get")
+	var resp models.User
+	if err := result.Decode(&resp); err != nil {
+		return nil, err
+	}
+	if err := r.crypto.Decrypt(&resp); err != nil {
+		return nil, err
 	}
 	// set updated fields
-	get.PhoneNumber = update.PhoneNumber
-	get.UpdatedAt = ts.New(updateUser.UpdatedAt)
-	get.PhoneNumberIsVerified = false
-	get.PhoneNumberHash = phoneNumberHash
-	return get, nil
+	resp.PhoneNumber = cryptox.Stringx{
+		Body:                    update.PhoneNumber,
+		InternalEncryptionLevel: resp.PhoneNumber.InternalEncryptionLevel,
+		ExternalEncryptionLevel: resp.PhoneNumber.ExternalEncryptionLevel,
+	}
+	resp.UpdatedAt = updateUser.UpdatedAt
+	resp.PhoneNumberIsVerified = false
+	resp.PhoneNumberHash = phoneNumberHash
+	return &resp, nil
 }

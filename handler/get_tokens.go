@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
 )
 
@@ -12,15 +13,15 @@ import (
 func (h *defaultHandler) GetTokens(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	var (
 		tokenRepo token_repository.TokenRepository
-		tokens    []*go_block.Token
+		tokens    []*models.Token
 		err       error
 	)
-	tokenRepo, err = h.repository.Tokens(ctx, req.Namespace)
+	tokenRepo, err = h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)
 	if err != nil {
 		return nil, err
 	}
 	tokens, err = tokenRepo.GetTokens(ctx, req.Token)
 	return &go_block.UserResponse{
-		Tokens: tokens,
+		Tokens: models.TokensToProto(tokens),
 	}, err
 }

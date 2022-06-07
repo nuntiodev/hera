@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token) ([]*go_block.Token, error) {
+func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token) ([]*models.Token, error) {
 	if token == nil {
 		return nil, errors.New("token is nil")
 	} else if token.UserId == "" {
@@ -20,18 +21,22 @@ func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token
 	if err != nil {
 		return nil, err
 	}
-	var resp []*go_block.Token
+	var resp []*models.Token
 	for cursor.Next(ctx) {
-		tempToken := Token{}
+		tempToken := models.Token{}
 		if err := cursor.Decode(&tempToken); err != nil {
 			return nil, err
 		}
-		if tempToken.InternalEncryptionLevel > 0 && len(t.internalEncryptionKeys) >= tempToken.InternalEncryptionLevel {
-			if err := t.DecryptToken(&tempToken); err != nil {
+		if err := t.crypto.Decrypt(&tempToken); err != nil {
+			return nil, err
+		}
+		// check if we should upgrade the encryption level
+		if upgradable, _ := t.crypto.Upgradeble(&tempToken); upgradable {
+			if err := t.upgradeEncryptionLevel(ctx, &tempToken); err != nil {
 				return nil, err
 			}
 		}
-		resp = append(resp, TokenToProtoToken(&tempToken))
+		resp = append(resp, &tempToken)
 	}
 	return resp, nil
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
 	"golang.org/x/sync/errgroup"
 
@@ -14,12 +15,12 @@ import (
 func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	var (
 		userRepo user_repository.UserRepository
-		users    []*go_block.User
+		users    []*models.User
 		count    int64
 		errGroup = &errgroup.Group{}
 		err      error
 	)
-	userRepo, err = h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
+	userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
@@ -34,7 +35,7 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) 
 		return err
 	})
 	return &go_block.UserResponse{
-		Users:       users,
+		Users:       models.UsersToProto(users),
 		UsersAmount: count,
 	}, nil
 }

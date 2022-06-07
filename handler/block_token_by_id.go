@@ -15,7 +15,7 @@ func (h *defaultHandler) BlockTokenById(ctx context.Context, req *go_block.UserR
 		tokenRepo token_repository.TokenRepository
 		err       error
 	)
-	tokenRepo, err = h.repository.Tokens(ctx, req.Namespace)
+	tokenRepo, err = h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}

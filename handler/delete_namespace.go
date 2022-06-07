@@ -21,7 +21,7 @@ func (h *defaultHandler) DeleteNamespace(ctx context.Context, req *go_block.User
 	)
 	// async action 1 - delete all users
 	errGroup.Go(func() error {
-		userRepo, err = h.repository.Users().SetNamespace(req.Namespace).Build(ctx)
+		userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 		if err != nil {
 			return err
 		}
@@ -29,7 +29,7 @@ func (h *defaultHandler) DeleteNamespace(ctx context.Context, req *go_block.User
 	})
 	// async action 2 - delete config
 	errGroup.Go(func() error {
-		configRepo, err = h.repository.Config(ctx, req.Namespace)
+		configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
 		if err != nil {
 			return err
 		}

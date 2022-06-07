@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.Config) (*go_block.Config, error) {
+func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.Config) (*models.Config, error) {
 	prepare(actionCreate, config)
 	if config == nil {
 		return nil, errors.New("missing required config")
@@ -20,21 +21,21 @@ func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.C
 	config.RequireEmailVerification = true
 	config.CreatedAt = ts.Now()
 	config.UpdatedAt = ts.Now()
-	config.DefaultLanguage = go_block.LanguageCode_EN
 	config.LoginType = go_block.LoginType_LOGIN_TYPE_EMAIL_PASSWORD
 	config.RequirePhoneNumberVerification = true
 	config.Id = namespaceConfigName
-	create := ProtoConfigToConfig(config)
-	if len(c.internalEncryptionKeys) > 0 {
-		if err := c.EncryptConfig(actionCreate, create); err != nil {
-			return nil, err
-		}
-		create.InternalEncryptionLevel = int32(len(c.internalEncryptionKeys))
+	create := models.ProtoConfigToConfig(config)
+	copy := *create
+	if err := c.crypto.Encrypt(create); err != nil {
+		return nil, err
 	}
 	if _, err := c.collection.InsertOne(ctx, create); err != nil {
 		return nil, err
 	}
-	// set created fields
-	config.InternalEncryptionLevel = create.InternalEncryptionLevel
-	return config, nil
+	// set updated fields
+	copy.Name.InternalEncryptionLevel = create.Name.InternalEncryptionLevel
+	copy.Name.ExternalEncryptionLevel = create.Name.ExternalEncryptionLevel
+	copy.Logo.InternalEncryptionLevel = create.Logo.InternalEncryptionLevel
+	copy.Logo.ExternalEncryptionLevel = create.Logo.ExternalEncryptionLevel
+	return &copy, nil
 }

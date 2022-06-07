@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
 	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
 	"golang.org/x/sync/errgroup"
@@ -19,7 +20,7 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 		tokenRepo token_repository.TokenRepository
 		userRepo  user_repository.UserRepository
 		claims    *go_block.CustomClaims
-		user      *go_block.User
+		user      *models.User
 		errGroup  = &errgroup.Group{}
 		err       error
 	)
@@ -30,7 +31,7 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 	})
 	// async action 2 - build token repository
 	errGroup.Go(func() error {
-		tokenRepo, err = h.repository.Tokens(ctx, req.Namespace)
+		tokenRepo, err = h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)
 		return err
 	})
 	if err = errGroup.Wait(); err != nil {
@@ -87,12 +88,12 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_block.UserRe
 		return err
 	})
 	// async action 5 - get user from token user id
-	userRepo, err = h.repository.Users().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
+	userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	user, err = userRepo.Get(ctx, &go_block.User{Id: claims.UserId}, true)
+	user, err = userRepo.Get(ctx, &go_block.User{Id: claims.UserId})
 	return &go_block.UserResponse{
-		User: user,
+		User: models.UserToProtoUser(user),
 	}, err
 }

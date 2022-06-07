@@ -2,13 +2,12 @@ package config_repository
 
 import (
 	"context"
-	"errors"
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (c *defaultConfigRepository) GetNamespaceConfig(ctx context.Context) (*go_block.Config, error) {
-	resp := Config{}
+func (c *defaultConfigRepository) GetNamespaceConfig(ctx context.Context) (*models.Config, error) {
+	resp := models.Config{}
 	result := c.collection.FindOne(ctx, bson.M{"_id": namespaceConfigName})
 	if err := result.Err(); err != nil {
 		return nil, err
@@ -16,19 +15,14 @@ func (c *defaultConfigRepository) GetNamespaceConfig(ctx context.Context) (*go_b
 	if err := result.Decode(&resp); err != nil {
 		return nil, err
 	}
-	if resp.InternalEncryptionLevel > 0 && len(c.internalEncryptionKeys) > 0 {
-		if resp.InternalEncryptionLevel > int32(len(c.internalEncryptionKeys)) {
-			return nil, errors.New("internal encryption level is illegally higher than amount of internal encryption keys")
-		}
-		if err := c.DecryptConfig(&resp); err != nil {
+	if err := c.crypto.Decrypt(&resp); err != nil {
+		return nil, err
+	}
+	// check if we should upgrade the encryption level
+	if upgradable, _ := c.crypto.Upgradeble(&resp); upgradable {
+		if err := c.upgradeEncryptionLevel(ctx, &resp); err != nil {
 			return nil, err
 		}
-		if resp.InternalEncryptionLevel > int32(len(c.internalEncryptionKeys)) {
-			// upgrade user to new internal encryption level
-			if err := c.upgradeEncryptionLevel(ctx, resp); err != nil {
-				return nil, err
-			}
-		}
 	}
-	return ConfigToProtoConfig(&resp), nil
+	return &resp, nil
 }

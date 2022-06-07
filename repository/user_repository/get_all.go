@@ -4,14 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/nuntiodev/nuntio-user-block/models"
 
 	"github.com/nuntiodev/block-proto/go_block"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mongodbRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*go_block.User, error) {
-	var resp []*go_block.User
+/*
+	GetAll - this method fetches all users matching the filter.
+*/
+func (r *mongodbRepository) GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*models.User, error) {
+	var resp []*models.User
 	sortOptions := options.FindOptions{}
 	limitOptions := options.Find()
 	limitOptions.SetLimit(maximumGetLimit)
@@ -42,23 +46,21 @@ func (r *mongodbRepository) GetAll(ctx context.Context, userFilter *go_block.Use
 		return nil, err
 	}
 	for cursor.Next(ctx) {
-		var user User
+		var user models.User
 		if err := cursor.Decode(&user); err != nil {
 			return nil, err
 		}
 		// check if external encryption has been applied
-		if user.InternalEncryptionLevel > 0 || user.ExternalEncryptionLevel > 0 {
-			if err := r.decryptUser(&user); err != nil {
-				return nil, err
-			}
+		if err := r.crypto.Decrypt(&user); err != nil {
+			return nil, err
 		}
 		// check if we should upgrade the encryption level
-		if r.isEncryptionLevelUpgradable(&user) {
-			if err := r.upgradeInternalEncryptionLevel(ctx, &user); err != nil {
+		if upgradable, _ := r.crypto.Upgradeble(&user); upgradable {
+			if err := r.upgradeEncryptionLevel(ctx, &user); err != nil {
 				return nil, err
 			}
 		}
-		resp = append(resp, UserToProtoUser(&user))
+		resp = append(resp, &user)
 	}
 
 	return resp, nil

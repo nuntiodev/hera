@@ -18,17 +18,16 @@ const (
 
 type Repository interface {
 	Liveness(ctx context.Context) error
-	Users() UsersBuilder
-	Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error)
+	UserRepositoryBuilder() UserRepositoryBuilder
+	Tokens(ctx context.Context, namespace, externalEncryptionKey string) (token_repository.TokenRepository, error)
 	Measurements(ctx context.Context, namespace string) (measurement_repository.MeasurementRepository, error)
-	Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error)
-	Email(ctx context.Context, namespace string) (email_repository.EmailRepository, error)
+	Config(ctx context.Context, namespace, externalEncryptionKey string) (config_repository.ConfigRepository, error)
+	Email(ctx context.Context, namespace, externalEncryptionKey string) (email_repository.EmailRepository, error)
 }
 
 type defaultRepository struct {
 	namespace               string
 	mongodbClient           *mongo.Client
-	crypto                  cryptox.Crypto
 	internalEncryptionKeys  []string
 	maxEmailVerificationAge time.Duration
 }
@@ -40,12 +39,16 @@ func (r *defaultRepository) Liveness(ctx context.Context) error {
 	return nil
 }
 
-func (r *defaultRepository) Tokens(ctx context.Context, namespace string) (token_repository.TokenRepository, error) {
+func (r *defaultRepository) Tokens(ctx context.Context, namespace, externalEncryptionKey string) (token_repository.TokenRepository, error) {
 	if namespace == "" {
 		namespace = defaultDb
 	}
+	crypto, err := cryptox.New(r.internalEncryptionKeys, []string{externalEncryptionKey})
+	if err != nil {
+		return nil, err
+	}
 	collection := r.mongodbClient.Database(namespace).Collection("user_tokens")
-	tokenRepository, err := token_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
+	tokenRepository, err := token_repository.New(ctx, collection, crypto, r.internalEncryptionKeys)
 	if err != nil {
 		return nil, err
 	}
@@ -66,35 +69,42 @@ func (r *defaultRepository) Measurements(ctx context.Context, namespace string) 
 	return measurementRepository, nil
 }
 
-func (r *defaultRepository) Config(ctx context.Context, namespace string) (config_repository.ConfigRepository, error) {
+func (r *defaultRepository) Config(ctx context.Context, namespace, externalEncryptionKey string) (config_repository.ConfigRepository, error) {
 	if namespace == "" {
 		namespace = defaultDb
 	}
+	crypto, err := cryptox.New(r.internalEncryptionKeys, []string{externalEncryptionKey})
+	if err != nil {
+		return nil, err
+	}
 	collection := r.mongodbClient.Database(namespace).Collection("user_config")
-	configRepository, err := config_repository.New(ctx, collection, r.crypto, r.internalEncryptionKeys)
+	configRepository, err := config_repository.New(ctx, collection, crypto)
 	if err != nil {
 		return nil, err
 	}
 	return configRepository, nil
 }
 
-func (r *defaultRepository) Email(ctx context.Context, namespace string) (email_repository.EmailRepository, error) {
+func (r *defaultRepository) Email(ctx context.Context, namespace, externalEncryptionKey string) (email_repository.EmailRepository, error) {
 	if namespace == "" {
 		namespace = defaultDb
 	}
+	crypto, err := cryptox.New(r.internalEncryptionKeys, []string{externalEncryptionKey})
+	if err != nil {
+		return nil, err
+	}
 	collection := r.mongodbClient.Database(namespace).Collection("user_emails")
-	emailRepository, err := email_repository.New(collection, r.crypto, r.internalEncryptionKeys)
+	emailRepository, err := email_repository.New(collection, crypto)
 	if err != nil {
 		return nil, err
 	}
 	return emailRepository, nil
 }
 
-func New(mongoClient *mongo.Client, crypto cryptox.Crypto, encryptionKeys []string, zapLog *zap.Logger, maxEmailVerificationAge time.Duration) (Repository, error) {
+func New(mongoClient *mongo.Client, encryptionKeys []string, zapLog *zap.Logger, maxEmailVerificationAge time.Duration) (Repository, error) {
 	zapLog.Info("creating repository...")
 	repository := &defaultRepository{
 		mongodbClient:           mongoClient,
-		crypto:                  crypto,
 		internalEncryptionKeys:  encryptionKeys,
 		maxEmailVerificationAge: maxEmailVerificationAge,
 	}

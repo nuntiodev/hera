@@ -5,13 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"strings"
 	"time"
 )
 
-func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measurement *go_block.ActiveMeasurement) (*go_block.ActiveMeasurement, error) {
+func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measurement *go_block.ActiveMeasurement) (*models.ActiveMeasurement, error) {
 	if measurement == nil {
 		return nil, errors.New("")
 	} else if measurement.Id == "" {
@@ -28,7 +29,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	measurement.CreatedAt = ts.Now()
 	measurement.ExpiresAt = ts.New(time.Now().Add(activeMeasurementExpiresAt))
 	// create in active measurement collection
-	create := ProtoActiveMeasurementToActiveMeasurement(measurement)
+	create := models.ProtoActiveMeasurementToActiveMeasurement(measurement)
 	if _, err := dmr.userActiveMeasurementCollection.InsertOne(ctx, create); err != nil {
 		return nil, err
 	}
@@ -41,17 +42,17 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		return nil, fmt.Errorf("could not decode user active history with err: %v", err)
 	}
 	if err != nil {
-		userActiveHistory = &go_block.ActiveHistory{}
+		userActiveHistory = &models.ActiveHistory{}
 		userActiveHistory.Year = year
 		// set user id hash instead of just id; this is more secure
 		userActiveHistory.UserId = getUserHash(measurement.UserId)
 	}
 	if _, ok := userActiveHistory.Data[month]; !ok {
-		userActiveHistory.Data[month] = &go_block.ActiveHistoryData{
+		userActiveHistory.Data[month] = &models.ActiveHistoryData{
 			Seconds: 0,
 			Points:  0,
 			From:    map[string]*go_block.CityHistoryMap{},
-			Device:  map[string]int32{},
+			Device:  map[go_block.Platform]int32{},
 		}
 	}
 	// make sure data is initialized
@@ -59,7 +60,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		userActiveHistory.Data[month].From = map[string]*go_block.CityHistoryMap{}
 	}
 	if userActiveHistory.Data[month].Device == nil {
-		userActiveHistory.Data[month].Device = map[string]int32{}
+		userActiveHistory.Data[month].Device = map[go_block.Platform]int32{}
 	}
 	// set optional data
 	if measurement.From != nil && measurement.From.CountryCode != "" {
@@ -74,7 +75,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 		userActiveHistory.Data[month].From[measurement.From.CountryCode].CityAmount[measurement.From.City] += 1
 	}
 	if measurement.Device != go_block.Platform_INVALID_PLATFORM {
-		userActiveHistory.Data[month].Device[measurement.Device.String()] += 1
+		userActiveHistory.Data[month].Device[measurement.Device] += 1
 	}
 	// set required data
 	userActiveHistory.Data[month].Seconds += measurement.Seconds
@@ -89,11 +90,10 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 			return nil, err
 		}
 	} else {
-		update := ProtoActiveHistoryToActiveHistory(userActiveHistory)
-		if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, update); err != nil {
+		if _, err := dmr.userActiveHistoryCollection.InsertOne(ctx, userActiveHistory); err != nil {
 			return nil, err
 		}
 	}
 	// now do the same for the namespace collection
-	return measurement, nil
+	return models.ProtoActiveMeasurementToActiveMeasurement(measurement), nil
 }

@@ -1,4 +1,4 @@
-package measurement_repository
+package models
 
 import (
 	"time"

@@ -11,9 +11,9 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/keighl/postmark v0.0.0-20190821160221-28358b1a94e3
-	github.com/nuntiodev/block-proto v0.2.61
-	github.com/nuntiodev/x v0.2.20
-	github.com/stretchr/testify v1.7.1
+	github.com/nuntiodev/block-proto v0.2.70
+	github.com/nuntiodev/x v0.2.37
+	github.com/stretchr/testify v1.7.2
 	go.mongodb.org/mongo-driver v1.9.1
 	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
@@ -88,5 +88,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20220503193339-ba3ae3f07e29 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

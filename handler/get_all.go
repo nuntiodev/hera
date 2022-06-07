@@ -34,8 +34,9 @@ func (h *defaultHandler) GetAll(ctx context.Context, req *go_block.UserRequest) 
 		count, err = userRepo.Count(ctx)
 		return err
 	})
+	err = errGroup.Wait()
 	return &go_block.UserResponse{
 		Users:       models.UsersToProto(users),
 		UsersAmount: count,
-	}, nil
+	}, err
 }

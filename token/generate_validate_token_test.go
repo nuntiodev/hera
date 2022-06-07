@@ -12,14 +12,11 @@ import (
 	TestGenerateValidateToken generates and validates a JWT signed and validated by a public/private keypair
 */
 func TestGenerateValidateToken(t *testing.T) {
-	// setup crypto
-	c, err := cryptox.New()
-	assert.NoError(t, err)
 	// setup token
 	to, err := New()
 	assert.NoError(t, err)
 	// generate rsa keys
-	privateKey, publicKey, err := c.GenerateRsaKeyPair(2048)
+	privateKey, publicKey, err := cryptox.GenerateRsaKeyPair(2048)
 	assert.NoError(t, err)
 	// data to validate
 	userId := uuid.NewString()
@@ -43,14 +40,11 @@ func TestGenerateValidateToken(t *testing.T) {
 }
 
 func TestGenerateValidateTokenInvalidKey(t *testing.T) {
-	// setup crypto
-	c, err := cryptox.New()
-	assert.NoError(t, err)
 	// setup token
 	to, err := New()
 	assert.NoError(t, err)
 	// generate rsa keys
-	privateKey, _, err := c.GenerateRsaKeyPair(2048)
+	privateKey, _, err := cryptox.GenerateRsaKeyPair(2048)
 	assert.NoError(t, err)
 	// data to validate
 	userId := uuid.NewString()
@@ -65,7 +59,7 @@ func TestGenerateValidateTokenInvalidKey(t *testing.T) {
 	assert.Equal(t, claims.UserId, userId)
 	assert.Equal(t, claims.RefreshTokenId, refreshId)
 	// act two - validate token with invalid public key
-	_, invalidPublicKey, err := c.GenerateRsaKeyPair(2048)
+	_, invalidPublicKey, err := cryptox.GenerateRsaKeyPair(2048)
 	assert.NoError(t, err)
 	validatedClaims, err := to.ValidateToken(invalidPublicKey, token)
 	assert.Error(t, err)
@@ -73,14 +67,11 @@ func TestGenerateValidateTokenInvalidKey(t *testing.T) {
 }
 
 func TestGenerateTokenEmptyRefreshId(t *testing.T) {
-	// setup crypto
-	c, err := cryptox.New()
-	assert.NoError(t, err)
 	// setup token
 	to, err := New()
 	assert.NoError(t, err)
 	// generate rsa keys
-	privateKey, _, err := c.GenerateRsaKeyPair(2048)
+	privateKey, _, err := cryptox.GenerateRsaKeyPair(2048)
 	assert.NoError(t, err)
 	// data to validate
 	expiresAfter := time.Second * 10
@@ -92,14 +83,11 @@ func TestGenerateTokenEmptyRefreshId(t *testing.T) {
 }
 
 func TestGenerateTokenInvalidType(t *testing.T) {
-	// setup crypto
-	c, err := cryptox.New()
-	assert.NoError(t, err)
 	// setup token
 	to, err := New()
 	assert.NoError(t, err)
 	// generate rsa keys
-	privateKey, _, err := c.GenerateRsaKeyPair(2048)
+	privateKey, _, err := cryptox.GenerateRsaKeyPair(2048)
 	assert.NoError(t, err)
 	// data to validate
 	expiresAfter := time.Second * 10

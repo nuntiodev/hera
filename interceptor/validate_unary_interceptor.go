@@ -40,6 +40,10 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		NamespaceActiveHistory, GetConfig, DeleteConfig,
 		InitializeApplication:
 		break
+	case Search:
+		if translatedReq.Search == "" {
+			return nil, errors.New("search parameter is empty")
+		}
 	case BlockToken:
 		if translatedReq.TokenPointer == "" {
 			return nil, TokenPointerIsEmpty

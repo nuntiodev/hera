@@ -62,6 +62,7 @@ type UserRepository interface {
 	UpdateEmailVerified(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
 	UpdatePhoneNumber(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
 	Get(ctx context.Context, user *go_block.User) (*models.User, error)
+	Search(ctx context.Context, search string) (*models.User, error)
 	GetAll(ctx context.Context, userFilter *go_block.UserFilter) ([]*models.User, error)
 	Count(ctx context.Context) (int64, error)
 	Delete(ctx context.Context, user *go_block.User) error

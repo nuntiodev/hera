@@ -46,6 +46,7 @@ type Handler interface {
 	UpdatePreferredLanguage(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	UpdateSecurity(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Get(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	Search(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	GetAll(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	ValidateCredentials(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
 	Login(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)

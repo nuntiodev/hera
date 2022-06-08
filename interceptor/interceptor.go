@@ -22,7 +22,7 @@ const (
 	UpdatePreferredLanguage = "UpdatePreferredLanguage"
 	UpdateSecurity          = "UpdateSecurity"
 	Get                     = "Get"
-	Search                  = ""
+	Search                  = "Search"
 	GetAll                  = "GetAll"
 	ValidateCredentials     = "ValidateCredentials"
 	Login                   = "Login"

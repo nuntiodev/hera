@@ -104,7 +104,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_block.UserRequest) (
 			DeviceInfo:   deviceInfo,
 			Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
 		})
-		return fmt.Errorf("could create refresh token with err: %v", err)
+		return err
 	})
 	// async action 4 - generate access token.
 	errGroup.Go(func() error {

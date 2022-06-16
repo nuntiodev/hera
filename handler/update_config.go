@@ -8,9 +8,9 @@ import (
 )
 
 /*
-	UpdateConfigDetails - this method updates a namespace's config details such as name and logo.
+	UpdateConfig - this method updates a namespace's config such as name and logo, validate password and etc.
 */
-func (h *defaultHandler) UpdateConfigDetails(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) UpdateConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
 	var (
 		configRepo config_repository.ConfigRepository
 		err        error
@@ -19,7 +19,7 @@ func (h *defaultHandler) UpdateConfigDetails(ctx context.Context, req *go_block.
 	if err != nil {
 		return nil, err
 	}
-	config, err := configRepo.UpdateDetails(ctx, req.Config)
+	config, err := configRepo.Update(ctx, req.Config)
 	return &go_block.UserResponse{
 		Config: models.ConfigToProtoConfig(config),
 	}, err

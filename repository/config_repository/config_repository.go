@@ -20,8 +20,7 @@ const (
 type ConfigRepository interface {
 	Create(ctx context.Context, config *go_block.Config) (*models.Config, error)
 	GetNamespaceConfig(ctx context.Context) (*models.Config, error)
-	UpdateDetails(ctx context.Context, config *go_block.Config) (*models.Config, error)
-	UpdateSettings(ctx context.Context, config *go_block.Config) (*models.Config, error)
+	Update(ctx context.Context, config *go_block.Config) (*models.Config, error)
 	Delete(ctx context.Context) error
 }
 

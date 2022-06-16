@@ -42,7 +42,7 @@ func (c *defaultConfigRepository) Update(ctx context.Context, config *go_block.C
 			"validate_password":          updateConfig.ValidatePassword,
 			"require_email_verification": updateConfig.RequireEmailVerification,
 			//"login_type":                        config.LoginType,
-			"require_phone_number_verification": updateConfig.RequireEmailVerification,
+			"require_phone_number_verification": updateConfig.RequirePhoneNumberVerification,
 			"updated_at":                        time.Now(),
 		},
 	}

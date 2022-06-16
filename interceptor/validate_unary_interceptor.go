@@ -86,8 +86,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.UserBatch == nil {
 			return nil, UserBatchIsNil
 		}
-	case CreateNamespaceConfig, UpdateConfigSettings,
-		UpdateConfigDetails:
+	case CreateNamespaceConfig, UpdateConfig:
 		if translatedReq.Config == nil {
 			return nil, ConfigIsNil
 		}

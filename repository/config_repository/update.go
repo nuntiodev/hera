@@ -20,7 +20,7 @@ func (c *defaultConfigRepository) Update(ctx context.Context, config *go_block.C
 	}
 	updateConfig := models.ProtoConfigToConfig(&go_block.Config{
 		Name:                           config.Name,
-		Logo:                           config.Name,
+		Logo:                           config.Logo,
 		EnableNuntioConnect:            config.EnableNuntioConnect,
 		DisableDefaultLogin:            config.DisableDefaultLogin,
 		DisableDefaultSignup:           config.DisableDefaultSignup,

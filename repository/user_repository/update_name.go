@@ -23,7 +23,7 @@ func (r *mongodbRepository) UpdateName(ctx context.Context, get *go_block.User, 
 		UpdatedAt: update.UpdatedAt,
 	})
 	// encrypt user if user has previously been encrypted
-	if err := r.crypto.Encrypt(&updateUser); err != nil {
+	if err := r.crypto.Encrypt(updateUser); err != nil {
 		return nil, err
 	}
 	mongoUpdate := bson.M{

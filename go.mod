@@ -12,7 +12,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/keighl/postmark v0.0.0-20190821160221-28358b1a94e3
 	github.com/nuntiodev/block-proto v0.2.72
-	github.com/nuntiodev/x v0.2.37
+	github.com/nuntiodev/x v0.2.39
 	github.com/stretchr/testify v1.7.2
 	go.mongodb.org/mongo-driver v1.9.1
 	go.uber.org/zap v1.21.0

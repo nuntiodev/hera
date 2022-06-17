@@ -1,7 +1,7 @@
 ## Welcome to the Nuntio User Block 👋
 
 ![example workflow](https://github.com/nuntiodev/nuntio-user-block/actions/workflows/build.yaml/badge.svg)
-
+### New name: Juno or (Hera)
 Building Nuntio Blocks: secure, efficient & open-source API blocks that run on any Linux-based environment and scales
 massively. Nuntio Cloud is the commercial offering of the above technologies and help companies go from idea to
 production faster, without losing control over their data or services. Our goal with Nuntio Cloud is to provide social

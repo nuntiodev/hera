@@ -64,7 +64,7 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		if translatedReq.Update == nil {
 			return &go_block.UserResponse{}, UpdateIsNil
 		} else if translatedReq.User == nil {
-			return &go_block.UserResponse{}, UpdateIsNil
+			return &go_block.UserResponse{}, UserIsNil
 		}
 	case ValidateCredentials, Delete, UpdateSecurity, Login:
 		if translatedReq.User == nil {

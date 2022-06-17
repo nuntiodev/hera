@@ -7,7 +7,6 @@ import (
 	"github.com/nuntiodev/nuntio-user-block/models"
 	"go.mongodb.org/mongo-driver/bson"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 )
 
 func (c *defaultConfigRepository) Update(ctx context.Context, config *go_block.Config) (*models.Config, error) {
@@ -43,7 +42,7 @@ func (c *defaultConfigRepository) Update(ctx context.Context, config *go_block.C
 			"require_email_verification": updateConfig.RequireEmailVerification,
 			//"login_type":                        config.LoginType,
 			"require_phone_number_verification": updateConfig.RequirePhoneNumberVerification,
-			"updated_at":                        time.Now(),
+			"updated_at":                        updateConfig.UpdatedAt,
 		},
 	}
 	var resp models.Config
@@ -61,6 +60,6 @@ func (c *defaultConfigRepository) Update(ctx context.Context, config *go_block.C
 	resp.RequireEmailVerification = config.RequireEmailVerification
 	resp.LoginType = config.LoginType
 	resp.RequirePhoneNumberVerification = config.RequirePhoneNumberVerification
-	resp.UpdatedAt = time.Now()
+	resp.UpdatedAt = updateConfig.UpdatedAt
 	return &resp, nil
 }

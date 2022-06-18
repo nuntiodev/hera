@@ -43,6 +43,7 @@ func (dmr *defaultMeasurementRepository) RecordActive(ctx context.Context, measu
 	}
 	if err != nil {
 		userActiveHistory = &models.ActiveHistory{}
+		userActiveHistory.Data = map[int32]*models.ActiveHistoryData{}
 		userActiveHistory.Year = year
 		// set user id hash instead of just id; this is more secure
 		userActiveHistory.UserId = getUserHash(measurement.UserId)

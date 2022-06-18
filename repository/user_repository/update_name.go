@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongodbRepository) UpdateName(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error) {
+func (r *mongodbRepository) UpdateProfile(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error) {
 	prepare(actionGet, get)
 	if err := r.validate(actionGet, get); err != nil {
 		return nil, err

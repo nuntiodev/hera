@@ -21,7 +21,7 @@ func (h *defaultHandler) UpdateName(ctx context.Context, req *go_block.UserReque
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
-	user, err = userRepo.UpdateName(ctx, req.User, req.Update)
+	user, err = userRepo.UpdateProfile(ctx, req.User, req.Update)
 	return &go_block.UserResponse{
 		User: models.UserToProtoUser(user),
 	}, err

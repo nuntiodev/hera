@@ -16,7 +16,7 @@ const (
 	UpdateImage             = "UpdateImage"
 	UpdateEmail             = "UpdateEmail"
 	UpdatePhoneNumber       = "UpdatePhoneNumber"
-	UpdateName              = "UpdateName"
+	UpdateName              = "UpdateProfile"
 	UpdateBirthdate         = "UpdateBirthdate"
 	UpdateUsername          = "UpdateUsername"
 	UpdatePreferredLanguage = "UpdatePreferredLanguage"

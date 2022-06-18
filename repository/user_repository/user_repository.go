@@ -53,7 +53,7 @@ type UserRepository interface {
 	UpdateUsername(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
 	UpdateImage(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
 	UpdateMetadata(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
-	UpdateProfile(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
+	UpdateName(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
 	UpdateBirthdate(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
 	UpdatePreferredLanguage(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error)
 	UpdateSecurity(ctx context.Context, get *go_block.User) (*models.User, error)

@@ -93,7 +93,7 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_bloc
 	})
 	// async action 4  update verification email sent at
 	errGroup.Go(func() error {
-		_, err = userRepo.UpdateVerificationEmailSent(ctx, &go_block.User{
+		user, err = userRepo.UpdateVerificationEmailSent(ctx, &go_block.User{
 			EmailVerificationCode: string(verificationCode),
 			Id:                    user.Id,
 		})

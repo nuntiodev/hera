@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/nuntiodev/block-proto/go_block"
 	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
 )
@@ -21,6 +22,7 @@ func (h *defaultHandler) BlockToken(ctx context.Context, req *go_block.UserReque
 		return &go_block.UserResponse{}, err
 	}
 	// validate if token is blocked in db
+	fmt.Println(claims)
 	tokenRepo, err = h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)
 	if err != nil {
 		return &go_block.UserResponse{}, err

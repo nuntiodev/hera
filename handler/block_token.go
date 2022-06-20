@@ -21,6 +21,7 @@ func (h *defaultHandler) BlockToken(ctx context.Context, req *go_block.UserReque
 	if err != nil {
 		return &go_block.UserResponse{}, err
 	}
+	fmt.Println(claims)
 	// validate if token is blocked in db
 	fmt.Println(claims)
 	tokenRepo, err = h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)

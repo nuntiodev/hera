@@ -66,32 +66,30 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		loggedInFrom = req.Token.LoggedInFrom
 		deviceInfo = req.Token.DeviceInfo
 	}
-	// create new refresh token if the token is expired.
-	// if refresh token is about to expire (in less than 10 hours), create a new one and block the old one
+	// create new refresh token and block the old one
+	// if refresh token is about to expire (in less than 10 hours),
 	refreshToken = req.Token.RefreshToken
-	if time.Unix(refreshClaims.ExpiresAt, 0).Sub(time.Now()) < time.Hour*10 {
-		if _, err := h.BlockToken(ctx, &go_block.UserRequest{
-			Token: &go_block.Token{
-				RefreshToken: refreshToken,
-			},
-		}); err != nil {
-			return &go_block.UserResponse{}, err
-		}
-		refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
-		if err != nil {
-			return &go_block.UserResponse{}, err
-		}
-		// create refresh token in database
-		if _, err := tokenRepo.Create(ctx, &go_block.Token{
-			Id:           refreshClaims.Id,
-			UserId:       refreshClaims.UserId,
-			Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
-			LoggedInFrom: loggedInFrom,
-			DeviceInfo:   deviceInfo,
-			ExpiresAt:    ts.New(time.Unix(refreshClaims.ExpiresAt, 0)),
-		}); err != nil {
-			return &go_block.UserResponse{}, err
-		}
+	if _, err := h.BlockToken(ctx, &go_block.UserRequest{
+		Token: &go_block.Token{
+			RefreshToken: refreshToken,
+		},
+	}); err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
+	if err != nil {
+		return &go_block.UserResponse{}, err
+	}
+	// create refresh token in database
+	if _, err := tokenRepo.Create(ctx, &go_block.Token{
+		Id:           refreshClaims.Id,
+		UserId:       refreshClaims.UserId,
+		Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
+		LoggedInFrom: loggedInFrom,
+		DeviceInfo:   deviceInfo,
+		ExpiresAt:    ts.New(time.Unix(refreshClaims.ExpiresAt, 0)),
+	}); err != nil {
+		return &go_block.UserResponse{}, err
 	}
 	// generate new access token from refresh token
 	accessToken, accessClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, refreshClaims.Id, token.TokenTypeAccess, accessTokenExpiry)

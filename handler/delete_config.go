@@ -2,21 +2,20 @@ package handler
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/repository/config_repository"
 )
 
 /*
 	DeleteConfig - this method deletes a namespace config.
 */
-func (h *defaultHandler) DeleteConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) DeleteConfig(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
-		configRepo config_repository.ConfigRepository
-		err        error
+		configRepository config_repository.ConfigRepository
 	)
-	configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
+	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &go_block.UserResponse{}, configRepo.Delete(ctx)
+	return nil, configRepository.Delete(ctx)
 }

@@ -2,14 +2,14 @@ package server
 
 import (
 	"context"
-	"errors"
-	"github.com/nuntiodev/nuntio-user-block/authenticator"
-	"github.com/nuntiodev/nuntio-user-block/email"
-	"github.com/nuntiodev/nuntio-user-block/handler"
-	"github.com/nuntiodev/nuntio-user-block/interceptor"
-	"github.com/nuntiodev/nuntio-user-block/repository"
-	"github.com/nuntiodev/nuntio-user-block/server/grpc_server"
-	"github.com/nuntiodev/nuntio-user-block/token"
+	"github.com/nuntiodev/hera/authenticator"
+	"github.com/nuntiodev/hera/email"
+	"github.com/nuntiodev/hera/handler"
+	"github.com/nuntiodev/hera/interceptor"
+	"github.com/nuntiodev/hera/repository"
+	"github.com/nuntiodev/hera/server/grpc_server"
+	"github.com/nuntiodev/hera/text"
+	"github.com/nuntiodev/hera/token"
 	database "github.com/nuntiodev/x/repositoryx"
 	"go.uber.org/zap"
 	"os"
@@ -43,20 +43,6 @@ func initialize() error {
 	return nil
 }
 
-func getSender() (email.Sender, error) {
-	// first check if postmark is present
-	postmarkServerToken := os.Getenv("POSTMARK_SERVER_TOKEN")
-	postmarkAccountToken := os.Getenv("POSTMARK_ACCOUNT_TOKEN")
-	if postmarkServerToken != "" && postmarkAccountToken != "" {
-		postmarkSender, err := email.NewPostmarkSender(postmarkServerToken, postmarkAccountToken)
-		if err != nil {
-			return nil, err
-		}
-		return postmarkSender, nil
-	}
-	return nil, errors.New("no email provider is available")
-}
-
 func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err := initialize(); err != nil {
 		return nil, err
@@ -78,15 +64,15 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 		return nil, err
 	}
 	// it should be okay to spin up a service without email provider
-	sender, err := getSender()
+	myEmail, err := email.New()
 	if err != nil {
-		zapLog.Warn("no valid sender available witn err: " + err.Error())
+		zapLog.Warn("Email is not enabled. If you want to enable the email interface, override the EmailSender interface.")
 	}
-	myEmail, err := email.New(sender)
+	myText, err := text.New()
 	if err != nil {
-		zapLog.Warn("email is not enabled with err: " + err.Error())
+		zapLog.Warn("Text is not enabled. If you want to enable the text interface, override the TextSender interface.")
 	}
-	myHandler, err := handler.New(zapLog, myRepository, myToken, myEmail, maxEmailVerificationAge)
+	myHandler, err := handler.New(zapLog, myRepository, myToken, myEmail, myText, maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}

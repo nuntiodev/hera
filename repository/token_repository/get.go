@@ -3,12 +3,12 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (t *mongodbRepository) Get(ctx context.Context, token *go_block.Token) (*models.Token, error) {
+func (t *mongodbRepository) Get(ctx context.Context, token *go_hera.Token) (*models.Token, error) {
 	if token == nil {
 		return nil, errors.New("token is nil")
 	} else if token.Id == "" {

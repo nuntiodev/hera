@@ -5,13 +5,13 @@ import (
 	"errors"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 )
 
-func (c *defaultToken) ValidateToken(key *rsa.PublicKey, jwtToken string) (*go_block.CustomClaims, error) {
+func (c *defaultToken) ValidateToken(key *rsa.PublicKey, jwtToken string) (*go_hera.CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		jwtToken,
-		&go_block.CustomClaims{},
+		&go_hera.CustomClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return key, nil
 		},
@@ -22,7 +22,7 @@ func (c *defaultToken) ValidateToken(key *rsa.PublicKey, jwtToken string) (*go_b
 	if token.Valid == false {
 		return nil, errors.New("token is not valid")
 	}
-	claims, ok := token.Claims.(*go_block.CustomClaims)
+	claims, ok := token.Claims.(*go_hera.CustomClaims)
 	if !ok {
 		return nil, errors.New("couldn't parse claims")
 	}

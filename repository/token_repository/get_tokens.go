@@ -3,13 +3,13 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token) ([]*models.Token, error) {
+func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_hera.Token) ([]*models.Token, error) {
 	if token == nil {
 		return nil, errors.New("token is nil")
 	} else if token.UserId == "" {
@@ -40,7 +40,3 @@ func (t *mongodbRepository) GetTokens(ctx context.Context, token *go_block.Token
 	}
 	return resp, nil
 }
-
-// Currently, tokens are not upgraded to higher encryption levels when we add another encryption key. this is primarily due to the fact that
-// tokens should be short-lived, meaning they will regularly be deleted from the database and is thus not considered a security issue.
-// Also, tokens do not contain any harmful information other than name of device which is encrypted.

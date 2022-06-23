@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 )
 
 /*
@@ -10,6 +10,6 @@ import (
 	and updates the users password.
 	todo: enable both email and text reset password.
 */
-func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
-	return &go_block.UserResponse{}, nil
+func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
+	return nil, nil
 }

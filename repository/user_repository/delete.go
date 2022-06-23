@@ -2,17 +2,17 @@ package user_repository
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 )
 
 /*
 	Delete - this method deletes a specific user with id, email or username.
 */
-func (r *mongodbRepository) Delete(ctx context.Context, user *go_block.User) error {
-	prepare(actionGet, user)
-	if err := r.validate(actionGet, user); err != nil {
-		return err
+func (r *mongodbRepository) Delete(ctx context.Context, user *go_hera.User) error {
+	if user == nil {
+		return UserIsNilErr
 	}
+	prepare(actionGet, user)
 	filter, err := getUserFilter(user)
 	if err != nil {
 		return err

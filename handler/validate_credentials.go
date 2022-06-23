@@ -3,37 +3,36 @@ package handler
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/nuntio-user-block/models"
-	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
+	"github.com/nuntiodev/hera/models"
+	"github.com/nuntiodev/hera/repository/user_repository"
 
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 	"golang.org/x/crypto/bcrypt"
 )
 
 /*
 	ValidateCredentials - this method is used to validate the credentials of a user without issuing a token.
 */
-func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
-		userRepo user_repository.UserRepository
-		user     *models.User
-		err      error
+		userRepository user_repository.UserRepository
+		user           *models.User
 	)
-	userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
+	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
-		return &go_block.UserResponse{}, err
+		return nil, err
 	}
-	user, err = userRepo.Get(ctx, req.User)
+	user, err = userRepository.Get(ctx, req.User)
 	if err != nil {
-		return &go_block.UserResponse{}, err
+		return nil, err
 	}
 	if user.Password == "" {
-		return &go_block.UserResponse{}, errors.New("please update the user with a non-empty password")
+		return nil, errors.New("please update the user with a non-empty password")
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.User.Password)); err != nil {
-		return &go_block.UserResponse{}, err
+		return nil, err
 	}
-	return &go_block.UserResponse{
+	return &go_hera.HeraResponse{
 		User: models.UserToProtoUser(user),
 	}, nil
 }

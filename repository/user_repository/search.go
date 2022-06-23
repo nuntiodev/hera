@@ -5,7 +5,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -19,7 +19,7 @@ func (r *mongodbRepository) Search(ctx context.Context, search string) (*models.
 			bson.D{{"_id", primitive.Regex{Pattern: search, Options: ""}}},
 			bson.D{{"email_hash", primitive.Regex{Pattern: fmt.Sprintf("%x", md5.Sum([]byte(search))), Options: ""}}},
 			bson.D{{"username_hash", primitive.Regex{Pattern: fmt.Sprintf("%x", md5.Sum([]byte(search))), Options: ""}}},
-			bson.D{{"phone_number_hash", primitive.Regex{Pattern: fmt.Sprintf("%x", md5.Sum([]byte(search))), Options: ""}}},
+			bson.D{{"phone_hash", primitive.Regex{Pattern: fmt.Sprintf("%x", md5.Sum([]byte(search))), Options: ""}}},
 		},
 		},
 	}

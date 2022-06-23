@@ -3,20 +3,19 @@ package token_repository
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/nuntio-user-block/models"
 	"time"
 
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongodbRepository) Block(ctx context.Context, token *go_block.Token) (*models.Token, error) {
+func (r *mongodbRepository) Block(ctx context.Context, token *go_hera.Token) error {
 	if token == nil {
-		return nil, errors.New("token is nil")
+		return errors.New("token is nil")
 	} else if token.Id == "" {
-		return nil, errors.New("missing required token id")
+		return errors.New("missing required token id")
 	}
-	expiresAt := time.Now().Add(time.Hour * 48)
+	expiresAt := time.Now().Add(time.Hour * 12)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"blocked":    true,
@@ -24,24 +23,12 @@ func (r *mongodbRepository) Block(ctx context.Context, token *go_block.Token) (*
 			"expires_at": expiresAt, // tokens should expire after a day, after being blocked
 		},
 	}
-	result := r.collection.FindOneAndUpdate(
+	if _, err := r.collection.UpdateOne(
 		ctx,
 		bson.M{"_id": token.Id},
 		mongoUpdate,
-	)
-	if err := result.Err(); err != nil {
-		return nil, err
+	); err != nil {
+		return err
 	}
-	var resp models.Token
-	if err := result.Decode(&resp); err != nil {
-		return nil, err
-	}
-	if err := r.crypto.Decrypt(&resp); err != nil {
-		return nil, err
-	}
-	// set updated fields
-	resp.Blocked = true
-	resp.BlockedAt = time.Now()
-	resp.ExpiresAt = expiresAt
-	return &resp, nil
+	return nil
 }

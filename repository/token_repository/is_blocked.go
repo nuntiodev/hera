@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *mongodbRepository) IsBlocked(ctx context.Context, token *go_block.Token) (bool, error) {
+func (r *mongodbRepository) IsBlocked(ctx context.Context, token *go_hera.Token) (bool, error) {
 	if token == nil {
 		return false, errors.New("token is nil")
 	} else if token.Id == "" {

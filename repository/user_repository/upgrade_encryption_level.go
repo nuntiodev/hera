@@ -3,7 +3,7 @@ package user_repository
 import (
 	"context"
 	"fmt"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"time"
 )
@@ -28,7 +28,7 @@ func (r *mongodbRepository) upgradeEncryptionLevel(ctx context.Context, user *mo
 			"first_name":   copy.FirstName,
 			"last_name":    copy.LastName,
 			"birthdate":    copy.Birthdate,
-			"phone_number": copy.PhoneNumber,
+			"phone_number": copy.Phone,
 			"updated_at":   time.Now(),
 			"encrypted_at": time.Now(),
 		},
@@ -59,7 +59,7 @@ func (r *mongodbRepository) upgradeEncryptionLevel(ctx context.Context, user *mo
 	user.LastName.ExternalEncryptionLevel = copy.LastName.ExternalEncryptionLevel
 	user.Birthdate.InternalEncryptionLevel = copy.Birthdate.InternalEncryptionLevel
 	user.Birthdate.ExternalEncryptionLevel = copy.Birthdate.ExternalEncryptionLevel
-	user.PhoneNumber.InternalEncryptionLevel = copy.PhoneNumber.InternalEncryptionLevel
-	user.PhoneNumber.ExternalEncryptionLevel = copy.PhoneNumber.ExternalEncryptionLevel
+	user.Phone.InternalEncryptionLevel = copy.Phone.InternalEncryptionLevel
+	user.Phone.ExternalEncryptionLevel = copy.Phone.ExternalEncryptionLevel
 	return nil
 }

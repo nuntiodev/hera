@@ -29,7 +29,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: softcorpdev/nuntio-user-block
+          images: nuntioio/hera
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -64,7 +64,7 @@ jobs:
         run: git config --global user.email "dev@nuntio.io" && git config --global user.name "Nuntio Automation"
 
       - name: Add git credentials
-        run: git remote set-url --push origin https://sinbad-io:$GITHUB_TOKEN@github.com/nuntiodev/nuntio-user-block
+        run: git remote set-url --push origin https://sinbad-io:$GITHUB_TOKEN@github.com/nuntiodev/hera
 
       - name: Git commit
         run: git commit -am "add helm package"

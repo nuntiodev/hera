@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 )
 
-func (c *defaultToken) GenerateToken(privateKey *rsa.PrivateKey, tokenId, userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_block.CustomClaims, error) {
+func (c *defaultToken) GenerateToken(privateKey *rsa.PrivateKey, tokenId, userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_hera.CustomClaims, error) {
 	expiresAtInt64 := int64(0)
 	if expiresAt.Seconds() != 0 {
 		expiresAtInt64 = time.Now().Add(expiresAt).Unix()
@@ -22,7 +22,7 @@ func (c *defaultToken) GenerateToken(privateKey *rsa.PrivateKey, tokenId, userId
 	if tokenType == TokenTypeAccess && refreshTokenId == "" {
 		return "", nil, errors.New("missing required refreshTokenId")
 	}
-	claims := go_block.CustomClaims{
+	claims := go_hera.CustomClaims{
 		UserId:         userId,
 		Type:           tokenType,
 		RefreshTokenId: refreshTokenId,

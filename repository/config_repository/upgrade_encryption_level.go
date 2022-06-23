@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"time"
 )

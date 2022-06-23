@@ -6,9 +6,9 @@ import (
 	"os"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/handler"
-	"github.com/nuntiodev/nuntio-user-block/interceptor"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/handler"
+	"github.com/nuntiodev/hera/interceptor"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -68,6 +68,6 @@ func (s *Server) Run() error {
 		),
 	)
 	reflection.Register(grpcServer)
-	go_block.RegisterUserServiceServer(grpcServer, s.handler)
+	go_hera.RegisterServiceServer(grpcServer, s.handler)
 	return grpcServer.Serve(lis)
 }

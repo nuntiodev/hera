@@ -2,25 +2,23 @@ package handler
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
-	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/repository/config_repository"
 )
 
 /*
 	UpdateConfig - this method updates a namespace's config such as name and logo, validate password and etc.
 */
-func (h *defaultHandler) UpdateConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) UpdateConfig(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
-		configRepo config_repository.ConfigRepository
-		err        error
+		configRepository config_repository.ConfigRepository
 	)
-	configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
+	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return nil, err
 	}
-	config, err := configRepo.Update(ctx, req.Config)
-	return &go_block.UserResponse{
-		Config: models.ConfigToProtoConfig(config),
-	}, err
+	if err := configRepository.Update(ctx, req.Config); err != nil {
+		return nil, err
+	}
+	return nil, nil
 }

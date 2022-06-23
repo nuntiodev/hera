@@ -4,30 +4,29 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
-	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
+	"github.com/nuntiodev/hera/repository/token_repository"
 	"golang.org/x/sync/errgroup"
 	"time"
 
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/token"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/token"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 /*
 	RefreshToken - this method provides a new access / refresh token pair given a valid refresh token.
 */
-func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
-		tokenRepo     token_repository.TokenRepository
-		refreshClaims *go_block.CustomClaims
-		refreshToken  string
-		accessClaims  *go_block.CustomClaims
-		accessToken   string
-		errGroup      = &errgroup.Group{}
-		err           error
+		tokenRepository token_repository.TokenRepository
+		refreshClaims   *go_hera.CustomClaims
+		refreshToken    string
+		accessClaims    *go_hera.CustomClaims
+		accessToken     string
+		errGroup        = &errgroup.Group{}
 	)
 	// async action 1 - validate that the refresh token is signed by Nuntio.
-	errGroup.Go(func() error {
+	errGroup.Go(func() (err error) {
 		refreshClaims, err = h.token.ValidateToken(publicKey, req.Token.RefreshToken)
 		if err != nil {
 			return err
@@ -38,13 +37,13 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		return nil
 	})
 	// async action 2 - check if the refresh token is blocked.
-	errGroup.Go(func() error {
+	errGroup.Go(func() (err error) {
 		// check if token is blocked in db
-		tokenRepo, err = h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)
+		tokenRepository, err = h.repository.TokenRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 		if err != nil {
 			return err
 		}
-		isBlocked, err := tokenRepo.IsBlocked(ctx, &go_block.Token{
+		isBlocked, err := tokenRepository.IsBlocked(ctx, &go_hera.Token{
 			Id:     refreshClaims.Id,
 			UserId: refreshClaims.UserId,
 		})
@@ -57,72 +56,72 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_block.UserReq
 		return nil
 	})
 	if err = errGroup.Wait(); err != nil {
-		return &go_block.UserResponse{}, err
-	}
-	// build metadata for token
-	loggedInFrom := &go_block.Location{}
-	deviceInfo := ""
-	if req.Token != nil {
-		loggedInFrom = req.Token.LoggedInFrom
-		deviceInfo = req.Token.DeviceInfo
+		return nil, err
 	}
 	// create new refresh token and block the old one
 	// if refresh token is about to expire (in less than 10 hours),
 	refreshToken = req.Token.RefreshToken
-	if _, err := h.BlockToken(ctx, &go_block.UserRequest{
-		Token: &go_block.Token{
+	if _, err := h.BlockToken(ctx, &go_hera.HeraRequest{
+		Token: &go_hera.Token{
 			RefreshToken: refreshToken,
 		},
 	}); err != nil {
-		return &go_block.UserResponse{}, err
+		return nil, err
 	}
 	refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
 	if err != nil {
-		return &go_block.UserResponse{}, err
+		return nil, err
 	}
 	// create refresh token in database
-	if _, err := tokenRepo.Create(ctx, &go_block.Token{
+	if err := tokenRepository.Create(ctx, &go_hera.Token{
 		Id:           refreshClaims.Id,
 		UserId:       refreshClaims.UserId,
-		Type:         go_block.TokenType_TOKEN_TYPE_REFRESH,
-		LoggedInFrom: loggedInFrom,
-		DeviceInfo:   deviceInfo,
+		Type:         go_hera.TokenType_TOKEN_TYPE_REFRESH,
+		LoggedInFrom: req.Token.LoggedInFrom,
+		DeviceInfo:   req.Token.DeviceInfo,
 		ExpiresAt:    ts.New(time.Unix(refreshClaims.ExpiresAt, 0)),
 	}); err != nil {
-		return &go_block.UserResponse{}, err
+		return nil, err
 	}
 	// generate new access token from refresh token
 	accessToken, accessClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, refreshClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
 	if err != nil {
-		return &go_block.UserResponse{}, err
+		return nil, err
 	}
 	// async action 3 - add new access token info to database
-	errGroup.Go(func() error {
-		_, err := tokenRepo.Create(ctx, &go_block.Token{
+	errGroup.Go(func() (err error) {
+		if err = tokenRepository.Create(ctx, &go_hera.Token{
 			Id:           accessClaims.Id,
 			UserId:       accessClaims.UserId,
-			Type:         go_block.TokenType_TOKEN_TYPE_ACCESS,
-			LoggedInFrom: loggedInFrom,
-			DeviceInfo:   deviceInfo,
+			Type:         go_hera.TokenType_TOKEN_TYPE_ACCESS,
+			LoggedInFrom: req.Token.LoggedInFrom,
+			DeviceInfo:   req.Token.DeviceInfo,
 			ExpiresAt:    ts.New(time.Unix(accessClaims.ExpiresAt, 0)),
-		})
-		return err
+		}); err != nil {
+			return err
+		}
+		return
 	})
 	// async action 4 - set refresh token used at to now
-	errGroup.Go(func() error {
-		_, err = tokenRepo.UpdateUsedAt(ctx, &go_block.Token{
+	errGroup.Go(func() (err error) {
+		if err = tokenRepository.UpdateUsedAt(ctx, &go_hera.Token{
 			Id:           refreshClaims.Id,
 			UserId:       refreshClaims.UserId,
-			LoggedInFrom: loggedInFrom,
-			DeviceInfo:   deviceInfo,
-		})
+			LoggedInFrom: req.Token.LoggedInFrom,
+			DeviceInfo:   req.Token.DeviceInfo,
+		}); err != nil {
+			return err
+		}
 		return err
 	})
 	err = errGroup.Wait()
-	return &go_block.UserResponse{
-		Token: &go_block.Token{
+	if err != nil {
+		return nil, err
+	}
+	return &go_hera.HeraResponse{
+		Token: &go_hera.Token{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
-	}, err
+	}, nil
 }

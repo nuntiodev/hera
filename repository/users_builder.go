@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
+	"github.com/nuntiodev/hera/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
@@ -10,41 +10,33 @@ import (
 
 type UserRepositoryBuilder interface {
 	SetNamespace(namespace string) UserRepositoryBuilder
-	SetEncryptionKey(encryptionKey string) UserRepositoryBuilder
 	WithPasswordValidation(validatePassword bool) UserRepositoryBuilder
 	Build(ctx context.Context) (user_repository.UserRepository, error)
 }
 
-type usersBuilder struct {
+type userRepositoryBuilder struct {
 	namespace               string
-	externalEncryptionKey   string
 	validatePassword        bool
 	internalEncryptionKeys  []string
 	client                  *mongo.Client
 	maxEmailVerificationAge time.Duration
 }
 
-func (ub *usersBuilder) SetNamespace(namespace string) UserRepositoryBuilder {
+func (ub *userRepositoryBuilder) SetNamespace(namespace string) UserRepositoryBuilder {
 	ub.namespace = namespace
 	return ub
 }
 
-func (ub *usersBuilder) SetEncryptionKey(encryptionKey string) UserRepositoryBuilder {
-	ub.externalEncryptionKey = encryptionKey
-
-	return ub
-}
-
-func (ub *usersBuilder) WithPasswordValidation(validatePassword bool) UserRepositoryBuilder {
+func (ub *userRepositoryBuilder) WithPasswordValidation(validatePassword bool) UserRepositoryBuilder {
 	ub.validatePassword = validatePassword
 	return ub
 }
 
-func (ub *usersBuilder) Build(ctx context.Context) (user_repository.UserRepository, error) {
+func (ub *userRepositoryBuilder) Build(ctx context.Context) (user_repository.UserRepository, error) {
 	if ub.namespace == "" {
-		ub.namespace = "nuntio-blocks-db"
+		ub.namespace = defaultDb
 	}
-	crypto, err := cryptox.New(ub.internalEncryptionKeys, []string{ub.externalEncryptionKey})
+	crypto, err := cryptox.New(ub.internalEncryptionKeys, []string{})
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +49,7 @@ func (ub *usersBuilder) Build(ctx context.Context) (user_repository.UserReposito
 }
 
 func (r *defaultRepository) UserRepositoryBuilder() UserRepositoryBuilder {
-	return &usersBuilder{
+	return &userRepositoryBuilder{
 		client:                  r.mongodbClient,
 		internalEncryptionKeys:  r.internalEncryptionKeys,
 		maxEmailVerificationAge: r.maxEmailVerificationAge,

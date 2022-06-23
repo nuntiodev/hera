@@ -2,53 +2,43 @@ package user_repository
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
-func (r *mongodbRepository) UpdatePassword(ctx context.Context, get *go_block.User, update *go_block.User) (*models.User, error) {
-	prepare(actionGet, get)
-	if err := r.validate(actionGet, get); err != nil {
-		return nil, err
+func (r *mongodbRepository) UpdatePassword(ctx context.Context, get *go_hera.User, update *go_hera.User) error {
+	if update == nil {
+		return UpdateIsNil
+	} else if err := validatePassword(update.Password); err != nil {
+		return err
 	}
+	prepare(actionGet, get)
 	prepare(actionUpdatePassword, update)
-	if err := r.validate(actionUpdatePassword, update); err != nil {
-		return nil, err
+	filter, err := getUserFilter(get)
+	if err != nil {
+		return err
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(update.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	update.Password = string(hashedPassword)
 	updateUser := models.ProtoUserToUser(update)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"password":   updateUser.Password,
-			"updated_at": updateUser.UpdatedAt,
+			"updated_at": time.Now(),
 		},
 	}
-	filter, err := getUserFilter(get)
-	if err != nil {
-		return nil, err
-	}
-	result := r.collection.FindOneAndUpdate(
+	if _, err := r.collection.UpdateOne(
 		ctx,
 		filter,
 		mongoUpdate,
-	)
-	if err := result.Err(); err != nil {
-		return nil, err
+	); err != nil {
+		return err
 	}
-	var resp models.User
-	if err := result.Decode(&resp); err != nil {
-		return nil, err
-	}
-	if err := r.crypto.Decrypt(&resp); err != nil {
-		return nil, err
-	}
-	// set updated fields
-	resp.Password = string(hashedPassword)
-	return &resp, nil
+	return nil
 }

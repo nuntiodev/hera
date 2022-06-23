@@ -2,7 +2,7 @@ package authenticator
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 )
 
 var (
@@ -10,12 +10,12 @@ var (
 )
 
 type Authenticator interface {
-	AuthenticateRequest(ctx context.Context, req *go_block.UserRequest) error
+	AuthenticateRequest(ctx context.Context, req *go_hera.HeraRequest) error
 }
 
 type NoAuthenticator struct{}
 
-func (*NoAuthenticator) AuthenticateRequest(ctx context.Context, req *go_block.UserRequest) error {
+func (*NoAuthenticator) AuthenticateRequest(ctx context.Context, req *go_hera.HeraRequest) error {
 	return nil
 }
 

@@ -11,13 +11,14 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/nuntiodev/nuntio-user-block/email"
+	"github.com/nuntiodev/hera/email"
+	"github.com/nuntiodev/hera/text"
 	"os"
 	"time"
 
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/repository"
-	"github.com/nuntiodev/nuntio-user-block/token"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/repository"
+	"github.com/nuntiodev/hera/token"
 	"github.com/nuntiodev/x/cryptox"
 	"go.uber.org/zap"
 )
@@ -33,54 +34,51 @@ var (
 )
 
 type Handler interface {
-	Heartbeat(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	Create(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdatePassword(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateMetadata(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateImage(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdatePhoneNumber(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateName(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateBirthdate(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateUsername(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdatePreferredLanguage(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateSecurity(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	Get(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	Search(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	GetAll(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	ValidateCredentials(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	Login(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	ValidateToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	BlockToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	BlockTokenById(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	RefreshToken(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	GetTokens(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	PublicKeys(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	RecordActiveMeasurement(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UserActiveHistory(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	NamespaceActiveHistory(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	SendVerificationEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	VerifyEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	SendResetPasswordEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	ResetPassword(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	Delete(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	DeleteBatch(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	DeleteNamespace(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	CreateNamespaceConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	UpdateConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	DeleteConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
-	InitializeApplication(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error)
+	Heartbeat(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	CreateUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	UpdateUserMetadata(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	UpdateUserProfile(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	UpdateUserContact(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	UpdateUserPassword(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	SearchForUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	GetUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	ListUsers(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	ValidateCredentials(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	Login(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	DeleteUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	DeleteUsers(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	CreateTokenPair(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	ValidateToken(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	BlockToken(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	RefreshToken(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	GetTokens(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	PublicKeys(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	SendVerificationEmail(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	VerifyEmail(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	SendVerificationText(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	VerifyPhone(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	SendResetPasswordEmail(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	SendResetPasswordText(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	ResetPassword(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	DeleteNamespace(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	CreateNamespace(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	RegisterRsaKey(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	RemovePublicKey(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	GetConfig(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	UpdateConfig(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	DeleteConfig(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
 }
 
 type defaultHandler struct {
-	repository              repository.Repository
-	crypto                  cryptox.Crypto
-	token                   token.Token
-	email                   email.Email
-	emailEnabled            bool
-	zapLog                  *zap.Logger
-	maxEmailVerificationAge time.Duration
+	repository         repository.Repository
+	crypto             cryptox.Crypto
+	token              token.Token
+	email              email.Email
+	text               text.Text
+	emailEnabled       bool
+	textEnabled        bool
+	zapLog             *zap.Logger
+	maxVerificationAge time.Duration
 }
 
 func decodeKeyPair(rsaPrivateKey, rsaPublicKey string) (*rsa.PrivateKey, *rsa.PublicKey, error) {
@@ -154,7 +152,7 @@ func initializeEmailTemplates() error {
 	return nil
 }
 
-func New(zapLog *zap.Logger, repository repository.Repository, token token.Token, email email.Email, maxEmailVerificationAge time.Duration) (Handler, error) {
+func New(zapLog *zap.Logger, repository repository.Repository, token token.Token, email email.Email, text text.Text, maxEmailVerificationAge time.Duration) (Handler, error) {
 	zapLog.Info("creating handler")
 	if err := initialize(); err != nil {
 		return nil, err
@@ -167,12 +165,12 @@ func New(zapLog *zap.Logger, repository repository.Repository, token token.Token
 		}
 	}
 	handler := &defaultHandler{
-		repository:              repository,
-		token:                   token,
-		zapLog:                  zapLog,
-		email:                   email,
-		emailEnabled:            emailEnabled,
-		maxEmailVerificationAge: maxEmailVerificationAge,
+		repository:         repository,
+		token:              token,
+		zapLog:             zapLog,
+		email:              email,
+		emailEnabled:       emailEnabled,
+		maxVerificationAge: maxEmailVerificationAge,
 	}
 	return handler, nil
 }

@@ -3,63 +3,48 @@ package config_repository
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
-	ts "google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 )
 
-func (c *defaultConfigRepository) Update(ctx context.Context, config *go_block.Config) (*models.Config, error) {
+func (c *defaultConfigRepository) Update(ctx context.Context, config *go_hera.Config) error {
 	if config == nil {
-		return nil, errors.New("missing required config")
-	} else if config.Id == "" {
-		return nil, errors.New("missing required id")
+		return errors.New("missing required config")
 	} else if config.Name == "" {
-		return nil, errors.New("missing required name")
+		return errors.New("missing required name")
 	}
-	updateConfig := models.ProtoConfigToConfig(&go_block.Config{
-		Name:                           config.Name,
-		Logo:                           config.Logo,
-		EnableNuntioConnect:            config.EnableNuntioConnect,
-		DisableDefaultLogin:            config.DisableDefaultLogin,
-		DisableDefaultSignup:           config.DisableDefaultSignup,
-		ValidatePassword:               config.ValidatePassword,
-		RequireEmailVerification:       config.RequireEmailVerification,
-		RequirePhoneNumberVerification: config.RequirePhoneNumberVerification,
-		UpdatedAt:                      ts.Now(),
+	updateConfig := models.ProtoConfigToConfig(&go_hera.Config{
+		Name:                     config.Name,
+		Logo:                     config.Logo,
+		NuntioVerifyId:           config.NuntioVerifyId,
+		DisableLogin:             config.DisableLogin,
+		DisableSignup:            config.DisableSignup,
+		ValidatePassword:         config.ValidatePassword,
+		VerifyEmail:              config.VerifyEmail,
+		VerifyPhone:              config.VerifyPhone,
+		SupportedLoginMechanisms: config.SupportedLoginMechanisms,
 	})
 	if err := c.crypto.Encrypt(updateConfig); err != nil {
-		return nil, err
+		return err
 	}
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"name":                       updateConfig.Name,
 			"logo":                       updateConfig.Logo,
-			"enable_nuntio_connect":      updateConfig.EnableNuntioConnect,
-			"disable_default_signup":     updateConfig.DisableDefaultSignup,
-			"disable_default_login":      updateConfig.DisableDefaultLogin,
+			"nuntio_verify_id":           updateConfig.NuntioVerifyId,
+			"disable_signup":             updateConfig.DisableSignup,
+			"disable_login":              updateConfig.DisableLogin,
 			"validate_password":          updateConfig.ValidatePassword,
-			"require_email_verification": updateConfig.RequireEmailVerification,
-			//"login_type":                        config.LoginType,
-			"require_phone_number_verification": updateConfig.RequirePhoneNumberVerification,
-			"updated_at":                        updateConfig.UpdatedAt,
+			"verify_email":               updateConfig.VerifyEmail,
+			"verify_phone":               updateConfig.VerifyPhone,
+			"supported_login_mechanisms": updateConfig.SupportedLoginMechanisms,
+			"updated_at":                 time.Now(),
 		},
 	}
-	var resp models.Config
-	if err := c.collection.FindOneAndUpdate(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate).Decode(&resp); err != nil {
-		return nil, err
+	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {
+		return err
 	}
-	if err := c.crypto.Decrypt(&resp); err != nil {
-		return nil, err
-	}
-	// set updated fields
-	resp.EnableNuntioConnect = config.EnableNuntioConnect
-	resp.DisableDefaultSignup = config.DisableDefaultSignup
-	resp.DisableDefaultLogin = config.DisableDefaultLogin
-	resp.ValidatePassword = config.ValidatePassword
-	resp.RequireEmailVerification = config.RequireEmailVerification
-	resp.LoginType = config.LoginType
-	resp.RequirePhoneNumberVerification = config.RequirePhoneNumberVerification
-	resp.UpdatedAt = updateConfig.UpdatedAt
-	return &resp, nil
+	return nil
 }

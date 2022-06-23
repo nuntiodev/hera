@@ -2,8 +2,8 @@ package config_repository
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,9 +18,11 @@ const (
 )
 
 type ConfigRepository interface {
-	Create(ctx context.Context, config *go_block.Config) (*models.Config, error)
-	GetNamespaceConfig(ctx context.Context) (*models.Config, error)
-	Update(ctx context.Context, config *go_block.Config) (*models.Config, error)
+	Create(ctx context.Context, config *go_hera.Config) error
+	Get(ctx context.Context) (*models.Config, error)
+	Update(ctx context.Context, config *go_hera.Config) error
+	RegisterPublicKey(ctx context.Context, publicKey string) error
+	RemovePublicKey(ctx context.Context) error
 	Delete(ctx context.Context) error
 }
 
@@ -29,13 +31,9 @@ type defaultConfigRepository struct {
 	crypto     cryptox.Crypto
 }
 
-func newMongodbConfigRepository(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto) (*defaultConfigRepository, error) {
+func New(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto) (ConfigRepository, error) {
 	return &defaultConfigRepository{
 		collection: collection,
 		crypto:     crypto,
 	}, nil
-}
-
-func New(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto) (ConfigRepository, error) {
-	return newMongodbConfigRepository(ctx, collection, crypto)
 }

@@ -2,26 +2,28 @@ package handler
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
-	"github.com/nuntiodev/nuntio-user-block/repository/token_repository"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
+	"github.com/nuntiodev/hera/repository/token_repository"
 )
 
 /*
 	GetTokens - this method returns information about all tokens for a specific user. UserId is included in the req.Token.
 */
-func (h *defaultHandler) GetTokens(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) GetTokens(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
-		tokenRepo token_repository.TokenRepository
-		tokens    []*models.Token
-		err       error
+		tokenRepository token_repository.TokenRepository
+		tokens          []*models.Token
 	)
-	tokenRepo, err = h.repository.Tokens(ctx, req.Namespace, req.EncryptionKey)
+	tokenRepository, err = h.repository.TokenRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return nil, err
 	}
-	tokens, err = tokenRepo.GetTokens(ctx, req.Token)
-	return &go_block.UserResponse{
+	tokens, err = tokenRepository.GetTokens(ctx, req.Token)
+	if err != nil {
+		return nil, err
+	}
+	return &go_hera.HeraResponse{
 		Tokens: models.TokensToProto(tokens),
-	}, err
+	}, nil
 }

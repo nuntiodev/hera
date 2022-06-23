@@ -3,39 +3,32 @@ package config_repository
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (c *defaultConfigRepository) Create(ctx context.Context, config *go_block.Config) (*models.Config, error) {
+func (c *defaultConfigRepository) Create(ctx context.Context, config *go_hera.Config) error {
 	prepare(actionCreate, config)
 	if config == nil {
-		return nil, errors.New("missing required config")
+		return errors.New("missing required config")
 	}
 	// set default fields
-	config.EnableNuntioConnect = false
-	config.DisableDefaultSignup = false
-	config.DisableDefaultLogin = false
+	config.DisableSignup = false
+	config.DisableLogin = false
 	config.ValidatePassword = true
-	config.RequireEmailVerification = true
+	config.VerifyEmail = true
 	config.CreatedAt = ts.Now()
 	config.UpdatedAt = ts.Now()
-	config.LoginType = go_block.LoginType_LOGIN_TYPE_EMAIL_PASSWORD
-	config.RequirePhoneNumberVerification = true
-	config.Id = namespaceConfigName
+	config.SupportedLoginMechanisms = []go_hera.LoginType{go_hera.LoginType_EMAIL_PASSWORD, go_hera.LoginType_PHONE_PASSWORD, go_hera.LoginType_USERNAME_PASSWORD}
+	config.VerifyPhone = true
 	create := models.ProtoConfigToConfig(config)
-	copy := *create
+	create.Id = namespaceConfigName
 	if err := c.crypto.Encrypt(create); err != nil {
-		return nil, err
+		return err
 	}
 	if _, err := c.collection.InsertOne(ctx, create); err != nil {
-		return nil, err
+		return err
 	}
-	// set updated fields
-	copy.Name.InternalEncryptionLevel = create.Name.InternalEncryptionLevel
-	copy.Name.ExternalEncryptionLevel = create.Name.ExternalEncryptionLevel
-	copy.Logo.InternalEncryptionLevel = create.Logo.InternalEncryptionLevel
-	copy.Logo.ExternalEncryptionLevel = create.Logo.ExternalEncryptionLevel
-	return &copy, nil
+	return nil
 }

@@ -3,8 +3,8 @@ package runner
 import (
 	"context"
 	"github.com/joho/godotenv"
-	"github.com/nuntiodev/nuntio-user-block/initializer"
-	"github.com/nuntiodev/nuntio-user-block/server"
+	"github.com/nuntiodev/hera/initializer"
+	"github.com/nuntiodev/hera/server"
 	"go.uber.org/zap"
 	"os"
 	"strconv"

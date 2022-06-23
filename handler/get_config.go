@@ -2,26 +2,28 @@ package handler
 
 import (
 	"context"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
-	"github.com/nuntiodev/nuntio-user-block/repository/config_repository"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
+	"github.com/nuntiodev/hera/repository/config_repository"
 )
 
 /*
 	GetConfig - this method returns a config for a specific namespace.
 */
-func (h *defaultHandler) GetConfig(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) GetConfig(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
-		configRepo config_repository.ConfigRepository
-		config     *models.Config
-		err        error
+		configRepository config_repository.ConfigRepository
+		config           *models.Config
 	)
-	configRepo, err = h.repository.Config(ctx, req.Namespace, req.EncryptionKey)
+	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return nil, err
 	}
-	config, err = configRepo.GetNamespaceConfig(ctx)
-	return &go_block.UserResponse{
+	config, err = configRepository.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &go_hera.HeraResponse{
 		Config: models.ConfigToProtoConfig(config),
-	}, err
+	}, nil
 }

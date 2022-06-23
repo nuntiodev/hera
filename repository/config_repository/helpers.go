@@ -1,11 +1,11 @@
 package config_repository
 
 import (
-	"github.com/nuntiodev/block-proto/go_block"
+	"github.com/nuntiodev/hera-proto/go_hera"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func prepare(action int, config *go_block.Config) {
+func prepare(action int, config *go_hera.Config) {
 	if config == nil {
 		return
 	}

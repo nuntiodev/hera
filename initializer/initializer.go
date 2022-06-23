@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/nuntiodev/x/cryptox"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -29,6 +30,7 @@ type Initializer interface {
 type defaultInitializer struct {
 	namespace string
 	zapLog    *zap.Logger
+	redLog    *color.Color
 	k8s       *kubernetes.Clientset
 }
 
@@ -57,20 +59,21 @@ func New(zapLog *zap.Logger, engine string) (*defaultInitializer, error) {
 	return &defaultInitializer{
 		zapLog:    zapLog,
 		k8s:       clientSet,
+		redLog:    color.New(color.FgRed),
 		namespace: string(bytesNamespace),
 	}, nil
 }
 
 func (i *defaultInitializer) CreateSecrets(ctx context.Context) error {
 	if os.Getenv("PUBLIC_KEY") != "" && os.Getenv("PRIVATE_KEY") != "" && os.Getenv("ENCRYPTION_KEYS") != "" {
-		i.zapLog.Info("secrets is already provided internally by the system (the PUBLIC_KEY, ENCRYPTION_KEYS and PRIVATE_KEY variable is set).")
+		i.zapLog.Info("secrets are already provided internally by the system (the PUBLIC_KEY, ENCRYPTION_KEYS and PRIVATE_KEY variable is set).")
 		return nil
 	}
 	// check if secret already exists
 	if cryptoSecret, err := i.k8s.CoreV1().Secrets(i.namespace).Get(ctx, blockUserSecretName, metav1.GetOptions{}); err != nil {
 		i.zapLog.Info("block user secret does not exist... creating....")
 		// create public private keys
-		rsaPrivateKey, rsaPublicKey, err := cryptox.GenerateRsaKeyPair(2048)
+		rsaPrivateKey, rsaPublicKey, err := cryptox.GenerateRsaKeyPair(4096)
 		if err != nil {
 			return err
 		}

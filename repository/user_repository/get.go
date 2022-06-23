@@ -3,18 +3,18 @@ package user_repository
 import (
 	"context"
 	"fmt"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/models"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
 )
 
 /*
 	Get - this method fetches a user either by id, username, or email.
 */
-func (r *mongodbRepository) Get(ctx context.Context, user *go_block.User) (*models.User, error) {
-	prepare(actionGet, user)
-	if err := r.validate(actionGet, user); err != nil {
-		return nil, err
+func (r *mongodbRepository) Get(ctx context.Context, user *go_hera.User) (*models.User, error) {
+	if user == nil {
+		return nil, UserIsNilErr
 	}
+	prepare(actionGet, user)
 	filter, err := getUserFilter(user)
 	if err != nil {
 		return nil, err

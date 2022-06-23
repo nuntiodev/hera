@@ -2,49 +2,43 @@ package handler
 
 import (
 	"context"
-	"encoding/hex"
 	"errors"
-	"github.com/nuntiodev/block-proto/go_block"
-	"github.com/nuntiodev/nuntio-user-block/email"
-	"github.com/nuntiodev/nuntio-user-block/models"
-	"github.com/nuntiodev/nuntio-user-block/repository/email_repository"
-	"github.com/nuntiodev/nuntio-user-block/repository/user_repository"
-	"github.com/nuntiodev/x/cryptox"
+	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/models"
+	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
+	"k8s.io/utils/strings/slices"
 	"strings"
 )
 
 /*
 	SendVerificationEmail - this method sends a verification email to the user with a code used to verify the email.
 */
-func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_block.UserRequest) (*go_block.UserResponse, error) {
+func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
-		userRepo          user_repository.UserRepository
-		emailRepo         email_repository.EmailRepository
-		user              *models.User
-		nameOfUser        string
-		verificationCode  []byte
-		verificationEmail *models.Email
-		errGroup          = &errgroup.Group{}
-		err               error
+		userRepository   user_repository.UserRepository
+		user             *models.User
+		nameOfUser       string
+		verificationCode []byte
+		errGroup         = &errgroup.Group{}
 	)
-	if !h.emailEnabled {
+	if h.emailEnabled == false {
 		return nil, errors.New("email provider is not enabled")
 	}
 	// async action 1 - get user and check if his email is verified
-	errGroup.Go(func() error {
-		userRepo, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetEncryptionKey(req.EncryptionKey).Build(ctx)
+	errGroup.Go(func() (err error) {
+		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 		if err != nil {
 			return err
 		}
-		user, err = userRepo.Get(ctx, req.User)
+		user, err = userRepository.Get(ctx, req.User)
 		if err != nil {
 			return err
 		}
 		if user.Email.Body == "" {
 			return errors.New("user do not have an email - set the email for the user")
 		}
-		if user.EmailIsVerified {
+		if slices.Contains(user.VerifiedEmails, user.EmailHash) {
 			return errors.New("email is already verified")
 		}
 		nameOfUser = user.Email.Body
@@ -54,53 +48,32 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_bloc
 				nameOfUser += " " + user.LastName.Body
 			}
 		}
-		return err
-	})
-	// async action 2 - setup email repository and generate verification code
-	errGroup.Go(func() error {
-		emailRepo, err = h.repository.Email(ctx, req.Namespace, req.EncryptionKey)
-		if err != nil {
-			return err
-		}
-		randomCode, err := cryptox.GenerateSymmetricKey(6, cryptox.Numeric)
-		if err != nil {
-			return err
-		}
-		verificationCode, err = hex.DecodeString(randomCode)
-		if err != nil {
-			return err
-		}
-		verificationEmail, err = emailRepo.Get(ctx, &go_block.Email{
-			Id: email_repository.VerificationEmail,
-		})
-		return err
+		return
 	})
 	if err = errGroup.Wait(); err != nil {
-		return &go_block.UserResponse{}, err
+		return nil, err
 	}
-	// async action 3 - send verification email
-	errGroup.Go(func() error {
-		return h.email.SendVerificationEmail(user.Email.Body, verificationEmail.Subject.Body, verificationEmail.TemplatePath.Body, &email.VerificationData{
-			Code: string(verificationCode),
-			TemplateData: email.TemplateData{
-				LogoUrl:        verificationEmail.Logo.Body,
-				WelcomeMessage: verificationEmail.WelcomeMessage.Body,
-				NameOfUser:     nameOfUser,
-				BodyMessage:    verificationEmail.BodyMessage.Body,
-				FooterMessage:  verificationEmail.FooterMessage.Body,
-			},
-		})
+	// async action 2 - send verification email
+	errGroup.Go(func() (err error) {
+		if err = h.email.SendVerificationEmail(user.Email.Body, string(verificationCode)); err != nil {
+			return err
+		}
+		return
 	})
-	// async action 4  update verification email sent at
-	errGroup.Go(func() error {
-		user, err = userRepo.UpdateVerificationEmailSent(ctx, &go_block.User{
+	// async action 3  update verification email sent at
+	errGroup.Go(func() (err error) {
+		if err = userRepository.UpdateEmailVerificationCode(ctx, &go_hera.User{
 			EmailVerificationCode: string(verificationCode),
 			Id:                    user.Id,
-		})
-		return err
+		}); err != nil {
+			return err
+		}
+		return
 	})
-	err = errGroup.Wait()
-	return &go_block.UserResponse{
+	if err = errGroup.Wait(); err != nil {
+		return nil, err
+	}
+	return &go_hera.HeraResponse{
 		User: models.UserToProtoUser(user),
-	}, err
+	}, nil
 }

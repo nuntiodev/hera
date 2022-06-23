@@ -13,7 +13,7 @@ func (c *defaultConfigRepository) Update(ctx context.Context, config *go_hera.Co
 	if config == nil {
 		return errors.New("missing required config")
 	} else if config.Name == "" {
-		return errors.New("missing required name")
+		config.Name = "Hera App"
 	}
 	updateConfig := models.ProtoConfigToConfig(&go_hera.Config{
 		Name:                     config.Name,

@@ -12,6 +12,8 @@ func (c *defaultConfigRepository) Create(ctx context.Context, config *go_hera.Co
 	prepare(actionCreate, config)
 	if config == nil {
 		return errors.New("missing required config")
+	} else if config.Name == "" {
+		config.Name = "Hera App"
 	}
 	// set default fields
 	config.DisableSignup = false

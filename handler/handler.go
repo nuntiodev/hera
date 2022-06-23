@@ -8,11 +8,14 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"github.com/nuntiodev/hera/email"
+	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/text"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -133,20 +136,36 @@ func initialize() error {
 	return nil
 }
 
-func initializeEmailTemplates() error {
-	var ok bool
-	emailVerificationTemplatePath, ok = os.LookupEnv("EMAIL_VERIFICATION_TEMPLATE_PATH")
-	if !ok || emailVerificationTemplatePath == "" {
-		return errors.New("missing required EMAIL_VERIFICATION_TEMPLATE_PATH")
+func (h *defaultHandler) initializeDefaultConfig() error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	defer cancel()
+	_, err := h.GetConfig(ctx, &go_hera.HeraRequest{})
+	heraConfig := models.Config{}
+	if err != nil {
+		h.zapLog.Info("hera config does not exits - creating...")
+		// load json file
+		jsonFile, err := os.Open("hera_config.json")
+		if err == nil {
+			byteValue, err := ioutil.ReadAll(jsonFile)
+			if err != nil {
+				return err
+			}
+			if err := json.Unmarshal(byteValue, &heraConfig); err != nil {
+				return err
+			}
+		}
+		if _, err := h.CreateNamespace(ctx, &go_hera.HeraRequest{
+			Config: models.ConfigToProtoConfig(&heraConfig),
+		}); err != nil {
+			return err
+		}
+		h.zapLog.Info("hera config was successfully created...")
+	} else {
+		h.zapLog.Info("hera config already exists...")
 	}
-	if _, err := os.Stat(emailVerificationTemplatePath); err != nil && errors.Is(err, os.ErrNotExist) {
-		return err
-	}
-	emailResetPasswordTemplatePath, ok = os.LookupEnv("EMAIL_RESET_PASSWORD_TEMPLATE_PATH")
-	if !ok || emailResetPasswordTemplatePath == "" {
-		return errors.New("missing required EMAIL_RESET_PASSWORD_TEMPLATE_PATH")
-	}
-	if _, err := os.Stat(emailResetPasswordTemplatePath); err != nil && errors.Is(err, os.ErrNotExist) {
+	if _, err := h.UpdateConfig(ctx, &go_hera.HeraRequest{
+		Config: models.ConfigToProtoConfig(&heraConfig),
+	}); err != nil {
 		return err
 	}
 	return nil
@@ -160,9 +179,10 @@ func New(zapLog *zap.Logger, repository repository.Repository, token token.Token
 	emailEnabled := false
 	if email != nil {
 		emailEnabled = true
-		if err := initializeEmailTemplates(); err != nil {
-			return nil, err
-		}
+	}
+	textEnabled := false
+	if text != nil {
+		textEnabled = true
 	}
 	handler := &defaultHandler{
 		repository:         repository,
@@ -170,7 +190,12 @@ func New(zapLog *zap.Logger, repository repository.Repository, token token.Token
 		zapLog:             zapLog,
 		email:              email,
 		emailEnabled:       emailEnabled,
+		text:               text,
+		textEnabled:        textEnabled,
 		maxVerificationAge: maxEmailVerificationAge,
+	}
+	if err := handler.initializeDefaultConfig(); err != nil {
+		return nil, err
 	}
 	return handler, nil
 }

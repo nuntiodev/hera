@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    volumes:
+      - ~/apps/mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=password
+  spvb:
+    build: ./
+    ports:
+      - "9000:9000"
+    environment:
+      - MONGO_URI=mongodb://user:password@mongodb:27017/?retryWrites=true
+      - INITIALIZE_SECRETS=true
+      - INITIALIZE_ENGINE=memory

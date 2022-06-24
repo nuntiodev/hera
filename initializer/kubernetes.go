@@ -27,6 +27,7 @@ type kubernetesInitializer struct {
 }
 
 func (i *kubernetesInitializer) CreateSecrets(ctx context.Context) error {
+	i.blueLog.Println("Hera is running in Kubernetes-engine mode...")
 	if os.Getenv("PUBLIC_KEY") != "" && os.Getenv("PRIVATE_KEY") != "" && os.Getenv("ENCRYPTION_KEYS") != "" {
 		i.blueLog.Println("secrets are already provided internally by the system (the PUBLIC_KEY, ENCRYPTION_KEYS and PRIVATE_KEY variable is set).")
 		return nil

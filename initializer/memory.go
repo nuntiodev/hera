@@ -19,7 +19,7 @@ type memoryInitializer struct {
 }
 
 func (i *memoryInitializer) CreateSecrets(ctx context.Context) error {
-	i.redLog.Println("running in memory and creating new secrets. All data will be lost when shut down")
+	i.redLog.Println("Hera is Running in memory mode. Creating secrets and storing them in memory; all data will be lost when shut down.")
 	if os.Getenv("PUBLIC_KEY") == "" || os.Getenv("PRIVATE_KEY") == "" {
 		// create public private keys
 		rsaPrivateKey, rsaPublicKey, err := cryptox.GenerateRsaKeyPair(4096)

@@ -27,7 +27,7 @@ func (cb *configRepositoryBuilder) Build(ctx context.Context) (config_repository
 	if cb.namespace == "" {
 		cb.namespace = defaultDb
 	}
-	crypto, err := cryptox.New(cb.internalEncryptionKeys, []string{})
+	crypto, err := cryptox.New(cb.internalEncryptionKeys, nil, nil)
 	if err != nil {
 		return nil, err
 	}

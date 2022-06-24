@@ -30,9 +30,7 @@ func (c *defaultConfigRepository) upgradeEncryptionLevel(ctx context.Context, co
 	if _, err := c.collection.UpdateOne(ctx, bson.M{"_id": namespaceConfigName}, mongoUpdate); err != nil {
 		return err
 	}
-	config.Name.InternalEncryptionLevel = copy.Name.InternalEncryptionLevel
-	config.Name.ExternalEncryptionLevel = copy.Name.ExternalEncryptionLevel
-	config.Logo.InternalEncryptionLevel = copy.Logo.InternalEncryptionLevel
-	config.Logo.ExternalEncryptionLevel = copy.Logo.ExternalEncryptionLevel
+	config.Name.EncryptionLevel = copy.Name.EncryptionLevel
+	config.Logo.EncryptionLevel = copy.Logo.EncryptionLevel
 	return nil
 }

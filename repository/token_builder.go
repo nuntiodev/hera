@@ -27,7 +27,7 @@ func (ub *tokenRepositoryBuilder) Build(ctx context.Context) (token_repository.T
 	if ub.namespace == "" {
 		ub.namespace = defaultDb
 	}
-	crypto, err := cryptox.New(ub.internalEncryptionKeys, []string{})
+	crypto, err := cryptox.New(ub.internalEncryptionKeys, nil, nil)
 	if err != nil {
 		return nil, err
 	}

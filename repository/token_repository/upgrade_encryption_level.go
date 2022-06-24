@@ -36,7 +36,7 @@ func (e *mongodbRepository) upgradeEncryptionLevel(ctx context.Context, token *m
 		return err
 	}
 	// update levels
-	token.DeviceInfo.InternalEncryptionLevel = copy.DeviceInfo.InternalEncryptionLevel
-	token.LoggedInFrom.InternalEncryptionLevel = copy.LoggedInFrom.InternalEncryptionLevel
+	token.DeviceInfo.EncryptionLevel = copy.DeviceInfo.EncryptionLevel
+	token.LoggedInFrom.EncryptionLevel = copy.LoggedInFrom.EncryptionLevel
 	return nil
 }

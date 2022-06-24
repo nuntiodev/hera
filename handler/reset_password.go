@@ -6,8 +6,10 @@ import (
 	"github.com/nuntiodev/hera-proto/go_hera"
 	"github.com/nuntiodev/hera/helpers"
 	"github.com/nuntiodev/hera/models"
+	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/sync/errgroup"
 	"strings"
 	"time"
 )
@@ -18,34 +20,50 @@ import (
 */
 func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
-		userRepository user_repository.UserRepository
-		user           *models.User
-		bcryptErr      error
+		configRepository config_repository.ConfigRepository
+		userRepository   user_repository.UserRepository
+		config           *models.Config
+		user             *models.User
+		bcryptErr        error
+		errGroup         errgroup.Group
 	)
-	// get requested user and check if the email is already verified
-	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
+	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return nil, err
 	}
-	user, err = userRepository.Get(ctx, req.User)
+	config, err = configRepository.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if user.ResetPasswordCode == "" {
-		return nil, errors.New("reset password code has not been set")
-	}
-	if req.User.ResetPasswordCode == "" {
-		return nil, errors.New("missing reset password code")
-	}
-	if time.Now().Sub(user.ResetPasswordEmailSentAt).Minutes() > h.maxVerificationAge.Minutes() {
-		return nil, errors.New("verification code has expired, send a new")
+	errGroup.Go(func() (err error) {
+		// get requested user and check if the email is already verified
+		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).WithPasswordValidation(config.ValidatePassword).Build(ctx)
+		if err != nil {
+			return err
+		}
+		user, err = userRepository.Get(ctx, req.User)
+		if err != nil {
+			return err
+		}
+		if user.ResetPasswordCode == "" {
+			return errors.New("reset password code has not been set")
+		}
+		if req.User.ResetPasswordCode == "" {
+			return errors.New("missing reset password code")
+		}
+		if time.Now().Sub(user.ResetPasswordEmailSentAt).Minutes() > h.maxVerificationAge.Minutes() {
+			return errors.New("verification code has expired, send a new")
+		}
+		return nil
+	})
+	if err = errGroup.Wait(); err != nil {
+		return nil, err
 	}
 	// provide exponential backoff
 	time.Sleep(helpers.GetExponentialBackoff(float64(user.VerifyEmailAttempts), helpers.BackoffFactorTwo))
 	bcryptErr = bcrypt.CompareHashAndPassword([]byte(user.ResetPasswordCode), []byte(strings.TrimSpace(req.User.ResetPasswordCode)))
-	// verify email
-	//todo: look through this
-	if err = userRepository.UpdateResetPasswordCode(ctx, models.UserToProtoUser(req.User)); err != nil {
+	// reset password
+	if err = userRepository.UpdatePassword(ctx, models.UserToProtoUser(user), req.User); err != nil {
 		return nil, err
 	}
 	if bcryptErr != nil {

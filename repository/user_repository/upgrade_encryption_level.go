@@ -45,21 +45,13 @@ func (r *mongodbRepository) upgradeEncryptionLevel(ctx context.Context, user *mo
 		return err
 	}
 	// update levels
-	user.Username.InternalEncryptionLevel = copy.Username.InternalEncryptionLevel
-	user.Username.ExternalEncryptionLevel = copy.Username.ExternalEncryptionLevel
-	user.Email.InternalEncryptionLevel = copy.Email.InternalEncryptionLevel
-	user.Email.ExternalEncryptionLevel = copy.Email.ExternalEncryptionLevel
-	user.Image.InternalEncryptionLevel = copy.Image.InternalEncryptionLevel
-	user.Image.ExternalEncryptionLevel = copy.Image.ExternalEncryptionLevel
-	user.Metadata.InternalEncryptionLevel = copy.Metadata.InternalEncryptionLevel
-	user.Metadata.ExternalEncryptionLevel = copy.Metadata.ExternalEncryptionLevel
-	user.FirstName.InternalEncryptionLevel = copy.FirstName.InternalEncryptionLevel
-	user.FirstName.ExternalEncryptionLevel = copy.FirstName.ExternalEncryptionLevel
-	user.LastName.InternalEncryptionLevel = copy.LastName.InternalEncryptionLevel
-	user.LastName.ExternalEncryptionLevel = copy.LastName.ExternalEncryptionLevel
-	user.Birthdate.InternalEncryptionLevel = copy.Birthdate.InternalEncryptionLevel
-	user.Birthdate.ExternalEncryptionLevel = copy.Birthdate.ExternalEncryptionLevel
-	user.Phone.InternalEncryptionLevel = copy.Phone.InternalEncryptionLevel
-	user.Phone.ExternalEncryptionLevel = copy.Phone.ExternalEncryptionLevel
+	user.Username.EncryptionLevel = copy.Username.EncryptionLevel
+	user.Email.EncryptionLevel = copy.Email.EncryptionLevel
+	user.Image.EncryptionLevel = copy.Image.EncryptionLevel
+	user.Metadata.EncryptionLevel = copy.Metadata.EncryptionLevel
+	user.FirstName.EncryptionLevel = copy.FirstName.EncryptionLevel
+	user.LastName.EncryptionLevel = copy.LastName.EncryptionLevel
+	user.Birthdate.EncryptionLevel = copy.Birthdate.EncryptionLevel
+	user.Phone.EncryptionLevel = copy.Phone.EncryptionLevel
 	return nil
 }

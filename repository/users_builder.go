@@ -36,7 +36,7 @@ func (ub *userRepositoryBuilder) Build(ctx context.Context) (user_repository.Use
 	if ub.namespace == "" {
 		ub.namespace = defaultDb
 	}
-	crypto, err := cryptox.New(ub.internalEncryptionKeys, []string{})
+	crypto, err := cryptox.New(ub.internalEncryptionKeys, nil, nil)
 	if err != nil {
 		return nil, err
 	}

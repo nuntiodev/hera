@@ -6,6 +6,7 @@ helm-install:
 helm-delete:
 	helm delete nuntio-user-block --namespace=nuntio-blocks
 
+.PHONY: helm-package
 helm-package:
 	rm -rf ./helm/charts/* && \
 	rm ./helm/index.yaml || true && touch ./helm/index.yaml && \

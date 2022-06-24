@@ -7,7 +7,6 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/nuntiodev/hera-proto/go_hera"
-	"github.com/nuntiodev/hera/handler"
 	"github.com/nuntiodev/hera/interceptor"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -20,7 +19,7 @@ var (
 
 type Server struct {
 	zapLog      *zap.Logger
-	handler     handler.Handler
+	handler     go_hera.ServiceServer
 	interceptor interceptor.Interceptor
 }
 
@@ -33,7 +32,7 @@ func initialize() error {
 	return nil
 }
 
-func New(zapLog *zap.Logger, handler handler.Handler, interceptor interceptor.Interceptor) (*Server, error) {
+func New(zapLog *zap.Logger, handler go_hera.ServiceServer, interceptor interceptor.Interceptor) (*Server, error) {
 	if err := initialize(); err != nil {
 		return nil, err
 	}

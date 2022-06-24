@@ -2,8 +2,6 @@
 
 ![example workflow](https://github.com/nuntiodev/hera/actions/workflows/build.yaml/badge.svg)
 
-### New name: Juno or (Hera)
-
 Building Nuntio Blocks: secure, efficient & open-source API blocks that run on any Linux-based environment and scales
 massively. Nuntio Cloud is the commercial offering of the above technologies and help companies go from idea to
 production faster, without losing control over their data or services. Our goal with Nuntio Cloud is to provide social
@@ -41,9 +39,9 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Please make sure to update tests as appropriate.
 
-## Buy me a cup of coffee!
+## Enjoy Hera? Show your gratitude by buying our team a cup of coffee!
 
-I spend many hours building these API blocks - if you want to support my work, buy me a cup of coffee below:
+We spend many hours building Hera and our other open-source projects - if you want to support our work, buy our founder (and team) a cup of coffee below:
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/sinbadio)
 

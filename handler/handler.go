@@ -27,51 +27,13 @@ import (
 )
 
 var (
-	accessTokenExpiry              = time.Minute * 30
-	refreshTokenExpiry             = time.Hour * 24 * 7
-	publicKey                      *rsa.PublicKey
-	publicKeyString                = ""
-	privateKey                     *rsa.PrivateKey
-	emailVerificationTemplatePath  = ""
-	emailResetPasswordTemplatePath = ""
+	accessTokenExpiry  = time.Minute * 30
+	refreshTokenExpiry = time.Hour * 24 * 7
+	publicKey          *rsa.PublicKey
+	publicKeyString    = ""
+	privateKey         *rsa.PrivateKey
+	appName            = ""
 )
-
-type Handler interface {
-	Heartbeat(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	CreateUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	UpdateUserMetadata(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	UpdateUserProfile(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	UpdateUserContact(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	UpdateUserPassword(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	SearchForUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	GetUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	GetUsers(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error)
-	ListUsers(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	ValidateCredentials(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	Login(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	DeleteUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	DeleteUsers(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	CreateTokenPair(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	ValidateToken(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	BlockToken(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	RefreshToken(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	GetTokens(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	PublicKeys(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	SendVerificationEmail(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	VerifyEmail(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	SendVerificationText(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	VerifyPhone(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	SendResetPasswordEmail(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	SendResetPasswordText(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	ResetPassword(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	DeleteNamespace(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	CreateNamespace(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	RegisterRsaKey(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	RemovePublicKey(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	GetConfig(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	UpdateConfig(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-	DeleteConfig(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
-}
 
 type defaultHandler struct {
 	repository         repository.Repository
@@ -134,6 +96,10 @@ func initialize() error {
 	if err != nil {
 		return err
 	}
+	appName, ok = os.LookupEnv("APP_NAME")
+	if !ok || appName == "" {
+		appName = "Nuntio Hera App"
+	}
 	return nil
 }
 
@@ -172,7 +138,7 @@ func (h *defaultHandler) initializeDefaultConfig() error {
 	return nil
 }
 
-func New(zapLog *zap.Logger, repository repository.Repository, token token.Token, email email.Email, text text.Text, maxEmailVerificationAge time.Duration) (Handler, error) {
+func New(zapLog *zap.Logger, repository repository.Repository, token token.Token, email email.Email, text text.Text, maxEmailVerificationAge time.Duration) (go_hera.ServiceServer, error) {
 	zapLog.Info("creating handler")
 	if err := initialize(); err != nil {
 		return nil, err

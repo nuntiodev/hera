@@ -10,6 +10,7 @@ func (h *defaultHandler) RemovePublicKey(ctx context.Context, req *go_hera.HeraR
 	var (
 		configRepository config_repository.ConfigRepository
 	)
+	return nil, nil
 	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return nil, err

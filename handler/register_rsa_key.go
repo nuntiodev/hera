@@ -33,7 +33,7 @@ func (h *defaultHandler) RegisterRsaKey(ctx context.Context, req *go_hera.HeraRe
 		return nil, errors.New("a public key is already present. Please call RemovePublicKey before adding a new one")
 	}
 	// generate rsa key pair
-	s, p, err = cryptox.GenerateRsaKeyPair(4096)
+	s, p, err = cryptox.GenerateRsaKeyPair(2048)
 	if err != nil {
 		return nil, err
 	}

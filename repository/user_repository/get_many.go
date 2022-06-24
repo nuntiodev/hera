@@ -46,6 +46,8 @@ func (r *mongodbRepository) GetMany(ctx context.Context, users []*go_hera.User) 
 		}
 		resp = append(resp, &user)
 	}
-
+	if len(users) != len(resp) {
+		return nil, errors.New("length of users does not equal length of resp which means that not all users could be found")
+	}
 	return resp, nil
 }

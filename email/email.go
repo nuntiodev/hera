@@ -9,8 +9,8 @@ var (
 )
 
 type Email interface {
-	SendVerificationEmail(to, code string) error
-	SendResetPasswordEmail(to, code string) error
+	SendVerificationEmail(appName, to, code string) error
+	SendResetPasswordEmail(appName, to, code string) error
 }
 
 func New() (Email, error) {

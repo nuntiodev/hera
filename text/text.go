@@ -9,8 +9,8 @@ var (
 )
 
 type Text interface {
-	SendVerificationText(to, code string) error
-	SendResetPasswordText(to, code string) error
+	SendVerificationText(appName, to, code string) error
+	SendResetPasswordText(appName, to, code string) error
 }
 
 func New() (Text, error) {

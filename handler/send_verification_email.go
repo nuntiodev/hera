@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/nuntiodev/hera-proto/go_hera"
 	"github.com/nuntiodev/hera/models"
+	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/utils/strings/slices"
@@ -17,9 +18,11 @@ import (
 func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
 		userRepository   user_repository.UserRepository
+		configRepository config_repository.ConfigRepository
 		user             *models.User
 		nameOfUser       string
 		verificationCode []byte
+		config           *models.Config
 		errGroup         = &errgroup.Group{}
 	)
 	if h.emailEnabled == false {
@@ -55,7 +58,15 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 	}
 	// async action 2 - send verification email
 	errGroup.Go(func() (err error) {
-		if err = h.email.SendVerificationEmail(user.Email.Body, string(verificationCode)); err != nil {
+		configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
+		if err != nil {
+			return err
+		}
+		config, err = configRepository.Get(ctx)
+		if err != nil {
+			return err
+		}
+		if err = h.email.SendVerificationEmail(config.Name.Body, user.Email.Body, string(verificationCode)); err != nil {
 			return err
 		}
 		return

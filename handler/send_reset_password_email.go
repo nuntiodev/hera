@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/nuntiodev/hera-proto/go_hera"
 	"github.com/nuntiodev/hera/models"
+	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
 	"golang.org/x/sync/errgroup"
@@ -18,10 +19,12 @@ import (
 func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
 		userRepository   user_repository.UserRepository
+		configRepository config_repository.ConfigRepository
 		user             *models.User
 		nameOfUser       string
 		randomCode       string
 		verificationCode []byte
+		config           *models.Config
 		errGroup         = &errgroup.Group{}
 	)
 	if h.emailEnabled == false {
@@ -62,7 +65,15 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_her
 	}
 	// async action 2 - send verification email
 	errGroup.Go(func() (err error) {
-		if err = h.email.SendResetPasswordEmail(user.Email.Body, string(verificationCode)); err != nil {
+		configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
+		if err != nil {
+			return err
+		}
+		config, err = configRepository.Get(ctx)
+		if err != nil {
+			return err
+		}
+		if err = h.email.SendResetPasswordEmail(config.Name.Body, user.Email.Body, string(verificationCode)); err != nil {
 			return err
 		}
 		return err

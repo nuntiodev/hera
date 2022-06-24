@@ -240,12 +240,8 @@ github.com/munnerz/goautoneg v0.0.0-20120707110453-a547fc61f48d/go.mod h1:+n7T8m
 github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f/go.mod h1:ZdcZmHo+o7JKHSa8/e818NopupXU1YMK5fe1lsApnBw=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
-github.com/nuntiodev/hera-proto v0.2.82 h1:1yNsJYrOO5To3APRvwyz0Q5ioPhbxvegYgjesko3vOk=
-github.com/nuntiodev/hera-proto v0.2.82/go.mod h1:i4tVO9nn5JskVo8mR9wmmI00aNIJ4hmg9d0BYQZfFZs=
-github.com/nuntiodev/hera-proto v0.2.83 h1:H1HDUzvuSkkOzBd6CbhSqvEL8XJ0ncHYAURllxP7+Js=
-github.com/nuntiodev/hera-proto v0.2.83/go.mod h1:i4tVO9nn5JskVo8mR9wmmI00aNIJ4hmg9d0BYQZfFZs=
-github.com/nuntiodev/x v0.2.39 h1:BEc7JHhV9zf/tCmkQE6X8pQ4gjha3Baqi+bfqSj2FyI=
-github.com/nuntiodev/x v0.2.39/go.mod h1:jaFmwyUkU2G1Mtvn+YlvmVpg+SEEc/v/NxRhueZ7p9Q=
+github.com/nuntiodev/hera-proto v0.2.84 h1:rCFmudpqOz7fX2WuyGMBSWNvjStKrPYmmYPsGDLbWxI=
+github.com/nuntiodev/hera-proto v0.2.84/go.mod h1:i4tVO9nn5JskVo8mR9wmmI00aNIJ4hmg9d0BYQZfFZs=
 github.com/nuntiodev/x v0.2.40 h1:oWDf+lqdYMURWrvYAR6IFStm7yb3uA5VpDHguuIaYxs=
 github.com/nuntiodev/x v0.2.40/go.mod h1:fBPW5cAn55VpDsOcz6Fn7M7Vj7cIDrKFBLCIgW8vpEA=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=

@@ -29,8 +29,11 @@ func (r *mongodbRepository) UpdatePassword(ctx context.Context, get *go_hera.Use
 	updateUser := models.ProtoUserToUser(update)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"password":   updateUser.Password,
-			"updated_at": time.Now(),
+			"password":                       updateUser.Password,
+			"reset_password_attempts":        int32(0),
+			"reset_password_code_sent_at":    time.Time{},
+			"reset_password_code_expires_at": time.Time{},
+			"updated_at":                     time.Now(),
 		},
 	}
 	if _, err := r.collection.UpdateOne(

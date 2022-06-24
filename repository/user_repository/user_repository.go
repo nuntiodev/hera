@@ -51,6 +51,7 @@ type UserRepository interface {
 	UpdatePhoneVerificationCode(ctx context.Context, get *go_hera.User) error
 	UpdateResetPasswordCode(ctx context.Context, user *go_hera.User) error
 	Get(ctx context.Context, user *go_hera.User) (*models.User, error)
+	GetMany(ctx context.Context, users []*go_hera.User) ([]*models.User, error)
 	Search(ctx context.Context, search string) (*models.User, error)
 	List(ctx context.Context, query *go_hera.Query) ([]*models.User, error)
 	Count(ctx context.Context) (int64, error)

@@ -30,7 +30,6 @@ func ProtoConfigToConfig(config *go_hera.Config) *Config {
 	return &Config{
 		Name:                     cryptox.Stringx{Body: config.Name},
 		Logo:                     cryptox.Stringx{Body: config.Logo},
-		NuntioVerifyId:           cryptox.Stringx{Body: config.NuntioVerifyId},
 		DisableSignup:            config.DisableSignup,
 		DisableLogin:             config.DisableLogin,
 		CreatedAt:                config.CreatedAt.AsTime(),
@@ -50,7 +49,6 @@ func ConfigToProtoConfig(config *Config) *go_hera.Config {
 	return &go_hera.Config{
 		Name:                     config.Name.Body,
 		Logo:                     config.Logo.Body,
-		NuntioVerifyId:           config.NuntioVerifyId.Body,
 		DisableSignup:            config.DisableSignup,
 		DisableLogin:             config.DisableLogin,
 		CreatedAt:                ts.New(config.CreatedAt),

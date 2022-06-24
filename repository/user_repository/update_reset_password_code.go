@@ -24,10 +24,10 @@ func (r *mongodbRepository) UpdateResetPasswordCode(ctx context.Context, user *g
 	user.ResetPasswordCode = string(hashedCode)
 	mongoUpdate := bson.M{
 		"$set": bson.M{
-			"reset_password_code":             user.ResetPasswordCode,
-			"reset_password_email_sent_at":    time.Now(),
-			"reset_password_email_expires_at": time.Now().Add(r.maxCodeVerificationAge),
-			"updated_at":                      time.Now(),
+			"reset_password_code":            user.ResetPasswordCode,
+			"reset_password_code_sent_at":    time.Now(),
+			"reset_password_code_expires_at": time.Now().Add(r.maxCodeVerificationAge),
+			"updated_at":                     time.Now(),
 		},
 	}
 	if _, err := r.collection.UpdateOne(

@@ -18,7 +18,6 @@ func (c *defaultConfigRepository) Update(ctx context.Context, config *go_hera.Co
 	updateConfig := models.ProtoConfigToConfig(&go_hera.Config{
 		Name:                     config.Name,
 		Logo:                     config.Logo,
-		NuntioVerifyId:           config.NuntioVerifyId,
 		DisableLogin:             config.DisableLogin,
 		DisableSignup:            config.DisableSignup,
 		ValidatePassword:         config.ValidatePassword,

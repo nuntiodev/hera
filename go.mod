@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
-	github.com/nuntiodev/hera-proto v0.2.83
+	github.com/nuntiodev/hera-proto v0.2.84
 	github.com/nuntiodev/x v0.2.40
 	github.com/stretchr/testify v1.7.2
 	go.mongodb.org/mongo-driver v1.9.1

@@ -43,6 +43,7 @@ func (r *mongodbRepository) UpdateContact(ctx context.Context, get *go_hera.User
 		mongoUpdate["email_hash"] = emailHash
 	}
 	if update.Phone != nil {
+		mongoUpdate["verification_text_sent_at"] = time.Time{}
 		mongoUpdate["phone"] = updateUser.Phone
 		mongoUpdate["phone_hash"] = phoneHash
 	}

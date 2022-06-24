@@ -51,7 +51,7 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 		if req.User.ResetPasswordCode == "" {
 			return errors.New("missing reset password code")
 		}
-		if time.Now().Sub(user.ResetPasswordEmailSentAt).Minutes() > h.maxVerificationAge.Minutes() {
+		if time.Now().Sub(user.ResetPasswordCodeSentAt).Minutes() > h.maxVerificationAge.Minutes() {
 			return errors.New("verification code has expired, send a new")
 		}
 		return nil

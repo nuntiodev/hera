@@ -28,7 +28,7 @@ func (r *mongodbRepository) upgradeEncryptionLevel(ctx context.Context, user *mo
 			"first_name":   copy.FirstName,
 			"last_name":    copy.LastName,
 			"birthdate":    copy.Birthdate,
-			"phone_number": copy.Phone,
+			"phone":        copy.Phone,
 			"updated_at":   time.Now(),
 			"encrypted_at": time.Now(),
 		},

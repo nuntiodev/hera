@@ -28,7 +28,7 @@ import (
 
 var (
 	accessTokenExpiry              = time.Minute * 30
-	refreshTokenExpiry             = time.Hour * 24 * 30
+	refreshTokenExpiry             = time.Hour * 24 * 7
 	publicKey                      *rsa.PublicKey
 	publicKeyString                = ""
 	privateKey                     *rsa.PrivateKey
@@ -45,6 +45,7 @@ type Handler interface {
 	UpdateUserPassword(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
 	SearchForUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
 	GetUser(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
+	GetUsers(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error)
 	ListUsers(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
 	ValidateCredentials(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)
 	Login(ctx context.Context, req *go_hera.HeraRequest) (*go_hera.HeraResponse, error)

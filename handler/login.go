@@ -58,7 +58,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 	}
 	// validate if email is verified
 	// if email validation is required and email is not verified; return error
-	if config.VerifyEmail && slices.Contains(user.VerifiedEmails, user.EmailHash) == false {
+	if req.User.GetEmail() != "" && config.VerifyEmail && slices.Contains(user.VerifiedEmails, user.EmailHash) == false {
 		// check if we should send a new email
 		if user.VerificationEmailExpiresAt.Sub(time.Now()).Seconds() <= 0 {
 			// sent new email
@@ -76,7 +76,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 			},
 		}, nil
 	}
-	if config.VerifyPhone && slices.Contains(user.VerifiedPhoneNumbers, user.PhoneHash) == false {
+	if req.User.GetPhone() != "" && config.VerifyPhone && slices.Contains(user.VerifiedPhoneNumbers, user.PhoneHash) == false {
 		// check if we should send a new email
 		// todo: implement
 	}

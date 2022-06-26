@@ -65,5 +65,4 @@ func New(zapLog *zap.Logger, engine string) (Initializer, error) {
 		redLog.Println(fmt.Sprintf("Hera is customized with an invalid engine: %s\n", engine))
 		return nil, errors.New("invalid engine")
 	}
-	return nil, nil
 }

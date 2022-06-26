@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"github.com/joho/godotenv"
 	"github.com/nuntiodev/hera/initializer"
 	"github.com/nuntiodev/hera/server"
 	"go.uber.org/zap"
@@ -22,9 +21,6 @@ func initialize() error {
 }
 
 func Run(ctx context.Context, zapLog *zap.Logger) error {
-	if err := godotenv.Load(".env"); err != nil {
-		zapLog.Warn("could not get .env")
-	}
 	if err := initialize(); err != nil {
 		return err
 	}

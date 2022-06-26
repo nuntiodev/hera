@@ -10,6 +10,7 @@ import (
 	"github.com/nuntiodev/hera/server/grpc_server"
 	"github.com/nuntiodev/hera/text"
 	"github.com/nuntiodev/hera/token"
+	"github.com/nuntiodev/x/pointerx"
 	database "github.com/nuntiodev/x/repositoryx"
 	"go.uber.org/zap"
 	"os"
@@ -51,7 +52,7 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	mongoClient, err := myDatabase.CreateMongoClient(ctx)
+	mongoClient, err := myDatabase.CreateMongoClient(ctx, pointerx.IntPtr(5))
 	if err != nil {
 		return nil, err
 	}

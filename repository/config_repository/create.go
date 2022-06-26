@@ -16,14 +16,9 @@ func (c *defaultConfigRepository) Create(ctx context.Context, config *go_hera.Co
 		config.Name = "Hera App"
 	}
 	// set default fields
-	config.DisableSignup = false
-	config.DisableLogin = false
 	config.ValidatePassword = true
-	config.VerifyEmail = true
 	config.CreatedAt = ts.Now()
 	config.UpdatedAt = ts.Now()
-	config.SupportedLoginMechanisms = []go_hera.LoginType{go_hera.LoginType_EMAIL_PASSWORD, go_hera.LoginType_PHONE_PASSWORD, go_hera.LoginType_USERNAME_PASSWORD}
-	config.VerifyPhone = true
 	create := models.ProtoConfigToConfig(config)
 	create.Id = namespaceConfigName
 	if err := c.crypto.Encrypt(create); err != nil {

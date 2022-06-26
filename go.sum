@@ -244,6 +244,8 @@ github.com/nuntiodev/hera-proto v0.2.84 h1:rCFmudpqOz7fX2WuyGMBSWNvjStKrPYmmYPsG
 github.com/nuntiodev/hera-proto v0.2.84/go.mod h1:i4tVO9nn5JskVo8mR9wmmI00aNIJ4hmg9d0BYQZfFZs=
 github.com/nuntiodev/x v0.2.40 h1:oWDf+lqdYMURWrvYAR6IFStm7yb3uA5VpDHguuIaYxs=
 github.com/nuntiodev/x v0.2.40/go.mod h1:fBPW5cAn55VpDsOcz6Fn7M7Vj7cIDrKFBLCIgW8vpEA=
+github.com/nuntiodev/x v0.2.41 h1:z3ecCTJwHRwuD9UQyv5+TCdOwFyKrpIfNxtIpq2Hytk=
+github.com/nuntiodev/x v0.2.41/go.mod h1:fBPW5cAn55VpDsOcz6Fn7M7Vj7cIDrKFBLCIgW8vpEA=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/onsi/ginkgo v0.0.0-20170829012221-11459a886d9c/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=

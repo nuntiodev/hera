@@ -103,39 +103,50 @@ func initialize() error {
 	return nil
 }
 
-func (h *defaultHandler) initializeDefaultConfig() error {
+func (h *defaultHandler) initializeDefaultConfig() (*go_hera.Config, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
-	_, err := h.GetConfig(ctx, &go_hera.HeraRequest{})
-	heraConfig := models.Config{}
+	var configUpdate *go_hera.Config
+	var configCreate *go_hera.Config
+	resp, err := h.GetConfig(ctx, &go_hera.HeraRequest{})
 	if err != nil {
-		h.zapLog.Info("hera config does not exits - creating...")
-		// load json file
-		jsonFile, err := os.Open("hera_config.json")
-		if err == nil {
-			byteValue, err := ioutil.ReadAll(jsonFile)
-			if err != nil {
-				return err
-			}
-			if err := json.Unmarshal(byteValue, &heraConfig); err != nil {
-				return err
-			}
-		}
-		if _, err := h.CreateNamespace(ctx, &go_hera.HeraRequest{
-			Config: models.ConfigToProtoConfig(&heraConfig),
-		}); err != nil {
-			return err
+		resp, err := h.CreateNamespace(ctx, &go_hera.HeraRequest{
+			Config: &go_hera.Config{Name: "Nuntio Hera App"},
+		})
+		configCreate = resp.Config
+		if err != nil {
+			return nil, err
 		}
 		h.zapLog.Info("hera config was successfully created...")
 	} else {
+		configCreate = resp.Config
 		h.zapLog.Info("hera config already exists...")
 	}
-	if _, err := h.UpdateConfig(ctx, &go_hera.HeraRequest{
-		Config: models.ConfigToProtoConfig(&heraConfig),
-	}); err != nil {
-		return err
+	// load json file
+	jsonFile, err := os.Open("hera_config.json")
+	if err == nil {
+		h.zapLog.Info("hera_config.json file found. Updating default config.")
+		byteValue, err := ioutil.ReadAll(jsonFile)
+		if err != nil {
+			return nil, err
+		}
+		var heraConfig models.HeraConfig
+		if err := json.Unmarshal(byteValue, &heraConfig); err != nil {
+			return nil, err
+		}
+		configUpdate, err = models.HeraConfigToProto(&heraConfig)
+	} else {
+		h.zapLog.Info("no hera_config.json file found. Create one to override default values.")
 	}
-	return nil
+	if configUpdate != nil {
+		if _, err := h.UpdateConfig(ctx, &go_hera.HeraRequest{
+			Config: configUpdate,
+		}); err != nil {
+			return nil, err
+		}
+		return configUpdate, nil
+	}
+	return configCreate, nil
 }
 
 func New(zapLog *zap.Logger, repository repository.Repository, token token.Token, email email.Email, text text.Text, maxEmailVerificationAge time.Duration) (go_hera.ServiceServer, error) {
@@ -161,8 +172,16 @@ func New(zapLog *zap.Logger, repository repository.Repository, token token.Token
 		textEnabled:        textEnabled,
 		maxVerificationAge: maxEmailVerificationAge,
 	}
-	if err := handler.initializeDefaultConfig(); err != nil {
+	config, err := handler.initializeDefaultConfig()
+	if err != nil {
 		return nil, err
+	}
+	zapLog.Info(fmt.Sprintf("Hera is starting with config: %s", config.String()))
+	if config.VerifyPhone && !textEnabled {
+		return nil, errors.New("default config requires phone verification, but no TextSender interfaces was provided")
+	}
+	if config.VerifyEmail && !emailEnabled {
+		return nil, errors.New("default config requires email verification, but no EmailSender interfaces was provided")
 	}
 	return handler, nil
 }

@@ -10,7 +10,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=user
       - MONGO_INITDB_ROOT_PASSWORD=password
-  spvb:
+  hera:
     build: ./
     ports:
       - "9000:9000"
@@ -18,3 +18,5 @@ services:
       - MONGO_URI=mongodb://user:password@mongodb:27017/?retryWrites=true
       - INITIALIZE_SECRETS=true
       - INITIALIZE_ENGINE=memory
+    volumes:
+      - ${PWD}/hera_config.json:/hera_config.json

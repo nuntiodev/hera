@@ -206,7 +206,8 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 			// user does not exists -> create user
 			h.zapLog.Info("creating new user with: " + id)
 			if _, err := h.CreateUser(ctx, &go_hera.HeraRequest{User: user}); err != nil {
-				h.zapLog.Error("could not create user")
+				h.zapLog.Error("could not create user with err: " + err.Error())
+				return err
 			}
 		} else {
 			h.zapLog.Info("user with identifier already exists: " + id)

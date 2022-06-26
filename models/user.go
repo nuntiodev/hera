@@ -9,7 +9,7 @@ import (
 )
 
 type User struct {
-	Id                         string               `bson:"_id" json:"id"`
+	Id                         string               `bson:"_id" json:"_id"`
 	Username                   cryptox.Stringx      `bson:"username" json:"username"`
 	Email                      cryptox.Stringx      `bson:"email" json:"email"`
 	Password                   string               `bson:"password" json:"password"`

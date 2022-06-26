@@ -103,52 +103,6 @@ func initialize() error {
 	return nil
 }
 
-func (h *defaultHandler) initializeDefaultConfig() (*go_hera.Config, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
-	defer cancel()
-	var configUpdate *go_hera.Config
-	var configCreate *go_hera.Config
-	resp, err := h.GetConfig(ctx, &go_hera.HeraRequest{})
-	if err != nil {
-		resp, err := h.CreateNamespace(ctx, &go_hera.HeraRequest{
-			Config: &go_hera.Config{Name: "Nuntio Hera App"},
-		})
-		configCreate = resp.Config
-		if err != nil {
-			return nil, err
-		}
-		h.zapLog.Info("hera config was successfully created...")
-	} else {
-		configCreate = resp.Config
-		h.zapLog.Info("hera config already exists...")
-	}
-	// load json file
-	jsonFile, err := os.Open("hera_config.json")
-	if err == nil {
-		h.zapLog.Info("hera_config.json file found. Updating default config.")
-		byteValue, err := ioutil.ReadAll(jsonFile)
-		if err != nil {
-			return nil, err
-		}
-		var heraConfig models.HeraConfig
-		if err := json.Unmarshal(byteValue, &heraConfig); err != nil {
-			return nil, err
-		}
-		configUpdate, err = models.HeraConfigToProto(&heraConfig)
-	} else {
-		h.zapLog.Info("no hera_config.json file found. Create one to override default values.")
-	}
-	if configUpdate != nil {
-		if _, err := h.UpdateConfig(ctx, &go_hera.HeraRequest{
-			Config: configUpdate,
-		}); err != nil {
-			return nil, err
-		}
-		return configUpdate, nil
-	}
-	return configCreate, nil
-}
-
 func New(zapLog *zap.Logger, repository repository.Repository, token token.Token, email email.Email, text text.Text, maxEmailVerificationAge time.Duration) (go_hera.ServiceServer, error) {
 	zapLog.Info("creating handler")
 	if err := initialize(); err != nil {
@@ -172,16 +126,91 @@ func New(zapLog *zap.Logger, repository repository.Repository, token token.Token
 		textEnabled:        textEnabled,
 		maxVerificationAge: maxEmailVerificationAge,
 	}
-	config, err := handler.initializeDefaultConfig()
-	if err != nil {
+	if err := handler.initializeDefaultConfigAndUsers(textEnabled, emailEnabled); err != nil {
 		return nil, err
 	}
-	zapLog.Info(fmt.Sprintf("Hera is starting with config: %s", config.String()))
-	if config.VerifyPhone && !textEnabled {
-		return nil, errors.New("default config requires phone verification, but no TextSender interfaces was provided")
-	}
-	if config.VerifyEmail && !emailEnabled {
-		return nil, errors.New("default config requires email verification, but no EmailSender interfaces was provided")
-	}
 	return handler, nil
+}
+
+func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabled bool) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	defer cancel()
+	// INITIALIZE CONFIG
+	var configUpdate *go_hera.Config
+	var configCreate *go_hera.Config
+	var users []*go_hera.User
+	resp, err := h.GetConfig(ctx, &go_hera.HeraRequest{})
+	if err != nil {
+		resp, err := h.CreateNamespace(ctx, &go_hera.HeraRequest{
+			Config: &go_hera.Config{Name: "Nuntio Hera App"},
+		})
+		configCreate = resp.Config
+		if err != nil {
+			return err
+		}
+		h.zapLog.Info("hera config was successfully created...")
+	} else {
+		configCreate = resp.Config
+		h.zapLog.Info("hera config already exists...")
+	}
+	// load json file
+	jsonFile, err := os.Open("hera_config.json")
+	if err == nil {
+		h.zapLog.Info("hera_config.json file found. Updating default config.")
+		byteValue, err := ioutil.ReadAll(jsonFile)
+		if err != nil {
+			return err
+		}
+		var heraConfig models.HeraConfig
+		if err := json.Unmarshal(byteValue, &heraConfig); err != nil {
+			return err
+		}
+		configUpdate, err = models.HeraConfigToProtoConfig(&heraConfig)
+		if err != nil {
+			return err
+		}
+		users = models.HeraConfigToProtoUsers(&heraConfig)
+	} else {
+		h.zapLog.Info("no hera_config.json file found. Create one to override default values.")
+	}
+	if configUpdate != nil {
+		if _, err := h.UpdateConfig(ctx, &go_hera.HeraRequest{
+			Config: configUpdate,
+		}); err != nil {
+			return err
+		}
+		configCreate = configUpdate
+	}
+	h.zapLog.Info(fmt.Sprintf("Hera is starting with config: %s", configCreate.String()))
+	if configCreate.VerifyPhone && !textEnabled {
+		return errors.New("default config requires phone verification, but no TextSender interfaces was provided")
+	}
+	if configCreate.VerifyEmail && !emailEnabled {
+		return errors.New("default config requires email verification, but no EmailSender interfaces was provided")
+	}
+	// INITIALIZE USERS
+	for _, user := range users {
+		id := ""
+		if user.GetId() != "" {
+			id = user.GetId()
+		} else if user.GetEmail() != "" {
+			id = user.GetEmail()
+		} else if user.GetPhone() != "" {
+			id = user.GetPhone()
+		} else if user.GetUsername() != "" {
+			id = user.GetUsername()
+		}
+		// check if user already has been created
+		if _, err := h.GetUser(ctx, &go_hera.HeraRequest{User: user}); err != nil {
+			h.zapLog.Error("could not find user with err: " + err.Error())
+			// user does not exists -> create user
+			h.zapLog.Info("creating new user with: " + id)
+			if _, err := h.CreateUser(ctx, &go_hera.HeraRequest{User: user}); err != nil {
+				h.zapLog.Error("could not create user")
+			}
+		} else {
+			h.zapLog.Info("user with identifier already exists: " + id)
+		}
+	}
+	return nil
 }

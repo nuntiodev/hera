@@ -41,7 +41,7 @@ func (ub *userRepositoryBuilder) Build(ctx context.Context) (user_repository.Use
 		return nil, err
 	}
 	collection := ub.client.Database(ub.namespace).Collection("users")
-	userRepository, err := user_repository.New(ctx, collection, crypto, ub.validatePassword, ub.maxEmailVerificationAge)
+	userRepository, err := user_repository.New(collection, crypto, ub.validatePassword, ub.maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}

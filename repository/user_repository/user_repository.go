@@ -130,7 +130,7 @@ func (r *mongodbRepository) BuildIndexes(ctx context.Context) error {
 	return nil
 }
 
-func New(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, validatePassword bool, maxEmailVerificationAge time.Duration) (UserRepository, error) {
+func New(collection *mongo.Collection, crypto cryptox.Crypto, validatePassword bool, maxEmailVerificationAge time.Duration) (UserRepository, error) {
 	return &mongodbRepository{
 		collection:             collection,
 		crypto:                 crypto,

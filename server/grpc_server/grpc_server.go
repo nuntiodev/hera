@@ -50,7 +50,6 @@ func (s *Server) Run() error {
 		return err
 	}
 	defer lis.Close()
-	s.logger.Info(fmt.Sprintf("gRPC server running on port: %s", port))
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(

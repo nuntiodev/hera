@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera/authenticator"
 	"google.golang.org/grpc"
 )
 
@@ -15,7 +16,7 @@ func (i *DefaultInterceptor) WithAuthenticateUnaryInterceptor(ctx context.Contex
 	if !ok {
 		translatedReq = &go_hera.HeraRequest{}
 	}
-	if err := i.authenticator.AuthenticateRequest(ctx, translatedReq); err != nil {
+	if err := i.authenticator.AuthenticateRequest(ctx, translatedReq, &authenticator.Info{IsGrpc: true}); err != nil {
 		return nil, err
 	}
 	return handler(ctx, translatedReq)

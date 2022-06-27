@@ -149,6 +149,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 		//HttpOnly: true,
 	}
 	fmt.Println(accessCookie.String())
+	// todo: check if header is also set for http server
 	if err := grpc.SetHeader(ctx, map[string][]string{
 		"Set-Cookie": {accessCookie.String(), refreshCookie.String()},
 	}); err != nil {

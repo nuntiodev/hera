@@ -31,6 +31,9 @@ type Server struct {
 }
 
 func New(handler go_hera.ServiceServer, interceptor interceptor.Interceptor, authenticator authenticator.Authenticator, logger *zap.Logger) (*Server, error) {
+	if err := initialize(); err != nil {
+		return nil, err
+	}
 	return &Server{
 		handler:       handler,
 		interceptor:   interceptor,

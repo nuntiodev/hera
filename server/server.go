@@ -44,11 +44,11 @@ func initialize() error {
 	return nil
 }
 
-func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
+func New(ctx context.Context, logger *zap.Logger) (*Server, error) {
 	if err := initialize(); err != nil {
 		return nil, err
 	}
-	myDatabase, err := database.CreateDatabase(zapLog)
+	myDatabase, err := database.CreateDatabase(logger)
 	if err != nil {
 		return nil, err
 	}
@@ -60,29 +60,29 @@ func New(ctx context.Context, zapLog *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	myRepository, err := repository.New(mongoClient, encryptionKeys, zapLog, maxEmailVerificationAge)
+	myRepository, err := repository.New(mongoClient, encryptionKeys, logger, maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}
 	// it should be okay to spin up a service without email provider
 	myEmail, err := email.New()
 	if err != nil {
-		zapLog.Warn("Email is not enabled. If you want to enable the email interface, override the EmailSender interface.")
+		logger.Warn("Email is not enabled. If you want to enable the email interface, override the EmailSender interface.")
 	}
 	myText, err := text.New()
 	if err != nil {
-		zapLog.Warn("Text is not enabled. If you want to enable the text interface, override the TextSender interface.")
+		logger.Warn("Text is not enabled. If you want to enable the text interface, override the TextSender interface.")
 	}
-	myHandler, err := handler.New(zapLog, myRepository, myToken, myEmail, myText, maxEmailVerificationAge)
+	myHandler, err := handler.New(logger, myRepository, myToken, myEmail, myText, maxEmailVerificationAge)
 	if err != nil {
 		return nil, err
 	}
 	myAuthenticator := authenticator.New()
-	myInterceptor, err := interceptor.New(zapLog, myAuthenticator)
+	myInterceptor, err := interceptor.New(logger, myAuthenticator)
 	if err != nil {
 		return nil, err
 	}
-	grpcServer, err := grpc_server.New(zapLog, myHandler, myInterceptor)
+	grpcServer, err := grpc_server.New(logger, myHandler, myInterceptor)
 	if err != nil {
 		return nil, err
 	}

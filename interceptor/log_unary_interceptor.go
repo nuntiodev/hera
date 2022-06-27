@@ -11,12 +11,12 @@ func (i *DefaultInterceptor) WithLogUnaryInterceptor(ctx context.Context, req in
 	start := time.Now()
 	h, err := handler(ctx, req) // make actual request
 	if err != nil {
-		i.zapLog.Error(fmt.Sprintf("Hera: Method:%s	Duration:%s   Error:%v",
+		i.logger.Error(fmt.Sprintf("Hera: Method:%s	Duration:%s   Error:%v",
 			info.FullMethod,
 			time.Since(start),
 			err))
 	} else {
-		i.zapLog.Debug(fmt.Sprintf("Method:%s	Duration:%s",
+		i.logger.Debug(fmt.Sprintf("Method:%s	Duration:%s",
 			info.FullMethod,
 			time.Since(start),
 		))

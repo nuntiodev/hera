@@ -22,8 +22,8 @@ type Initializer interface {
 	CreateSecrets(ctx context.Context) error
 }
 
-func New(zapLog *zap.Logger, engine string) (Initializer, error) {
-	zapLog.Info("initializing system with encryption secrets and public/private keys")
+func New(logger *zap.Logger, engine string) (Initializer, error) {
+	logger.Info("initializing system with encryption secrets and public/private keys")
 	redLog := color.New(color.FgRed)
 	blueLog := color.New(color.FgBlue)
 	if engine == EngineKubernetes {
@@ -45,7 +45,7 @@ func New(zapLog *zap.Logger, engine string) (Initializer, error) {
 			return nil, err
 		}
 		return &kubernetesInitializer{
-			zapLog:    zapLog,
+			logger:    logger,
 			k8s:       clientSet,
 			redLog:    redLog,
 			blueLog:   blueLog,
@@ -53,7 +53,7 @@ func New(zapLog *zap.Logger, engine string) (Initializer, error) {
 		}, nil
 	} else if engine == EngineMemory {
 		return &memoryInitializer{
-			zapLog:  zapLog,
+			logger:  logger,
 			redLog:  redLog,
 			blueLog: blueLog,
 		}, nil

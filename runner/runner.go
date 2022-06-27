@@ -25,13 +25,13 @@ func initialize() error {
 	return nil
 }
 
-func Run(ctx context.Context, zapLog *zap.Logger) error {
-	zapLog.Info(fmt.Sprintf("running Hera version: %d", version))
+func Run(ctx context.Context, logger *zap.Logger) error {
+	logger.Info(fmt.Sprintf("running Hera version: %d", version))
 	if err := initialize(); err != nil {
 		return err
 	}
 	if initializeSecrets {
-		myInitializer, err := initializer.New(zapLog, initializeEngine)
+		myInitializer, err := initializer.New(logger, initializeEngine)
 		if err != nil {
 			return err
 		}
@@ -39,8 +39,8 @@ func Run(ctx context.Context, zapLog *zap.Logger) error {
 			return err
 		}
 	}
-	zapLog.Info("runner is initializing the application...")
-	serve, err := server.New(ctx, zapLog)
+	logger.Info("runner is initializing the application...")
+	serve, err := server.New(ctx, logger)
 	if err != nil {
 		return err
 	}

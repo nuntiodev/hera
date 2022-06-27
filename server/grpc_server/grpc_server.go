@@ -18,7 +18,7 @@ var (
 )
 
 type Server struct {
-	zapLog      *zap.Logger
+	logger      *zap.Logger
 	handler     go_hera.ServiceServer
 	interceptor interceptor.Interceptor
 }
@@ -32,25 +32,25 @@ func initialize() error {
 	return nil
 }
 
-func New(zapLog *zap.Logger, handler go_hera.ServiceServer, interceptor interceptor.Interceptor) (*Server, error) {
+func New(logger *zap.Logger, handler go_hera.ServiceServer, interceptor interceptor.Interceptor) (*Server, error) {
 	if err := initialize(); err != nil {
 		return nil, err
 	}
 	return &Server{
-		zapLog:      zapLog,
+		logger:      logger,
 		handler:     handler,
 		interceptor: interceptor,
 	}, nil
 }
 
 func (s *Server) Run() error {
-	s.zapLog.Info("starting gRPC server")
+	s.logger.Info("starting gRPC server")
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		return err
 	}
 	defer lis.Close()
-	s.zapLog.Info(fmt.Sprintf("gRPC server running on port: %s", port))
+	s.logger.Info(fmt.Sprintf("gRPC server running on port: %s", port))
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(

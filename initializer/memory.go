@@ -13,7 +13,7 @@ import (
 
 type memoryInitializer struct {
 	namespace string
-	zapLog    *zap.Logger
+	logger    *zap.Logger
 	redLog    *color.Color
 	blueLog   *color.Color
 }

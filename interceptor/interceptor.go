@@ -45,7 +45,7 @@ const (
 )
 
 type DefaultInterceptor struct {
-	zapLog        *zap.Logger
+	logger        *zap.Logger
 	authenticator authenticator.Authenticator
 }
 
@@ -57,9 +57,9 @@ type Interceptor interface {
 	WithValidateStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
 }
 
-func New(zapLog *zap.Logger, authenticator authenticator.Authenticator) (Interceptor, error) {
+func New(logger *zap.Logger, authenticator authenticator.Authenticator) (Interceptor, error) {
 	return &DefaultInterceptor{
-		zapLog:        zapLog,
+		logger:        logger,
 		authenticator: authenticator,
 	}, nil
 }

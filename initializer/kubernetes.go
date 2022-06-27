@@ -20,7 +20,7 @@ const (
 
 type kubernetesInitializer struct {
 	namespace string
-	zapLog    *zap.Logger
+	logger    *zap.Logger
 	redLog    *color.Color
 	blueLog   *color.Color
 	k8s       *kubernetes.Clientset
@@ -34,7 +34,7 @@ func (i *kubernetesInitializer) CreateSecrets(ctx context.Context) error {
 	}
 	// check if secret already exists
 	if cryptoSecret, err := i.k8s.CoreV1().Secrets(i.namespace).Get(ctx, heraSecretName, metav1.GetOptions{}); err != nil {
-		i.zapLog.Info("hera secret does not exist... creating....")
+		i.logger.Info("hera secret does not exist... creating....")
 		// create public private keys
 		rsaPrivateKey, rsaPublicKey, err := cryptox.GenerateRsaKeyPair(4096)
 		if err != nil {
@@ -80,9 +80,9 @@ func (i *kubernetesInitializer) CreateSecrets(ctx context.Context) error {
 		if err := os.Setenv("ENCRYPTION_KEYS", encryptionSecret); err != nil {
 			return err
 		}
-		i.zapLog.Info("successfully created secret")
+		i.logger.Info("successfully created secret")
 	} else {
-		i.zapLog.Info("hera secret already exists")
+		i.logger.Info("hera secret already exists")
 		newEncryptionKey := strings.TrimSpace(os.Getenv("NEW_ENCRYPTION_KEY"))
 		newKeyAlreadyExists := false
 		encryptionKeys := strings.Fields(string(cryptoSecret.Data["ENCRYPTION_KEYS"]))
@@ -93,7 +93,7 @@ func (i *kubernetesInitializer) CreateSecrets(ctx context.Context) error {
 			}
 		}
 		if newEncryptionKey != "" && !newKeyAlreadyExists {
-			i.zapLog.Info("new key added... updating existing secret...")
+			i.logger.Info("new key added... updating existing secret...")
 			encryptionKeys = append(encryptionKeys, newEncryptionKey)
 			secretData := map[string]string{
 				"ENCRYPTION_KEYS": strings.Join(encryptionKeys, " "),

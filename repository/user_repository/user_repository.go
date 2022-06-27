@@ -64,7 +64,7 @@ type UserRepository interface {
 type mongodbRepository struct {
 	collection             *mongo.Collection
 	crypto                 cryptox.Crypto
-	zapLog                 *zap.Logger
+	logger                 *zap.Logger
 	validatePassword       bool
 	maxCodeVerificationAge time.Duration
 }

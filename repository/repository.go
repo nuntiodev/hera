@@ -41,8 +41,8 @@ func (r *defaultRepository) DropDatabase(ctx context.Context, namespace string) 
 	return r.mongodbClient.Database(namespace).Drop(ctx)
 }
 
-func New(mongoClient *mongo.Client, encryptionKeys []string, zapLog *zap.Logger, maxEmailVerificationAge time.Duration) (Repository, error) {
-	zapLog.Info("creating repository...")
+func New(mongoClient *mongo.Client, encryptionKeys []string, logger *zap.Logger, maxEmailVerificationAge time.Duration) (Repository, error) {
+	logger.Info("creating repository...")
 	repository := &defaultRepository{
 		mongodbClient:           mongoClient,
 		internalEncryptionKeys:  encryptionKeys,

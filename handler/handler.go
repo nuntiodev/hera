@@ -48,7 +48,7 @@ type defaultHandler struct {
 	text               text.Text
 	emailEnabled       bool
 	textEnabled        bool
-	zapLog             *zap.Logger
+	logger             *zap.Logger
 	maxVerificationAge time.Duration
 	defaultConfig      *go_hera.Config
 }
@@ -109,8 +109,8 @@ func initialize() error {
 	return nil
 }
 
-func New(zapLog *zap.Logger, repository repository.Repository, token token.Token, email email.Email, text text.Text, maxEmailVerificationAge time.Duration) (go_hera.ServiceServer, error) {
-	zapLog.Info("creating handler")
+func New(logger *zap.Logger, repository repository.Repository, token token.Token, email email.Email, text text.Text, maxEmailVerificationAge time.Duration) (go_hera.ServiceServer, error) {
+	logger.Info("creating handler")
 	if err := initialize(); err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func New(zapLog *zap.Logger, repository repository.Repository, token token.Token
 	handler := &defaultHandler{
 		repository:         repository,
 		token:              token,
-		zapLog:             zapLog,
+		logger:             logger,
 		email:              email,
 		emailEnabled:       emailEnabled,
 		text:               text,
@@ -156,15 +156,15 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		if err != nil {
 			return nil, err
 		}
-		h.zapLog.Info("hera config was successfully created...")
+		h.logger.Info("hera config was successfully created...")
 	} else {
 		configCreate = resp.Config
-		h.zapLog.Info("hera config already exists...")
+		h.logger.Info("hera config already exists...")
 	}
 	// load json file
 	jsonFile, err := os.Open("hera_config.json")
 	if err == nil {
-		h.zapLog.Info("hera_config.json file found. Updating default config.")
+		h.logger.Info("hera_config.json file found. Updating default config.")
 		byteValue, err := ioutil.ReadAll(jsonFile)
 		if err != nil {
 			return nil, err
@@ -179,7 +179,7 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		}
 		users = models.HeraConfigToProtoUsers(&heraConfig)
 	} else {
-		h.zapLog.Info("no hera_config.json file found. Create one to override default values.")
+		h.logger.Info("no hera_config.json file found. Create one to override default values.")
 	}
 	if configUpdate != nil {
 		if _, err := h.UpdateConfig(ctx, &go_hera.HeraRequest{
@@ -189,7 +189,7 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		}
 		configCreate = configUpdate
 	}
-	h.zapLog.Info(fmt.Sprintf("Hera is starting with config: %s", configCreate.String()))
+	h.logger.Info(fmt.Sprintf("Hera is starting with config: %s", configCreate.String()))
 	if configCreate.VerifyPhone && !textEnabled {
 		return nil, errors.New("default config requires phone verification, but no TextSender interfaces was provided")
 	}
@@ -210,15 +210,15 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		}
 		// check if user already has been created
 		if _, err := h.GetUser(ctx, &go_hera.HeraRequest{User: user}); err != nil {
-			h.zapLog.Error("could not find user with err: " + err.Error())
+			h.logger.Error("could not find user with err: " + err.Error())
 			// user does not exists -> create user
-			h.zapLog.Info("creating new user with: " + id)
+			h.logger.Info("creating new user with: " + id)
 			if _, err := h.CreateUser(ctx, &go_hera.HeraRequest{User: user}); err != nil {
-				h.zapLog.Error("could not create user with err: " + err.Error())
+				h.logger.Error("could not create user with err: " + err.Error())
 				return nil, err
 			}
 		} else {
-			h.zapLog.Info("user with identifier already exists: " + id)
+			h.logger.Info("user with identifier already exists: " + id)
 		}
 	}
 	return configCreate, nil

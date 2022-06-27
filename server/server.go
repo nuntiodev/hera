@@ -8,23 +8,28 @@ import (
 	"github.com/nuntiodev/hera/interceptor"
 	"github.com/nuntiodev/hera/repository"
 	"github.com/nuntiodev/hera/server/grpc_server"
+	"github.com/nuntiodev/hera/server/http_server"
 	"github.com/nuntiodev/hera/text"
 	"github.com/nuntiodev/hera/token"
 	"github.com/nuntiodev/x/pointerx"
 	database "github.com/nuntiodev/x/repositoryx"
 	"go.uber.org/zap"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
 type Server struct {
 	GrpcServer *grpc_server.Server
+	HttpServer *http_server.Server
 }
 
 var (
 	encryptionKeys          []string
 	maxEmailVerificationAge = time.Minute * 5
+	enableGrpcServer        = true
+	enableHttpServer        = false
 )
 
 func initialize() error {
@@ -41,12 +46,27 @@ func initialize() error {
 			maxEmailVerificationAge = t
 		}
 	}
+	enableGrpcServerString, ok := os.LookupEnv("ENABLE_GRPC_SERVER")
+	if !ok || enableGrpcServerString == "" {
+		if val, err := strconv.ParseBool(enableGrpcServerString); err == nil {
+			enableGrpcServer = val
+		}
+	}
+	enableHttpServerString, ok := os.LookupEnv("ENABLE_HTTP_SERVER")
+	if !ok || enableHttpServerString == "" {
+		if val, err := strconv.ParseBool(enableHttpServerString); err == nil {
+			enableHttpServer = val
+		}
+	}
 	return nil
 }
 
 func New(ctx context.Context, logger *zap.Logger) (*Server, error) {
 	if err := initialize(); err != nil {
 		return nil, err
+	}
+	if !enableGrpcServer && !enableHttpServer {
+		logger.Fatal("no servers enabled")
 	}
 	myDatabase, err := database.CreateDatabase(logger)
 	if err != nil {
@@ -82,11 +102,22 @@ func New(ctx context.Context, logger *zap.Logger) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	grpcServer, err := grpc_server.New(logger, myHandler, myInterceptor)
-	if err != nil {
-		return nil, err
+	var grpcServer *grpc_server.Server
+	var httpServer *http_server.Server
+	if enableGrpcServer {
+		grpcServer, err = grpc_server.New(logger, myHandler, myInterceptor)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if enableHttpServer {
+		httpServer, err = http_server.New(myHandler, myInterceptor, myAuthenticator, logger)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &Server{
 		GrpcServer: grpcServer,
+		HttpServer: httpServer,
 	}, nil
 }

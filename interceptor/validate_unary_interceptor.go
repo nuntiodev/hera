@@ -34,7 +34,14 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 	if len(method) != 2 {
 		return nil, errors.New(fmt.Sprintf("invalid method call: %s", info.FullMethod))
 	}
-	switch method[1] {
+	if err := ValidateRequest(method[1], translatedReq); err != nil {
+		return &go_hera.HeraResponse{}, err
+	}
+	return handler(ctx, req) // make actual request
+}
+
+func ValidateRequest(name string, request *go_hera.HeraRequest) error {
+	switch name {
 	case Heartbeat, PublicKeys, DeleteNamespace,
 		RegisterRsaKey, RemovePublicKey, GetConfig,
 		/*todo: implment*/ ResetPassword:
@@ -43,49 +50,49 @@ func (i *DefaultInterceptor) WithValidateUnaryInterceptor(ctx context.Context, r
 		Login, DeleteUser, SendVerificationEmail,
 		VerifyEmail, SendVerificationText, VerifyPhone,
 		SendResetPasswordEmail, SendResetPasswordText:
-		if translatedReq.User == nil {
-			return nil, UserIsNil
+		if request.User == nil {
+			return UserIsNil
 		}
 	case CreateNamespace, UpdateConfig, DeleteConfig:
-		if translatedReq.Config == nil {
-			return nil, ConfigIsNil
+		if request.Config == nil {
+			return ConfigIsNil
 		}
 	case DeleteUsers:
-		if translatedReq.Users == nil {
-			return nil, UsersIsNil
+		if request.Users == nil {
+			return UsersIsNil
 		}
 	case UpdateUserMetadata, UpdateUserProfile, UpdateUserContact,
 		UpdateUserPassword:
-		if translatedReq.User == nil {
-			return nil, UserIsNil
-		} else if translatedReq.UserUpdate == nil {
-			return nil, UpdateIsNil
+		if request.User == nil {
+			return UserIsNil
+		} else if request.UserUpdate == nil {
+			return UpdateIsNil
 		}
 	case SearchForUser, ListUsers:
-		if translatedReq.Query == nil {
-			return nil, QueryIsNil
+		if request.Query == nil {
+			return QueryIsNil
 		}
 	case CreateTokenPair:
-		if translatedReq.User == nil {
-			return nil, UserIsNil
-		} else if translatedReq.Token == nil {
-			return nil, TokenIsNil
+		if request.User == nil {
+			return UserIsNil
+		} else if request.Token == nil {
+			return TokenIsNil
 		}
 	case ValidateToken:
-		if translatedReq.TokenPointer == "" {
-			return nil, TokenIsNil
+		if request.TokenPointer == "" {
+			return TokenIsNil
 		}
 	case BlockToken:
-		if translatedReq.TokenPointer == "" && translatedReq.Token == nil {
-			return nil, TokenIsNil
+		if request.TokenPointer == "" && request.Token == nil {
+			return TokenIsNil
 		}
 	case RefreshToken, GetTokens:
-		if translatedReq.Token == nil {
-			return nil, TokenIsNil
+		if request.Token == nil {
+			return TokenIsNil
 		}
 
 	default:
-		return nil, errors.New(fmt.Sprintf("invalid request: %s", info.FullMethod))
+		return errors.New(fmt.Sprintf("invalid request: %s", name))
 	}
-	return handler(ctx, req) // make actual request
+	return nil
 }

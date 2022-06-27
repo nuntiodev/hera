@@ -44,7 +44,7 @@ func New(logger *zap.Logger, handler go_hera.ServiceServer, interceptor intercep
 }
 
 func (s *Server) Run() error {
-	s.logger.Info("starting gRPC server")
+	s.logger.Info(fmt.Sprintf("starting Hera gRPC server on port %s", port))
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		return err

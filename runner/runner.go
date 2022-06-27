@@ -6,6 +6,7 @@ import (
 	"github.com/nuntiodev/hera/initializer"
 	"github.com/nuntiodev/hera/server"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 	"os"
 	"strconv"
 )
@@ -44,5 +45,18 @@ func Run(ctx context.Context, logger *zap.Logger) error {
 	if err != nil {
 		return err
 	}
-	return serve.GrpcServer.Run()
+	errGroup := errgroup.Group{}
+	if serve.HttpServer != nil {
+		if serve.GrpcServer == nil {
+			return serve.HttpServer.Run()
+		} else {
+			errGroup.Go(func() error {
+				return serve.HttpServer.Run()
+			})
+		}
+	}
+	if serve.GrpcServer != nil {
+		return serve.GrpcServer.Run()
+	}
+	return errGroup.Wait()
 }

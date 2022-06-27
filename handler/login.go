@@ -148,6 +148,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 		Value: refreshToken,
 		//HttpOnly: true,
 	}
+	fmt.Println(accessCookie.String())
 	if err := grpc.SetHeader(ctx, map[string][]string{
 		"Set-Cookie": {accessCookie.String(), refreshCookie.String()},
 	}); err != nil {

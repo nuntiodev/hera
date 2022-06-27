@@ -35,6 +35,11 @@ var (
 	appName            = ""
 )
 
+const (
+	HeraAccessTokenId  = "hera-access-token"
+	HeraRefreshTokenId = "hera-refresh-token"
+)
+
 type defaultHandler struct {
 	repository         repository.Repository
 	crypto             cryptox.Crypto
@@ -45,6 +50,7 @@ type defaultHandler struct {
 	textEnabled        bool
 	zapLog             *zap.Logger
 	maxVerificationAge time.Duration
+	defaultConfig      *go_hera.Config
 }
 
 func decodeKeyPair(rsaPrivateKey, rsaPublicKey string) (*rsa.PrivateKey, *rsa.PublicKey, error) {
@@ -126,13 +132,15 @@ func New(zapLog *zap.Logger, repository repository.Repository, token token.Token
 		textEnabled:        textEnabled,
 		maxVerificationAge: maxEmailVerificationAge,
 	}
-	if err := handler.initializeDefaultConfigAndUsers(textEnabled, emailEnabled); err != nil {
+	defaultConfig, err := handler.initializeDefaultConfigAndUsers(textEnabled, emailEnabled)
+	if err != nil {
 		return nil, err
 	}
+	handler.defaultConfig = defaultConfig
 	return handler, nil
 }
 
-func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabled bool) error {
+func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabled bool) (*go_hera.Config, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
 	// INITIALIZE CONFIG
@@ -146,7 +154,7 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		})
 		configCreate = resp.Config
 		if err != nil {
-			return err
+			return nil, err
 		}
 		h.zapLog.Info("hera config was successfully created...")
 	} else {
@@ -159,15 +167,15 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		h.zapLog.Info("hera_config.json file found. Updating default config.")
 		byteValue, err := ioutil.ReadAll(jsonFile)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		var heraConfig models.HeraConfig
 		if err := json.Unmarshal(byteValue, &heraConfig); err != nil {
-			return err
+			return nil, err
 		}
 		configUpdate, err = models.HeraConfigToProtoConfig(&heraConfig)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		users = models.HeraConfigToProtoUsers(&heraConfig)
 	} else {
@@ -177,16 +185,16 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		if _, err := h.UpdateConfig(ctx, &go_hera.HeraRequest{
 			Config: configUpdate,
 		}); err != nil {
-			return err
+			return nil, err
 		}
 		configCreate = configUpdate
 	}
 	h.zapLog.Info(fmt.Sprintf("Hera is starting with config: %s", configCreate.String()))
 	if configCreate.VerifyPhone && !textEnabled {
-		return errors.New("default config requires phone verification, but no TextSender interfaces was provided")
+		return nil, errors.New("default config requires phone verification, but no TextSender interfaces was provided")
 	}
 	if configCreate.VerifyEmail && !emailEnabled {
-		return errors.New("default config requires email verification, but no EmailSender interfaces was provided")
+		return nil, errors.New("default config requires email verification, but no EmailSender interfaces was provided")
 	}
 	// INITIALIZE USERS
 	for _, user := range users {
@@ -207,11 +215,11 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 			h.zapLog.Info("creating new user with: " + id)
 			if _, err := h.CreateUser(ctx, &go_hera.HeraRequest{User: user}); err != nil {
 				h.zapLog.Error("could not create user with err: " + err.Error())
-				return err
+				return nil, err
 			}
 		} else {
 			h.zapLog.Info("user with identifier already exists: " + id)
 		}
 	}
-	return nil
+	return configCreate, nil
 }

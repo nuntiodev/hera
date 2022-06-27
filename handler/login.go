@@ -8,7 +8,9 @@ import (
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	"k8s.io/utils/strings/slices"
+	"net/http"
 	"time"
 
 	"github.com/nuntiodev/hera-proto/go_hera"
@@ -135,6 +137,23 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 	if err != nil {
 		return nil, err
 	}
+	// set cookies for the browser
+	accessCookie := &http.Cookie{
+		Name:     HeraAccessTokenId,
+		Value:    accessToken,
+		HttpOnly: true,
+	}
+	refreshCookie := &http.Cookie{
+		Name:     HeraRefreshTokenId,
+		Value:    refreshToken,
+		HttpOnly: true,
+	}
+	if err := grpc.SetHeader(ctx, map[string][]string{
+		"Set-Cookie": {accessCookie.String(), refreshCookie.String()},
+	}); err != nil {
+		return nil, err
+	}
+	// return access and refresh token to the client
 	return &go_hera.HeraResponse{
 		Token: &go_hera.Token{
 			AccessToken:  accessToken,

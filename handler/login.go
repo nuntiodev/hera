@@ -137,7 +137,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 	if err != nil {
 		return nil, err
 	}
-	// set cookies for the browser
+	// set access and refresh cookies for the browser
 	accessCookie := &http.Cookie{
 		Name:  HeraAccessTokenId,
 		Value: accessToken,

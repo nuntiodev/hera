@@ -139,14 +139,14 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 	}
 	// set cookies for the browser
 	accessCookie := &http.Cookie{
-		Name:     HeraAccessTokenId,
-		Value:    accessToken,
-		HttpOnly: true,
+		Name:  HeraAccessTokenId,
+		Value: accessToken,
+		//HttpOnly: true,
 	}
 	refreshCookie := &http.Cookie{
-		Name:     HeraRefreshTokenId,
-		Value:    refreshToken,
-		HttpOnly: true,
+		Name:  HeraRefreshTokenId,
+		Value: refreshToken,
+		//HttpOnly: true,
 	}
 	if err := grpc.SetHeader(ctx, map[string][]string{
 		"Set-Cookie": {accessCookie.String(), refreshCookie.String()},

@@ -70,5 +70,5 @@ func (h *defaultHandler) CreateNamespace(ctx context.Context, req *go_hera.HeraR
 	if err = errGroup.Wait(); err != nil {
 		return nil, err
 	}
-	return
+	return &go_hera.HeraResponse{}, nil
 }

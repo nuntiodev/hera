@@ -92,5 +92,5 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_hera.HeraReq
 		}
 		return nil
 	})
-	return nil, nil
+	return &go_hera.HeraResponse{}, nil
 }

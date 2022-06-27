@@ -69,5 +69,5 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 	if bcryptErr != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &go_hera.HeraResponse{}, nil
 }

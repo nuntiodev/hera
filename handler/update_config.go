@@ -20,5 +20,5 @@ func (h *defaultHandler) UpdateConfig(ctx context.Context, req *go_hera.HeraRequ
 	if err := configRepository.Update(ctx, req.Config); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &go_hera.HeraResponse{}, nil
 }

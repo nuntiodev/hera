@@ -22,5 +22,5 @@ func (h *defaultHandler) UpdateUserMetadata(ctx context.Context, req *go_hera.He
 	if err = userRepository.UpdateMetadata(ctx, req.User, req.UserUpdate); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &go_hera.HeraResponse{}, nil
 }

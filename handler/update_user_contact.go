@@ -21,5 +21,5 @@ func (h *defaultHandler) UpdateUserContact(ctx context.Context, req *go_hera.Her
 	if err = userRepository.UpdateContact(ctx, req.User, req.UserUpdate); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &go_hera.HeraResponse{}, nil
 }

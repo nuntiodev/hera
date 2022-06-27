@@ -53,5 +53,5 @@ func (h *defaultHandler) VerifyPhone(ctx context.Context, req *go_hera.HeraReque
 	if bcryptErr != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &go_hera.HeraResponse{}, nil
 }

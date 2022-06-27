@@ -40,5 +40,5 @@ func (h *defaultHandler) BlockToken(ctx context.Context, req *go_hera.HeraReques
 	if err = tokenRepository.Block(ctx, token); err != nil {
 		return nil, err
 	}
-	return
+	return &go_hera.HeraResponse{}, nil
 }

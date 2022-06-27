@@ -13,5 +13,5 @@ func (h *defaultHandler) Heartbeat(ctx context.Context, req *go_hera.HeraRequest
 	if err := h.repository.Liveness(ctx); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &go_hera.HeraResponse{}, nil
 }

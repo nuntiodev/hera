@@ -12,6 +12,7 @@ var (
 type Info struct {
 	IsGrpc bool
 	IsHttp bool
+	Name   string
 }
 
 type Authenticator interface {

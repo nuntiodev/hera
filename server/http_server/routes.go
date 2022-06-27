@@ -68,7 +68,10 @@ func (s *Server) performAction(name string, x func(ctx context.Context, req *go_
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
-		if err := s.authenticator.AuthenticateRequest(ctx, &heraRequest, &authenticator.Info{IsHttp: true}); err != nil {
+		if err := s.authenticator.AuthenticateRequest(ctx, &heraRequest, &authenticator.Info{
+			IsHttp: true,
+			Name:   name,
+		}); err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			s.logger.Debug("request failed with err: " + err.Error())
 			return

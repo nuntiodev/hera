@@ -2,17 +2,13 @@
 
 ![example workflow](https://github.com/nuntiodev/hera/actions/workflows/build.yaml/badge.svg)
 
-Building Nuntio Blocks: secure, efficient & open-source API blocks that run on any Linux-based environment and scales
-massively. Nuntio Cloud is the commercial offering of the above technologies and help companies go from idea to
-production faster, without losing control over their data or services. Our goal with Nuntio Cloud is to provide social
-API-blocks that are secure, easy to set up, scales worldwide and that you can move from Nuntio Cloud to your private
-data center whenever you want.
+Building Nuntio Blocks: secure, efficient & open-source API blocks that run on any Linux-based environment and scale massively. Nuntio Cloud is the commercial offering of the above technologies and helps companies go from idea to production faster, without losing control over their data or services. Our goal with Nuntio Cloud is to provide an open European alternative to Google Firebase that is secure, easy to set up, scale worldwide, and that you can move from Nuntio Cloud to your private data-center or another provider whenever you want.
 
 ## Hera
 
 Hera is a fully fledged user-management system written in **Golang**, designed to be secure & stateless and to run in Kubernetes. It handles
 advanced data encryption models and features such as: normal and verfified authentication flows, creating, fetching and
-updating user information with custom metatadata, sending and validating emails and much more!
+updating user information with custom metatadata, sending and validating emails and much more! Hopefully, Hera will be the last authentication & user-management system you will ever need.
 Reach out to info@nuntio.io if you wanna give it a try, or sign-up for for a porfile
 in [Nuntio Cloud](https://cloud.nuntio.io) if you wanna try our managed solution.
 

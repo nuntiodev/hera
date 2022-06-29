@@ -33,6 +33,7 @@ secrets:
   newSecret: ""
 init:
   enabled: "true"
+  mountPath: "/mnt"
   config:
     logo: ""
     name: ""

@@ -161,7 +161,8 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 	if path := os.Getenv("CONFIG_PATH"); path != "" {
 		configPath = path
 	}
-	h.logger.Info(fmt.Sprintf("trying to open config file: %s", configPath))
+	path, _ := os.Getwd()
+	h.logger.Info(fmt.Sprintf("trying to open config file: %s current directory is: %s", configPath, path))
 	jsonFile, err := os.Open(configPath)
 	if err == nil {
 		h.logger.Info("hera_config.json file found. Updating default config.")

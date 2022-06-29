@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	ts "google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 )
 
 const (
@@ -34,6 +36,7 @@ type HeraUser struct {
 	Username  string `bson:"username" json:"username"`
 	Image     string `bson:"image" json:"image"`
 	Id        string `bson:"id" json:"id"`
+	Birthdate string `bson:"birthdate" json:"birthdate"`
 }
 
 type HeraConfig struct {
@@ -89,6 +92,7 @@ func HeraConfigToProtoUsers(h *HeraConfig) []*go_hera.User {
 	}
 	var resp []*go_hera.User
 	for _, user := range h.Users {
+		birthdate, _ := time.Parse("2006-01-02", user.Birthdate)
 		resp = append(resp, &go_hera.User{
 			FirstName: &user.FirstName,
 			LastName:  &user.LastName,
@@ -98,6 +102,7 @@ func HeraConfigToProtoUsers(h *HeraConfig) []*go_hera.User {
 			Username:  &user.Username,
 			Image:     &user.Image,
 			Id:        user.Id,
+			Birthdate: ts.New(birthdate),
 		})
 	}
 	return resp

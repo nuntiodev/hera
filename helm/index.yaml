@@ -1,14 +1,14 @@
 apiVersion: v1
 entries:
-  nuntio-user-block:
+  hera:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-06-29T07:08:36.853989873Z"
-    description: A Helm chart for the nuntio-user-block
-    digest: 97441437d8c34e5b811318a86e401d089b5dfff3dcc93ded27ae67c3b9f10522
-    name: nuntio-user-block
+    created: "2022-06-29T07:42:57.585625915Z"
+    description: A Helm chart for Hera
+    digest: 4a0979f21891b0adb4c0ea2152428d89c92485c9afb832f87020bc33616f88c4
+    name: hera
     type: application
     urls:
-    - charts/nuntio-user-block-0.0.43.tgz
-    version: 0.0.43
-generated: "2022-06-29T07:08:36.85336106Z"
+    - charts/hera-0.0.44.tgz
+    version: 0.0.44
+generated: "2022-06-29T07:42:57.58488392Z"

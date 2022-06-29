@@ -37,7 +37,7 @@ spec:
           env:
           {{- if eq .Values.service.grpc.enabled "true" }}
           - name: CONFIG_PATH
-            value: "/tmp/hera_config.json"
+            value: "{{ .Values.init.mountPath }}/hera_config.json"
           {{- end }}
           {{- range $k, $v := .Values.deployment.env }}
           - name: {{ $v.name }}

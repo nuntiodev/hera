@@ -10,7 +10,7 @@ data center whenever you want.
 
 ## Hera
 
-Hera is a fully fledged user-management system written in ```Golang, designed to be secure & stateless and to run in Kubernetes. It handles
+Hera is a fully fledged user-management system written in **Golang**, designed to be secure & stateless and to run in Kubernetes. It handles
 advanced data encryption models and features such as: normal and verfified authentication flows, creating, fetching and
 updating user information with custom metatadata, sending and validating emails and much more!
 Reach out to info@nuntio.io if you wanna give it a try, or sign-up for for a porfile

@@ -34,3 +34,30 @@ service:
 secrets:
   enabled: "false"
   newSecret: ""
+init:
+  enabled: true
+  config:
+    logo: ""
+    name: ""
+    disable_signup: false
+    disable_login: false
+    verify_email: true
+    verify_phone: false
+    validate_password: true
+    login_mechanisms:
+      - "email/password"
+  users:
+    - first_name: "Oscar Antonio Borlund"
+      last_name: "Orellana"
+      email: "oscar@nuntio.io"
+      password: "oscar@nuntio.io"
+      phone: "004522122798"
+      username: "nuntio-root-user"
+      birthdate: "1997-09-07"
+    - first_name: "Oscar Antonio Borlund"
+      last_name: "Orellana"
+      email: "oscar@nuntio.io"
+      password: "oscar@nuntio.io"
+      phone: "004522122798"
+      username: "nuntio-root-user"
+      birthdate: "1997-09-07"

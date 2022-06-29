@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hera-config
+  namespace: {{ .Release.Namespace | default "default" }}
+data:
+  hera_config.json: |-
+    {
+      "app": {
+        "logo": "{{ .Values.init.config.logo }}",
+        "name": "{{ .Values.init.config.name }}",
+        "disable_signup": {{ .Values.init.config.disable_signup }},
+        "disable_login": {{ .Values.init.config.disable_login }},
+        "verify_email": {{ .Values.init.config.verify_email }},
+        "verify_phone": {{ .Values.init.config.verify_phone }},
+        "validate_password": {{ .Values.init.config.validate_password }},
+        "login_mechanisms": [
+            {{- $last := sub (len .Values.init.config.login_mechanisms) 1 }}
+            {{- range  $index, $login := .Values.init.config.login_mechanisms }}
+            {{ $login }}{{ if ne $index $last }},{{ end }}
+            {{- end}}
+        ]
+      },
+      "users": [
+        {{- $last := sub (len .Values.init.users) 1 }}
+        {{- range  $index, $user := .Values.init.users }}
+        {{ $user | toJson }}{{ if ne $index $last }},{{ end }}
+        {{- end}}
+      ]
+    }

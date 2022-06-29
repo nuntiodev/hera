@@ -17,9 +17,6 @@ deployment:
   env:
     - name: MONGO_USER_COLLECTION
       value: users
-  secretEnv:
-    - cloud-mongo-secret
-    - mongo-secret
 service:
   http:
     enabled: "false"

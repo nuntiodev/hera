@@ -24,7 +24,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if eq .Values.init.enabled "true" }}
           volumeMounts:
-            - mountPath: /main/
+            - mountPath: /tmp
               name: {{ .Release.Name }}-config
           {{- end }}
           ports:
@@ -35,6 +35,10 @@ spec:
             - containerPort: {{ .Values.service.http.targetPort }}
             {{- end }}
           env:
+          {{- if eq .Values.service.grpc.enabled "true" }}
+          - name: CONFIG_PATH
+            value: "/tmp/hera_config.json"
+          {{- end }}
           {{- range $k, $v := .Values.deployment.env }}
           - name: {{ $v.name }}
             value: "{{ $v.value }}"

@@ -32,7 +32,7 @@ var (
 	publicKey          *rsa.PublicKey
 	publicKeyString    = ""
 	privateKey         *rsa.PrivateKey
-	appName            = ""
+	configPath         = "hera_config.json"
 )
 
 const (
@@ -102,10 +102,6 @@ func initialize() error {
 	if err != nil {
 		return err
 	}
-	appName, ok = os.LookupEnv("APP_NAME")
-	if !ok || appName == "" {
-		appName = "Nuntio Hera App"
-	}
 	return nil
 }
 
@@ -162,6 +158,9 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		h.logger.Info("hera config already exists...")
 	}
 	// load json file
+	if path := os.Getenv("CONFIG_PATH"); path != "" {
+		configPath = path
+	}
 	jsonFile, err := os.Open("hera_config.json")
 	if err == nil {
 		h.logger.Info("hera_config.json file found. Updating default config.")

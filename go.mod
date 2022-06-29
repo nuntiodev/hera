@@ -11,7 +11,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/joho/godotenv v1.4.0
 	github.com/nuntiodev/hera-sdks v0.2.96
-	github.com/nuntiodev/x v0.2.44
+	github.com/nuntiodev/x v0.2.45
 	go.mongodb.org/mongo-driver v1.9.1
 	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f

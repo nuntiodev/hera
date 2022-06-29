@@ -33,7 +33,7 @@ secrets:
   newSecret: ""
 init:
   enabled: "true"
-  mountPath: "/mnt"
+  mountPath: "/main/hera_config.json"
   config:
     logo: ""
     name: ""

@@ -26,7 +26,7 @@ data:
         "login_mechanisms": [
             {{- $last := sub (len .Values.init.config.login_mechanisms) 1 }}
             {{- range  $index, $login := .Values.init.config.login_mechanisms }}
-            {{ "{{ $login }}" }}{{ if ne $index $last }},{{ end }}
+            {{ $login | quote }}{{ if ne $index $last }},{{ end }}
             {{- end}}
         ]
       }

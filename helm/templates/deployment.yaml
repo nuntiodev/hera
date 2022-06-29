@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: {{ .Release.Name }}
+    name: {{ .Release.Name }}-hera
     namespace: {{ .Release.Namespace | default "default" }}
 spec:
   {{- if not .Values.deployment.autoscaling.enabled }}
@@ -9,23 +9,18 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-        app: {{ .Release.Name }}
+        app: {{ .Release.Name }}-hera
   template:
     metadata:
-      name: {{ .Release.Name }}
+      name: {{ .Release.Name }}-hera
       labels:
-        app: {{ .Release.Name }}
+        app: {{ .Release.Name }}-hera
     spec:
-      serviceAccountName: {{ .Release.Name }}-user
+      serviceAccountName: {{ .Release.Name }}-hera
       automountServiceAccountToken: true
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          {{- if eq .Values.email.enabled "true" }}
-          volumeMounts:
-            - mountPath: {{ .Values.email.path }}
-              name: {{ .Release.Name }}-emails
-          {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             {{- range $port := .Values.deployment.ports }}
@@ -42,12 +37,20 @@ spec:
           - name: INITIALIZE_ENGINE
             value: "kubernetes"
           {{- end}}
+          {{- if eq .Values.service.http.enabled "true" }}
+          - name: HTTP_PORT
+            value: "{{ .Values.service.http.targetPort }}"
+          - name: ENABLE_HTTP_SERVER
+            value: "true"
+          {{- end }}
+          {{- if eq .Values.service.grpc.enabled "true" }}
+          - name: GRPC_PORT
+            value: "{{ .Values.service.grpc.targetPort }}"
+          - name: ENABLE_GRPC_SERVER
+            value: "true"
+          {{- end }}
           envFrom:
             {{- range $secret := .Values.deployment.secretEnv }}
             - secretRef:
                 name: {{ $secret }}
             {{- end }}
-      volumes:
-        - name: {{ .Release.Name }}-emails
-          configMap:
-            name: {{ .Release.Name }}-emails

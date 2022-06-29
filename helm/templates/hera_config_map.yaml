@@ -1,11 +1,20 @@
+{{- if eq .Values.init.enabled "true" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: hera-config
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace | default "default" }}
 data:
   hera_config.json: |-
     {
+      {{- if gt (len .Values.init.users) 0 }}
+      "users": [
+        {{- $last := sub (len .Values.init.users) 1 }}
+        {{- range  $index, $user := .Values.init.users }}
+        {{ $user | toJson }}{{ if ne $index $last }},{{ end }}
+        {{- end}}
+      ],
+      {{- end }}
       "app": {
         "logo": "{{ .Values.init.config.logo }}",
         "name": "{{ .Values.init.config.name }}",
@@ -20,11 +29,6 @@ data:
             {{ $login }}{{ if ne $index $last }},{{ end }}
             {{- end}}
         ]
-      },
-      "users": [
-        {{- $last := sub (len .Values.init.users) 1 }}
-        {{- range  $index, $user := .Values.init.users }}
-        {{ $user | toJson }}{{ if ne $index $last }},{{ end }}
-        {{- end}}
-      ]
+      }
     }
+{{- end }}

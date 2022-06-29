@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-hera
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace | default "default" }}
 spec:
   type: {{ .Values.service.type }}
@@ -17,4 +17,4 @@ spec:
       protocol: TCP
     {{- end }}
   selector:
-    app: {{ .Release.Name }}-hera
+    app: {{ .Release.Name }}

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: {{ .Release.Name }}-hera
+    name: {{ .Release.Name }}
     namespace: {{ .Release.Namespace | default "default" }}
 spec:
   {{- if not .Values.deployment.autoscaling.enabled }}
@@ -9,19 +9,24 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-        app: {{ .Release.Name }}-hera
+        app: {{ .Release.Name }}
   template:
     metadata:
-      name: {{ .Release.Name }}-hera
+      name: {{ .Release.Name }}
       labels:
-        app: {{ .Release.Name }}-hera
+        app: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ .Release.Name }}-hera
+      serviceAccountName: {{ .Release.Name }}
       automountServiceAccountToken: true
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if eq .Values.init.enabled "true" }}
+          volumeMounts:
+            - mountPath: ./
+              name: {{ .Release.Name }}-config
+          {{- end }}
           ports:
             {{- if eq .Values.service.grpc.enabled "true" }}
             - containerPort: {{ .Values.service.grpc.targetPort }}
@@ -57,3 +62,9 @@ spec:
             - secretRef:
                 name: {{ $secret }}
             {{- end }}
+      {{- if eq .Values.init.enabled "true" }}
+      volumes:
+        - name: {{ .Release.Name }}-config
+          configMap:
+            name: {{ .Release.Name }}
+      {{- end }}

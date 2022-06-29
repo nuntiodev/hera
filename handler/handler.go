@@ -162,7 +162,7 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		h.logger.Info("hera config already exists...")
 	}
 	// load json file
-	jsonFile, err := os.Open("/var/hera_config.json")
+	jsonFile, err := os.Open("hera_config.json")
 	if err == nil {
 		h.logger.Info("hera_config.json file found. Updating default config.")
 		byteValue, err := ioutil.ReadAll(jsonFile)

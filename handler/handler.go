@@ -19,7 +19,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/repository"
 	"github.com/nuntiodev/hera/token"
 	"github.com/nuntiodev/x/cryptox"

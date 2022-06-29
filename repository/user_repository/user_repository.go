@@ -3,7 +3,7 @@ package user_repository
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
@@ -78,10 +78,10 @@ func (r *mongodbRepository) BuildIndexes(ctx context.Context) error {
 			bson.D{
 				{
 					"email_hash", bson.D{
-						{
-							"$gt", "",
-						},
+					{
+						"$gt", "",
 					},
+				},
 				},
 			},
 		).SetName(emailHashIndex),
@@ -97,10 +97,10 @@ func (r *mongodbRepository) BuildIndexes(ctx context.Context) error {
 			bson.D{
 				{
 					"username_hash", bson.D{
-						{
-							"$gt", "",
-						},
+					{
+						"$gt", "",
 					},
+				},
 				},
 			},
 		).SetName(usernameIndex),
@@ -116,10 +116,10 @@ func (r *mongodbRepository) BuildIndexes(ctx context.Context) error {
 			bson.D{
 				{
 					"phone_hash", bson.D{
-						{
-							"$gt", "",
-						},
+					{
+						"$gt", "",
 					},
+				},
 				},
 			},
 		).SetName(phoneIndex),

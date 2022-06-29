@@ -6,7 +6,7 @@ import (
 	"github.com/nuntiodev/hera/repository/token_repository"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/token"
 )
 
@@ -42,7 +42,7 @@ func (h *defaultHandler) ValidateToken(ctx context.Context, req *go_hera.HeraReq
 	// async action 3 - validate if access token is blocked
 	errGroup.Go(func() (err error) {
 		// for access tokens we also validate if refresh token is blocked
-		if claims.Type == token.TokenTypeAccess {
+		if claims.Type == token.AccessToken {
 			var isBlocked bool
 			isBlocked, err = tokenRepository.IsBlocked(ctx, &go_hera.Token{
 				Id:     claims.RefreshTokenId,

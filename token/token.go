@@ -4,13 +4,13 @@ import (
 	"crypto/rsa"
 	"time"
 
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 )
 
 const (
-	TokenTypeAccess  = "access_token"
-	TokenTypeRefresh = "refresh_token"
-	Issuer           = "Block User Service"
+	AccessToken  = "access_token"
+	RefreshToken = "refresh_token"
+	Issuer       = "Block User Service"
 )
 
 type Token interface {

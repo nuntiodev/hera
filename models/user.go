@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/araddon/dateparse"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/x/cryptox"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"

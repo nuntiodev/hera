@@ -3,7 +3,7 @@ package user_repository
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 )

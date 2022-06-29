@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 )
 
 func (c *defaultToken) ValidateToken(key *rsa.PublicKey, jwtToken string) (*go_hera.CustomClaims, error) {

@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/token"
 	"golang.org/x/crypto/bcrypt"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
@@ -97,7 +97,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 	}
 	// async action 3 - generate refresh token.
 	errGroup.Go(func() (err error) {
-		refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, refreshTokenId, user.Id, "", token.TokenTypeRefresh, refreshTokenExpiry)
+		refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, refreshTokenId, user.Id, "", token.RefreshToken, refreshTokenExpiry)
 		if err != nil {
 			return fmt.Errorf("could generate refresh token with err: %v", err)
 		}
@@ -116,7 +116,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 	})
 	// async action 4 - generate access token.
 	errGroup.Go(func() (err error) {
-		accessToken, accessClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), user.Id, refreshTokenId, token.TokenTypeAccess, accessTokenExpiry)
+		accessToken, accessClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), user.Id, refreshTokenId, token.AccessToken, accessTokenExpiry)
 		if err != nil {
 			return fmt.Errorf("could generate access token with err: %v", err)
 		}

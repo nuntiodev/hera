@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/nuntiodev/hera/repository/user_repository"
 
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 )
 
 /*

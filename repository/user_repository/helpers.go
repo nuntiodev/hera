@@ -13,7 +13,7 @@ import (
 	"unicode"
 
 	"github.com/google/uuid"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 

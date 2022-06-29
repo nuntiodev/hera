@@ -8,7 +8,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"time"
 
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/token"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -32,7 +32,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_hera.HeraRequ
 		if err != nil {
 			return err
 		}
-		if refreshClaims.Type != token.TokenTypeRefresh {
+		if refreshClaims.Type != token.RefreshToken {
 			return errors.New("invalid refresh token")
 		}
 		return nil
@@ -71,7 +71,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_hera.HeraRequ
 	})
 	// async action 4 - generate new refresh token and store information about in the database
 	errGroup.Go(func() (err error) {
-		refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, "", token.TokenTypeRefresh, refreshTokenExpiry)
+		refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, "", token.RefreshToken, refreshTokenExpiry)
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func (h *defaultHandler) RefreshToken(ctx context.Context, req *go_hera.HeraRequ
 			return err
 		}
 		// generate new access token from refresh token
-		accessToken, accessClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, refreshClaims.Id, token.TokenTypeAccess, accessTokenExpiry)
+		accessToken, accessClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), refreshClaims.UserId, refreshClaims.Id, token.AccessToken, accessTokenExpiry)
 		if err != nil {
 			return err
 		}

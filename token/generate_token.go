@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 )
 
 func (c *defaultToken) GenerateToken(privateKey *rsa.PrivateKey, tokenId, userId, refreshTokenId, tokenType string, expiresAt time.Duration) (string, *go_hera.CustomClaims, error) {
@@ -16,10 +16,10 @@ func (c *defaultToken) GenerateToken(privateKey *rsa.PrivateKey, tokenId, userId
 	} else if tokenId == "" {
 		return "", nil, errors.New("missing required token id")
 	}
-	if tokenType != TokenTypeAccess && tokenType != TokenTypeRefresh {
+	if tokenType != AccessToken && tokenType != RefreshToken {
 		return "", nil, errors.New("invalid token type")
 	}
-	if tokenType == TokenTypeAccess && refreshTokenId == "" {
+	if tokenType == AccessToken && refreshTokenId == "" {
 		return "", nil, errors.New("missing required refreshTokenId")
 	}
 	claims := go_hera.CustomClaims{

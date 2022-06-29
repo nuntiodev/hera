@@ -2,7 +2,7 @@ package http_server
 
 import (
 	"fmt"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/authenticator"
 	"github.com/nuntiodev/hera/interceptor"
 	"go.uber.org/zap"

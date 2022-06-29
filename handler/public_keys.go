@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 )
 
 /*
@@ -12,7 +12,7 @@ import (
 func (h *defaultHandler) PublicKeys(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	return &go_hera.HeraResponse{
 		PublicKeys: map[string]string{
-			"public-jwt-key": publicKeyString,
+			"hera-public-key": publicKeyString,
 		},
 	}, nil
 }

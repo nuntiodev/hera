@@ -3,7 +3,7 @@ package interceptor
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/authenticator"
 	"google.golang.org/grpc"
 )

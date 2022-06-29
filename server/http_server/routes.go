@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/gorilla/mux"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/authenticator"
 	"github.com/nuntiodev/hera/interceptor"
 	"net/http"

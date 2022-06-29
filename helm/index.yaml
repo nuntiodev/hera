@@ -3,12 +3,12 @@ entries:
   hera:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-06-29T19:53:27.021549098Z"
+    created: "2022-06-29T20:17:37.351538934Z"
     description: A Helm chart for Hera
-    digest: e261b2198fe80a5c60afec87e7042d043a4ce986a948dd2c576a05bf6942b30f
+    digest: f69117b2878b4a83790c2cb07add20568ebf1cfbdee6120895e025bab6cbe34a
     name: hera
     type: application
     urls:
-    - charts/hera-0.0.58.tgz
-    version: 0.0.58
-generated: "2022-06-29T19:53:27.020539891Z"
+    - charts/hera-0.0.59.tgz
+    version: 0.0.59
+generated: "2022-06-29T20:17:37.350782723Z"

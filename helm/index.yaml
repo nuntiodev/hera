@@ -3,7 +3,17 @@ entries:
   hera:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-06-29T21:13:07.154988+02:00"
+    created: "2022-06-29T21:16:18.69508+02:00"
+    description: A Helm chart for Hera
+    digest: 2037e96830dde6333dde1aed8822d6450fc9bcc3ba83742bdb466ea086c36feb
+    name: hera
+    type: application
+    urls:
+    - charts/hera-0.0.54.tgz
+    version: 0.0.54
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2022-06-29T21:16:18.686168+02:00"
     description: A Helm chart for Hera
     digest: dfd3b02c867469f081cf6969196f9040cc67c0ef73772a3dec2b57207a7de8e2
     name: hera
@@ -13,7 +23,7 @@ entries:
     version: 0.0.53
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-06-29T21:13:07.15004+02:00"
+    created: "2022-06-29T21:16:18.681438+02:00"
     description: A Helm chart for Hera
     digest: 34af869ad739d65d7634dc2b267c87ea44fb762e63b43c694058920b2d542eaa
     name: hera
@@ -23,7 +33,7 @@ entries:
     version: 0.0.52
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-06-29T21:13:07.147321+02:00"
+    created: "2022-06-29T21:16:18.678622+02:00"
     description: A Helm chart for Hera
     digest: 1fda08f879ea9b4d01a4339556e5537c13f4141234dfdcf15a415f44b7de8423
     name: hera
@@ -33,7 +43,7 @@ entries:
     version: 0.0.51
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-06-29T21:13:07.145685+02:00"
+    created: "2022-06-29T21:16:18.677394+02:00"
     description: A Helm chart for Hera
     digest: 62234d3754fd1dfcba911ef136592c22efefee17513cd79d10840c5b41f320a2
     name: hera
@@ -43,7 +53,7 @@ entries:
     version: 0.0.50
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2022-06-29T21:13:07.14485+02:00"
+    created: "2022-06-29T21:16:18.676606+02:00"
     description: A Helm chart for Hera
     digest: 4e81051fa6b10f5d2016d7125a96422b1a509b8824dd1fa891dd504bd960d75b
     name: hera
@@ -51,4 +61,4 @@ entries:
     urls:
     - charts/hera-0.0.48.tgz
     version: 0.0.48
-generated: "2022-06-29T21:13:07.144126+02:00"
+generated: "2022-06-29T21:16:18.676217+02:00"

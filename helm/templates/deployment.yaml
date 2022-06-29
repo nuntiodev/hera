@@ -24,7 +24,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if eq .Values.init.enabled "true" }}
           volumeMounts:
-            - mountPath: /mai
+            - mountPath: /main
               name: {{ .Release.Name }}-config
           {{- end }}
           ports:

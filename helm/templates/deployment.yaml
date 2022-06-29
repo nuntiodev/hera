@@ -23,8 +23,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            {{- range $port := .Values.deployment.ports }}
-            - containerPort: {{ $port }}
+            {{- if eq .Values.service.grpc.enabled "true" }}
+            - containerPort: {{ .Values.service.grpc.targetPort }}
+            {{- end }}
+            {{- if eq .Values.service.http.enabled "true" }}
+            - containerPort: {{ .Values.service.http.targetPort }}
             {{- end }}
           env:
           {{- range $k, $v := .Values.deployment.env }}

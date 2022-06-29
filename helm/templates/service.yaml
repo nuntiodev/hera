@@ -8,7 +8,7 @@ spec:
   ports:
     {{- if eq .Values.service.http.enabled "true"  }}
     - port: {{ .Values.service.http.port }}
-      targetPort: {{ .Values.servic.http.targetPort }}
+      targetPort: {{ .Values.service.http.targetPort }}
       protocol: TCP
     {{- end }}
     {{- if eq .Values.service.grpc.enabled "true" }}

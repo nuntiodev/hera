@@ -2,11 +2,12 @@ package config_repository
 
 import (
 	"context"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (c *defaultConfigRepository) Get(ctx context.Context) (*models.Config, error) {
+func (c *defaultConfigRepository) Get(ctx context.Context) (*go_hera.Config, error) {
 	resp := models.Config{}
 	result := c.collection.FindOne(ctx, bson.M{"_id": namespaceConfigName})
 	if err := result.Err(); err != nil {
@@ -24,5 +25,5 @@ func (c *defaultConfigRepository) Get(ctx context.Context) (*models.Config, erro
 			return nil, err
 		}
 	}
-	return &resp, nil
+	return models.ConfigToProtoConfig(&resp), nil
 }

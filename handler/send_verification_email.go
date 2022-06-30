@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
@@ -19,10 +18,10 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 	var (
 		userRepository   user_repository.UserRepository
 		configRepository config_repository.ConfigRepository
-		user             *models.User
+		user             *go_hera.User
 		nameOfUser       string
 		verificationCode []byte
-		config           *models.Config
+		config           *go_hera.Config
 		errGroup         = &errgroup.Group{}
 	)
 	if h.emailEnabled == false {
@@ -38,17 +37,17 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		if err != nil {
 			return err
 		}
-		if user.Email.Body == "" {
+		if user.GetEmail() == "" {
 			return errors.New("user do not have an email - set the email for the user")
 		}
 		if slices.Contains(user.VerifiedEmails, user.EmailHash) {
 			return errors.New("email is already verified")
 		}
-		nameOfUser = user.Email.Body
-		if user.FirstName.Body != "" {
-			nameOfUser = strings.TrimSpace(user.FirstName.Body)
-			if user.LastName.Body != "" {
-				nameOfUser += " " + user.LastName.Body
+		nameOfUser = user.GetEmail()
+		if user.GetFirstName() != "" {
+			nameOfUser = strings.TrimSpace(user.GetFirstName())
+			if user.GetLastName() != "" {
+				nameOfUser += " " + user.GetLastName()
 			}
 		}
 		return
@@ -66,7 +65,7 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		if err != nil {
 			return err
 		}
-		if err = h.email.SendVerificationEmail(config.Name.Body, user.Email.Body, string(verificationCode)); err != nil {
+		if err = h.email.SendVerificationEmail(config.GetName(), user.GetEmail(), string(verificationCode)); err != nil {
 			return err
 		}
 		return
@@ -85,6 +84,6 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		return nil, err
 	}
 	return &go_hera.HeraResponse{
-		User: models.UserToProtoUser(user),
+		User: user,
 	}, nil
 }

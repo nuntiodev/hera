@@ -3,7 +3,6 @@ package config_repository
 import (
 	"context"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -19,7 +18,7 @@ const (
 
 type ConfigRepository interface {
 	Create(ctx context.Context, config *go_hera.Config) error
-	Get(ctx context.Context) (*models.Config, error)
+	Get(ctx context.Context) (*go_hera.Config, error)
 	Update(ctx context.Context, config *go_hera.Config) error
 	RegisterPublicKey(ctx context.Context, publicKey string) error
 	RemovePublicKey(ctx context.Context) error

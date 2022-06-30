@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
@@ -17,8 +16,8 @@ func (h *defaultHandler) ListUsers(ctx context.Context, req *go_hera.HeraRequest
 	var (
 		userRepository   user_repository.UserRepository
 		configRepository config_repository.ConfigRepository
-		users            []*models.User
-		config           *models.Config
+		users            []*go_hera.User
+		config           *go_hera.Config
 		count            int64
 		errGroup         = &errgroup.Group{}
 	)
@@ -49,8 +48,8 @@ func (h *defaultHandler) ListUsers(ctx context.Context, req *go_hera.HeraRequest
 		return nil, err
 	}
 	return &go_hera.HeraResponse{
-		Users:  models.UsersToProto(users),
+		Users:  users,
 		Amount: count,
-		Config: models.ConfigToProtoConfig(config),
+		Config: config,
 	}, nil
 }

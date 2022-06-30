@@ -10,37 +10,36 @@ import (
 /*
 	Create - this method creates a user and encrypts it if keys are present.
 */
-func (r *mongodbRepository) Create(ctx context.Context, user *go_hera.User) (*models.User, error) {
+func (r *mongodbRepository) Create(ctx context.Context, user *go_hera.User) error {
 	// validate data
 	if user == nil {
-		return nil, UserIsNilErr
+		return UserIsNilErr
 	} else if err := validateEmail(user.GetEmail()); err != nil {
-		return nil, err
+		return err
 	} else if err := validatePassword(user.Password); err != nil && r.validatePassword {
-		return nil, err
+		return err
 	} else if err := validateMetadata(user.Metadata); err != nil {
-		return nil, err
+		return err
 	} else if err := validatePhone(user.GetPhone()); err != nil {
-		return nil, err
+		return err
 	}
 	prepare(actionCreate, user)
 	if user.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		user.Password = string(hashedPassword)
 	}
 	create := models.ProtoUserToUser(user)
 	// create hashes
 	create.EmailHash, create.UsernameHash, create.PhoneHash = generateUserHashes(user)
-	resp := *create
 	if err := r.crypto.Encrypt(create); err != nil {
-		return nil, err
+		return err
 	}
 	if _, err := r.collection.InsertOne(ctx, create); err != nil {
-		return nil, err
+		return err
 	}
 	// set new data for user created
-	return &resp, nil
+	return nil
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -40,7 +39,7 @@ var (
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, user *go_hera.User) (*models.User, error)
+	Create(ctx context.Context, user *go_hera.User) error
 	UpdateMetadata(ctx context.Context, get *go_hera.User, update *go_hera.User) error
 	UpdateProfile(ctx context.Context, get *go_hera.User, update *go_hera.User) error
 	UpdatePassword(ctx context.Context, get *go_hera.User, update *go_hera.User) error
@@ -50,10 +49,10 @@ type UserRepository interface {
 	VerifyPhone(ctx context.Context, user *go_hera.User, isVerified bool) error
 	UpdatePhoneVerificationCode(ctx context.Context, get *go_hera.User) error
 	UpdateResetPasswordCode(ctx context.Context, user *go_hera.User) error
-	Get(ctx context.Context, user *go_hera.User) (*models.User, error)
-	GetMany(ctx context.Context, users []*go_hera.User) ([]*models.User, error)
-	Search(ctx context.Context, search string) (*models.User, error)
-	List(ctx context.Context, query *go_hera.Query) ([]*models.User, error)
+	Get(ctx context.Context, user *go_hera.User) (*go_hera.User, error)
+	GetMany(ctx context.Context, users []*go_hera.User) ([]*go_hera.User, error)
+	Search(ctx context.Context, search string) (*go_hera.User, error)
+	List(ctx context.Context, query *go_hera.Query) ([]*go_hera.User, error)
 	Count(ctx context.Context) (int64, error)
 	Delete(ctx context.Context, user *go_hera.User) error
 	DeleteMany(ctx context.Context, userBatch []*go_hera.User) error
@@ -78,10 +77,10 @@ func (r *mongodbRepository) BuildIndexes(ctx context.Context) error {
 			bson.D{
 				{
 					"email_hash", bson.D{
-					{
-						"$gt", "",
+						{
+							"$gt", "",
+						},
 					},
-				},
 				},
 			},
 		).SetName(emailHashIndex),
@@ -97,10 +96,10 @@ func (r *mongodbRepository) BuildIndexes(ctx context.Context) error {
 			bson.D{
 				{
 					"username_hash", bson.D{
-					{
-						"$gt", "",
+						{
+							"$gt", "",
+						},
 					},
-				},
 				},
 			},
 		).SetName(usernameIndex),
@@ -116,10 +115,10 @@ func (r *mongodbRepository) BuildIndexes(ctx context.Context) error {
 			bson.D{
 				{
 					"phone_hash", bson.D{
-					{
-						"$gt", "",
+						{
+							"$gt", "",
+						},
 					},
-				},
 				},
 			},
 		).SetName(phoneIndex),

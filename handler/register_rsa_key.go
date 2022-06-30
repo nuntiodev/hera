@@ -7,7 +7,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/x/cryptox"
 )
@@ -19,7 +18,7 @@ func (h *defaultHandler) RegisterRsaKey(ctx context.Context, req *go_hera.HeraRe
 		s                *rsa.PrivateKey
 		publicKey        string
 		privateKey       string
-		config           *models.Config
+		config           *go_hera.Config
 	)
 	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {

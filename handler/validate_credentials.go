@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/user_repository"
 
 	"github.com/nuntiodev/hera-sdks/go_hera"
@@ -16,7 +15,7 @@ import (
 func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
 		userRepository user_repository.UserRepository
-		user           *models.User
+		user           *go_hera.User
 	)
 	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
@@ -33,6 +32,6 @@ func (h *defaultHandler) ValidateCredentials(ctx context.Context, req *go_hera.H
 		return nil, err
 	}
 	return &go_hera.HeraResponse{
-		User: models.UserToProtoUser(user),
+		User: user,
 	}, nil
 }

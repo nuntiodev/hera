@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
@@ -20,11 +19,11 @@ func (h *defaultHandler) SendResetPasswordText(ctx context.Context, req *go_hera
 	var (
 		userRepository   user_repository.UserRepository
 		configRepository config_repository.ConfigRepository
-		user             *models.User
+		user             *go_hera.User
 		nameOfUser       string
 		randomCode       string
 		verificationCode []byte
-		config           *models.Config
+		config           *go_hera.Config
 		errGroup         = &errgroup.Group{}
 	)
 	if h.textEnabled == false {
@@ -40,14 +39,14 @@ func (h *defaultHandler) SendResetPasswordText(ctx context.Context, req *go_hera
 		if err != nil {
 			return err
 		}
-		if user.Phone.Body == "" {
+		if user.GetPhone() == "" {
 			return errors.New("user do not have a phone number - set the phone number for the user")
 		}
-		nameOfUser = user.Phone.Body
-		if user.FirstName.Body != "" {
-			nameOfUser = strings.TrimSpace(user.FirstName.Body)
-			if user.LastName.Body != "" {
-				nameOfUser += " " + user.LastName.Body
+		nameOfUser = user.GetPhone()
+		if user.GetFirstName() != "" {
+			nameOfUser = strings.TrimSpace(user.GetFirstName())
+			if user.GetLastName() != "" {
+				nameOfUser += " " + user.GetLastName()
 			}
 		}
 		return err
@@ -73,7 +72,7 @@ func (h *defaultHandler) SendResetPasswordText(ctx context.Context, req *go_hera
 		if err != nil {
 			return err
 		}
-		if err = h.text.SendResetPasswordText(config.Name.Body, user.Phone.Body, string(verificationCode)); err != nil {
+		if err = h.text.SendResetPasswordText(config.GetName(), user.GetPhone(), string(verificationCode)); err != nil {
 			return err
 		}
 		return err

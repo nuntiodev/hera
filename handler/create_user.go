@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 )
@@ -16,8 +15,8 @@ func (h *defaultHandler) CreateUser(ctx context.Context, req *go_hera.HeraReques
 	var (
 		configRepository config_repository.ConfigRepository
 		userRepository   user_repository.UserRepository
-		config           *models.Config
-		user             *models.User
+		config           *go_hera.Config
+		user             *go_hera.User
 	)
 	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
@@ -46,11 +45,10 @@ func (h *defaultHandler) CreateUser(ctx context.Context, req *go_hera.HeraReques
 	if err != nil {
 		return nil, err
 	}
-	user, err = userRepository.Create(ctx, req.User)
-	if err != nil {
+	if err = userRepository.Create(ctx, req.User); err != nil {
 		return nil, err
 	}
 	return &go_hera.HeraResponse{
-		User: models.UserToProtoUser(user),
+		User: user,
 	}, nil
 }

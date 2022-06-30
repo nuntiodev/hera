@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
 	"time"
@@ -20,7 +19,7 @@ import (
 func (h *defaultHandler) CreateTokenPair(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
 		userRepository user_repository.UserRepository
-		user           *models.User
+		user           *go_hera.User
 		refreshToken   string
 		refreshClaims  *go_hera.CustomClaims
 		accessToken    string
@@ -95,6 +94,6 @@ func (h *defaultHandler) CreateTokenPair(ctx context.Context, req *go_hera.HeraR
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
-		User: models.UserToProtoUser(user),
+		User: user,
 	}, nil
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
@@ -20,11 +19,11 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_her
 	var (
 		userRepository   user_repository.UserRepository
 		configRepository config_repository.ConfigRepository
-		user             *models.User
+		user             *go_hera.User
 		nameOfUser       string
 		randomCode       string
 		verificationCode []byte
-		config           *models.Config
+		config           *go_hera.Config
 		errGroup         = &errgroup.Group{}
 	)
 	if h.emailEnabled == false {
@@ -40,14 +39,14 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_her
 		if err != nil {
 			return err
 		}
-		if user.Email.Body == "" {
+		if user.GetEmail() == "" {
 			return errors.New("user do not have an email - set the email for the user")
 		}
-		nameOfUser = user.Email.Body
-		if user.FirstName.Body != "" {
-			nameOfUser = strings.TrimSpace(user.FirstName.Body)
-			if user.LastName.Body != "" {
-				nameOfUser += " " + user.LastName.Body
+		nameOfUser = user.GetEmail()
+		if user.GetFirstName() != "" {
+			nameOfUser = strings.TrimSpace(user.GetFirstName())
+			if user.GetLastName() != "" {
+				nameOfUser += " " + user.GetLastName()
 			}
 		}
 		return err
@@ -73,7 +72,7 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_her
 		if err != nil {
 			return err
 		}
-		if err = h.email.SendResetPasswordEmail(config.Name.Body, user.Email.Body, string(verificationCode)); err != nil {
+		if err = h.email.SendResetPasswordEmail(config.GetName(), user.GetEmail(), string(verificationCode)); err != nil {
 			return err
 		}
 		return err

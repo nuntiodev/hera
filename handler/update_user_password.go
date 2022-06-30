@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 )
@@ -15,8 +14,8 @@ func (h *defaultHandler) UpdateUserPassword(ctx context.Context, req *go_hera.He
 	var (
 		configRepository config_repository.ConfigRepository
 		userRepository   user_repository.UserRepository
-		config           *models.Config
-		user             *models.User
+		config           *go_hera.Config
+		user             *go_hera.User
 	)
 	// get config
 	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
@@ -35,6 +34,6 @@ func (h *defaultHandler) UpdateUserPassword(ctx context.Context, req *go_hera.He
 		return nil, err
 	}
 	return &go_hera.HeraResponse{
-		User: models.UserToProtoUser(user),
+		User: user,
 	}, nil
 }

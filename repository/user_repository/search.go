@@ -5,12 +5,13 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (r *mongodbRepository) Search(ctx context.Context, search string) (*models.User, error) {
+func (r *mongodbRepository) Search(ctx context.Context, search string) (*go_hera.User, error) {
 	if search == "" {
 		return nil, errors.New("missing required search parameter")
 	}
@@ -36,5 +37,5 @@ func (r *mongodbRepository) Search(ctx context.Context, search string) (*models.
 			return nil, err
 		}
 	}
-	return &resp, nil
+	return models.UserToProtoUser(&resp), nil
 }

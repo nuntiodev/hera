@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/helpers"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/crypto/bcrypt"
@@ -22,8 +21,8 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 	var (
 		configRepository config_repository.ConfigRepository
 		userRepository   user_repository.UserRepository
-		config           *models.Config
-		user             *models.User
+		config           *go_hera.Config
+		user             *go_hera.User
 		bcryptErr        error
 		errGroup         errgroup.Group
 	)
@@ -51,7 +50,7 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 		if req.User.ResetPasswordCode == "" {
 			return errors.New("missing reset password code")
 		}
-		if time.Now().Sub(user.ResetPasswordCodeSentAt).Minutes() > h.maxVerificationAge.Minutes() {
+		if time.Now().Sub(user.ResetPasswordCodeSentAt.AsTime()).Minutes() > h.maxVerificationAge.Minutes() {
 			return errors.New("verification code has expired, send a new")
 		}
 		return nil
@@ -63,7 +62,7 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 	time.Sleep(helpers.GetExponentialBackoff(float64(user.VerifyEmailAttempts), helpers.BackoffFactorTwo))
 	bcryptErr = bcrypt.CompareHashAndPassword([]byte(user.ResetPasswordCode), []byte(strings.TrimSpace(req.User.ResetPasswordCode)))
 	// reset password
-	if err = userRepository.UpdatePassword(ctx, models.UserToProtoUser(user), req.User); err != nil {
+	if err = userRepository.UpdatePassword(ctx, user, req.User); err != nil {
 		return nil, err
 	}
 	if bcryptErr != nil {

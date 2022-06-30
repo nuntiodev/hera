@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"github.com/nuntiodev/hera-sdks/go_hera"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 )
 
@@ -13,7 +12,7 @@ import (
 func (h *defaultHandler) GetConfig(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
 		configRepository config_repository.ConfigRepository
-		config           *models.Config
+		config           *go_hera.Config
 	)
 	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
@@ -24,6 +23,6 @@ func (h *defaultHandler) GetConfig(ctx context.Context, req *go_hera.HeraRequest
 		return nil, err
 	}
 	return &go_hera.HeraResponse{
-		Config: models.ConfigToProtoConfig(config),
+		Config: config,
 	}, nil
 }

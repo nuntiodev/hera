@@ -10,7 +10,7 @@ import (
 /*
 	Get - this method fetches a user either by id, username, or email.
 */
-func (r *mongodbRepository) Get(ctx context.Context, user *go_hera.User) (*models.User, error) {
+func (r *mongodbRepository) Get(ctx context.Context, user *go_hera.User) (*go_hera.User, error) {
 	if user == nil {
 		return nil, UserIsNilErr
 	}
@@ -32,5 +32,5 @@ func (r *mongodbRepository) Get(ctx context.Context, user *go_hera.User) (*model
 			return nil, err
 		}
 	}
-	return &resp, nil
+	return models.UserToProtoUser(&resp), nil
 }

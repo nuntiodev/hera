@@ -11,7 +11,7 @@ import (
 /*
 	GetMany - this method fetches an array of users by id.
 */
-func (r *mongodbRepository) GetMany(ctx context.Context, users []*go_hera.User) ([]*models.User, error) {
+func (r *mongodbRepository) GetMany(ctx context.Context, users []*go_hera.User) ([]*go_hera.User, error) {
 	if users == nil {
 		return nil, errors.New("users array is nil")
 	}
@@ -22,7 +22,7 @@ func (r *mongodbRepository) GetMany(ctx context.Context, users []*go_hera.User) 
 		}
 		userIds = append(userIds, user.Id)
 	}
-	var resp []*models.User
+	var resp []*go_hera.User
 	cursor, err := r.collection.Find(ctx, bson.M{
 		"_id": bson.M{"$in": userIds},
 	})
@@ -44,7 +44,7 @@ func (r *mongodbRepository) GetMany(ctx context.Context, users []*go_hera.User) 
 				return nil, err
 			}
 		}
-		resp = append(resp, &user)
+		resp = append(resp, models.UserToProtoUser(&user))
 	}
 	if len(users) != len(resp) {
 		return nil, errors.New("length of users does not equal length of resp which means that not all users could be found")

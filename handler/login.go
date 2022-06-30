@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
@@ -26,8 +25,8 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 	var (
 		configRepository config_repository.ConfigRepository
 		userRepository   user_repository.UserRepository
-		config           *models.Config
-		user             *models.User
+		config           *go_hera.Config
+		user             *go_hera.User
 		refreshToken     string
 		refreshClaims    *go_hera.CustomClaims
 		accessToken      string
@@ -62,19 +61,19 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 	// if email validation is required and email is not verified; return error
 	if req.User.GetEmail() != "" && config.VerifyEmail && slices.Contains(user.VerifiedEmails, user.EmailHash) == false {
 		// check if we should send a new email
-		if user.VerificationEmailExpiresAt.Sub(time.Now()).Seconds() <= 0 {
+		if user.VerificationEmailExpiresAt.AsTime().Sub(time.Now()).Seconds() <= 0 {
 			// sent new email
 			verificationEmail, err := h.SendVerificationEmail(ctx, req) // do not call directly on interface, but make same requests...
 			if err != nil {
 				return nil, fmt.Errorf("could not send email with err: %v", err)
 			}
-			user = models.ProtoUserToUser(verificationEmail.User)
+			user = verificationEmail.User
 		}
 		return &go_hera.HeraResponse{
 			LoginSession: &go_hera.LoginSession{
 				LoginStatus:    go_hera.LoginStatus_EMAIL_IS_NOT_VERIFIED,
-				EmailSentAt:    ts.New(user.VerificationEmailSentAt),
-				EmailExpiresAt: ts.New(user.VerificationEmailExpiresAt),
+				EmailSentAt:    user.VerificationEmailSentAt,
+				EmailExpiresAt: user.VerificationEmailExpiresAt,
 			},
 		}, nil
 	}
@@ -161,6 +160,6 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
-		User: models.UserToProtoUser(user),
+		User: user,
 	}, nil
 }

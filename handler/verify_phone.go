@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/helpers"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/crypto/bcrypt"
 	"k8s.io/utils/strings/slices"
@@ -19,7 +18,7 @@ import (
 func (h *defaultHandler) VerifyPhone(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
 		userRepository user_repository.UserRepository
-		user           *models.User
+		user           *go_hera.User
 		bcryptErr      error
 	)
 	// get requested user and check if the phone is already verified
@@ -40,14 +39,14 @@ func (h *defaultHandler) VerifyPhone(ctx context.Context, req *go_hera.HeraReque
 	if req.User.PhoneVerificationCode == "" {
 		return nil, errors.New("missing provided text verification code")
 	}
-	if time.Now().Sub(user.VerificationTextSentAt).Minutes() > h.maxVerificationAge.Minutes() {
+	if time.Now().Sub(user.VerificationTextSentAt.AsTime()).Minutes() > h.maxVerificationAge.Minutes() {
 		return nil, errors.New("verification text has expired, send a new one or login again")
 	}
 	// provide exponential backoff
 	time.Sleep(helpers.GetExponentialBackoff(float64(user.VerifyPhoneAttempts), helpers.BackoffFactorTwo))
 	bcryptErr = bcrypt.CompareHashAndPassword([]byte(user.PhoneVerificationCode), []byte(strings.TrimSpace(req.User.PhoneVerificationCode)))
 	// verify phone
-	if err = userRepository.VerifyPhone(ctx, models.UserToProtoUser(user), bcryptErr == nil); err != nil {
+	if err = userRepository.VerifyPhone(ctx, user, bcryptErr == nil); err != nil {
 		return nil, err
 	}
 	if bcryptErr != nil {

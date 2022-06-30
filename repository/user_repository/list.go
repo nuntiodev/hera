@@ -14,11 +14,11 @@ import (
 /*
 	List - this method fetches all users matching the filter.
 */
-func (r *mongodbRepository) List(ctx context.Context, query *go_hera.Query) ([]*models.User, error) {
+func (r *mongodbRepository) List(ctx context.Context, query *go_hera.Query) ([]*go_hera.User, error) {
 	if query == nil {
 		return nil, errors.New("query is nil")
 	}
-	var resp []*models.User
+	var resp []*go_hera.User
 	sortOptions := options.FindOptions{}
 	limitOptions := options.Find()
 	limitOptions.SetLimit(maximumGetLimit)
@@ -63,7 +63,7 @@ func (r *mongodbRepository) List(ctx context.Context, query *go_hera.Query) ([]*
 				return nil, err
 			}
 		}
-		resp = append(resp, &user)
+		resp = append(resp, models.UserToProtoUser(&user))
 	}
 
 	return resp, nil

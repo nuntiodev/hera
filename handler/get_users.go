@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"github.com/nuntiodev/hera/models"
 	"github.com/nuntiodev/hera/repository/user_repository"
 
 	"github.com/nuntiodev/hera-sdks/go_hera"
@@ -14,7 +13,7 @@ import (
 func (h *defaultHandler) GetUsers(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (
 		userRepository user_repository.UserRepository
-		users          []*models.User
+		users          []*go_hera.User
 	)
 	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
@@ -25,6 +24,6 @@ func (h *defaultHandler) GetUsers(ctx context.Context, req *go_hera.HeraRequest)
 		return nil, err
 	}
 	return &go_hera.HeraResponse{
-		Users: models.UsersToProto(users),
+		Users: users,
 	}, nil
 }

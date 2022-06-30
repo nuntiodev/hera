@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	"github.com/nuntiodev/x/pointerx"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
@@ -92,15 +93,16 @@ func HeraConfigToProtoUsers(h *HeraConfig) []*go_hera.User {
 	}
 	var resp []*go_hera.User
 	for _, user := range h.Users {
+		fmt.Println(user)
 		birthdate, _ := time.Parse("2006-01-02", user.Birthdate)
 		resp = append(resp, &go_hera.User{
-			FirstName: &user.FirstName,
-			LastName:  &user.LastName,
-			Email:     &user.Email,
+			FirstName: pointerx.StringPtr(user.FirstName),
+			LastName:  pointerx.StringPtr(user.LastName),
+			Email:     pointerx.StringPtr(user.Email),
 			Password:  user.Password,
-			Phone:     &user.Phone,
-			Username:  &user.Username,
-			Image:     &user.Image,
+			Phone:     pointerx.StringPtr(user.Phone),
+			Username:  pointerx.StringPtr(user.Username),
+			Image:     pointerx.StringPtr(user.Image),
 			Id:        user.Id,
 			Birthdate: ts.New(birthdate),
 		})

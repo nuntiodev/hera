@@ -14,6 +14,12 @@ type UserRepositoryBuilder interface {
 	Build(ctx context.Context) (user_repository.UserRepository, error)
 }
 
+func NewUserRepositoryBuilder(client *mongo.Client) UserRepositoryBuilder {
+	return &userRepositoryBuilder{
+		client: client,
+	}
+}
+
 type userRepositoryBuilder struct {
 	namespace               string
 	validatePassword        bool

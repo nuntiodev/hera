@@ -85,7 +85,5 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 	if err = errGroup.Wait(); err != nil {
 		return nil, err
 	}
-	return &go_hera.HeraResponse{
-		User: user,
-	}, nil
+	return &go_hera.HeraResponse{}, nil
 }

@@ -13,7 +13,7 @@ func (r *mongodbRepository) VerifyEmail(ctx context.Context, user *go_hera.User,
 		return UserIsNilErr
 	}
 	prepare(actionGet, user)
-	_, emailHash, _ := generateUserHashes(&go_hera.User{Email: user.Email})
+	emailHash, _, _ := generateUserHashes(&go_hera.User{Email: user.Email})
 	if emailHash == "" {
 		return errors.New("no valid email hash")
 	}

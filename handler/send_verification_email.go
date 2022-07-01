@@ -3,12 +3,12 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/utils/strings/slices"
-	"strings"
 )
 
 /*
@@ -19,7 +19,6 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		userRepository   user_repository.UserRepository
 		configRepository config_repository.ConfigRepository
 		user             *go_hera.User
-		nameOfUser       string
 		verificationCode []byte
 		config           *go_hera.Config
 		errGroup         = &errgroup.Group{}
@@ -43,13 +42,6 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		if slices.Contains(user.VerifiedEmails, user.EmailHash) {
 			return errors.New("email is already verified")
 		}
-		nameOfUser = user.GetEmail()
-		if user.GetFirstName() != "" {
-			nameOfUser = strings.TrimSpace(user.GetFirstName())
-			if user.GetLastName() != "" {
-				nameOfUser += " " + user.GetLastName()
-			}
-		}
 		return
 	})
 	if err = errGroup.Wait(); err != nil {
@@ -65,6 +57,7 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		if err != nil {
 			return err
 		}
+		fmt.Println(string(verificationCode))
 		if err = h.email.SendVerificationEmail(config.GetName(), user.GetEmail(), string(verificationCode)); err != nil {
 			return err
 		}

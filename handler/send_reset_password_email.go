@@ -9,7 +9,6 @@ import (
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
 	"golang.org/x/sync/errgroup"
-	"strings"
 )
 
 /*
@@ -20,7 +19,6 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_her
 		userRepository   user_repository.UserRepository
 		configRepository config_repository.ConfigRepository
 		user             *go_hera.User
-		nameOfUser       string
 		randomCode       string
 		verificationCode []byte
 		config           *go_hera.Config
@@ -41,13 +39,6 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_her
 		}
 		if user.GetEmail() == "" {
 			return errors.New("user do not have an email - set the email for the user")
-		}
-		nameOfUser = user.GetEmail()
-		if user.GetFirstName() != "" {
-			nameOfUser = strings.TrimSpace(user.GetFirstName())
-			if user.GetLastName() != "" {
-				nameOfUser += " " + user.GetLastName()
-			}
 		}
 		return err
 	})

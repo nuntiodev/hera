@@ -2,10 +2,12 @@ package handler
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
+	"github.com/nuntiodev/x/cryptox"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/utils/strings/slices"
 )
@@ -18,6 +20,7 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		userRepository   user_repository.UserRepository
 		configRepository config_repository.ConfigRepository
 		user             *go_hera.User
+		randomCode       string
 		verificationCode []byte
 		config           *go_hera.Config
 		errGroup         = &errgroup.Group{}
@@ -44,6 +47,14 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		return
 	})
 	if err = errGroup.Wait(); err != nil {
+		return nil, err
+	}
+	randomCode, err = cryptox.GenerateSymmetricKey(6, cryptox.Numeric)
+	if err != nil {
+		return nil, err
+	}
+	verificationCode, err = hex.DecodeString(randomCode)
+	if err != nil {
 		return nil, err
 	}
 	// async action 2 - send verification email

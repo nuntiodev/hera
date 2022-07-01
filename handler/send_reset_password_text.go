@@ -54,6 +54,7 @@ func (h *defaultHandler) SendResetPasswordText(ctx context.Context, req *go_hera
 	if err = errGroup.Wait(); err != nil {
 		return nil, err
 	}
+	// generate unique verification code
 	randomCode, err = cryptox.GenerateSymmetricKey(6, cryptox.Numeric)
 	if err != nil {
 		return nil, err

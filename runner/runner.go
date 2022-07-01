@@ -3,10 +3,12 @@ package runner
 import (
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/nuntiodev/hera/initializer"
 	"github.com/nuntiodev/hera/server"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"log"
 	"os"
 	"strconv"
 )
@@ -14,6 +16,7 @@ import (
 var (
 	initializeSecrets = false
 	initializeEngine  = ""
+	logMode           = ""
 )
 
 const (
@@ -26,7 +29,26 @@ func initialize() error {
 	return nil
 }
 
-func Run(ctx context.Context, logger *zap.Logger) error {
+func Run(ctx context.Context) error {
+	var logger *zap.Logger
+	var err error
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println("could not get .env")
+	}
+	logMode = os.Getenv("LOG_MODE")
+	if logMode == "prod" {
+		logger, err = zap.NewProduction()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else if logMode == "" || logMode == "dev" {
+		logger, err = zap.NewDevelopment()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Fatalf("invalid log mode %s, supported log-modes: dev & prod", logMode)
+	}
 	logger.Info(fmt.Sprintf("running Hera version: %d", version))
 	if err := initialize(); err != nil {
 		return err

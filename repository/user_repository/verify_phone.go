@@ -23,10 +23,11 @@ func (r *mongodbRepository) VerifyPhone(ctx context.Context, user *go_hera.User,
 	}
 	if isVerified {
 		setData["verify_phone_attempts"] = int32(0)
+		mongoUpdate["$addToSet"] = bson.D{{"verified_phone_numbers", phoneHash}}
 	} else {
 		mongoUpdate["$inc"] = bson.D{{"verify_phone_attempts", int32(1)}}
-		mongoUpdate["$addToSet"] = bson.D{{"verified_phone_numbers", phoneHash}}
 	}
+	mongoUpdate["$set"] = setData
 	if _, err := r.collection.UpdateOne(
 		ctx,
 		bson.M{"phone_hash": phoneHash},

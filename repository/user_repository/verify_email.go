@@ -23,9 +23,9 @@ func (r *mongodbRepository) VerifyEmail(ctx context.Context, user *go_hera.User,
 	}
 	if isVerified {
 		setData["verify_email_attempts"] = int32(0)
+		mongoUpdate["$addToSet"] = bson.D{{"verified_emails", emailHash}}
 	} else {
 		mongoUpdate["$inc"] = bson.D{{"verify_email_attempts", int32(1)}}
-		mongoUpdate["$addToSet"] = bson.D{{"verified_emails", emailHash}}
 	}
 	mongoUpdate["$set"] = setData
 	//2022-07-01T20:35:27.446Z	ERROR	interceptor/log_unary_interceptor.go:14	Hera: Method:/Hera.Service/VerifyEmail	Duration:178.734662ms   Error:update document must have at least one element

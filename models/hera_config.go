@@ -93,7 +93,6 @@ func HeraConfigToProtoUsers(h *HeraConfig) []*go_hera.User {
 	}
 	var resp []*go_hera.User
 	for _, user := range h.Users {
-		fmt.Println(user)
 		birthdate, _ := time.Parse("2006-01-02", user.Birthdate)
 		resp = append(resp, &go_hera.User{
 			FirstName: pointerx.StringPtr(user.FirstName),

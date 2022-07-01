@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
@@ -57,7 +56,6 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		if err != nil {
 			return err
 		}
-		fmt.Println(string(verificationCode))
 		if err = h.email.SendVerificationEmail(config.GetName(), user.GetEmail(), string(verificationCode)); err != nil {
 			return err
 		}

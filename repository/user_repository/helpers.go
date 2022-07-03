@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/nuntiodev/x/pointerx"
-	"go.mongodb.org/mongo-driver/bson"
 	"net/mail"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/nuntiodev/x/pointerx"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/google/uuid"
 	"github.com/nuntiodev/hera-sdks/go_hera"

@@ -30,7 +30,7 @@ spec:
           ports:
             {{- if eq .Values.service.grpc.enabled "true" }}
             - containerPort: {{ .Values.service.grpc.targetPort }}
-              name: hera_grpc
+              name: hera-grpc
             {{- end }}
             {{- if eq .Values.service.http.enabled "true" }}
             - containerPort: {{ .Values.service.http.targetPort }}

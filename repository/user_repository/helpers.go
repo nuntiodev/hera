@@ -40,19 +40,19 @@ func prepare(action int, user *go_hera.User) {
 		user.Email = pointerx.StringPtr(strings.TrimSpace(strings.ToLower(*user.Email)))
 	}
 	if user.FirstName != nil {
-		user.FirstName = pointerx.StringPtr(strings.TrimSpace(strings.ToLower(*user.FirstName)))
+		user.FirstName = pointerx.StringPtr(strings.TrimSpace(*user.FirstName))
 	}
 	if user.LastName != nil {
-		user.LastName = pointerx.StringPtr(strings.TrimSpace(strings.ToLower(*user.LastName)))
+		user.LastName = pointerx.StringPtr(strings.TrimSpace(*user.LastName))
 	}
 	if user.Image != nil {
-		user.Image = pointerx.StringPtr(strings.TrimSpace(strings.ToLower(*user.Image)))
+		user.Image = pointerx.StringPtr(strings.TrimSpace(*user.Image))
 	}
 	if user.Username != nil {
-		user.Username = pointerx.StringPtr(strings.TrimSpace(strings.ToLower(*user.Username)))
+		user.Username = pointerx.StringPtr(strings.TrimSpace(*user.Username))
 	}
 	if user.Phone != nil {
-		user.Phone = pointerx.StringPtr(strings.TrimSpace(strings.ToLower(*user.Phone)))
+		user.Phone = pointerx.StringPtr(strings.TrimSpace(*user.Phone))
 	}
 	user.Metadata = strings.TrimSpace(user.Metadata)
 	user.EmailVerificationCode = strings.TrimSpace(user.EmailVerificationCode)

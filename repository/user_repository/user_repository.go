@@ -39,7 +39,7 @@ var (
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, user *go_hera.User) error
+	Create(ctx context.Context, user *go_hera.User) (*go_hera.User, error)
 	UpdateMetadata(ctx context.Context, get *go_hera.User, update *go_hera.User) error
 	UpdateProfile(ctx context.Context, get *go_hera.User, update *go_hera.User) error
 	UpdatePassword(ctx context.Context, get *go_hera.User, update *go_hera.User) error

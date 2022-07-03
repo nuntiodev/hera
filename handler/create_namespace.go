@@ -33,7 +33,7 @@ func (h *defaultHandler) CreateNamespace(ctx context.Context, req *go_hera.HeraR
 			return err
 		}
 		// create test user
-		if err = userRepository.Create(ctx, &go_hera.User{
+		if _, err = userRepository.Create(ctx, &go_hera.User{
 			FirstName: pointerx.StringPtr("Test"),
 			LastName:  pointerx.StringPtr("User"),
 			Email:     pointerx.StringPtr("test@user.io"),

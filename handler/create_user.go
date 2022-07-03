@@ -45,7 +45,8 @@ func (h *defaultHandler) CreateUser(ctx context.Context, req *go_hera.HeraReques
 	if err != nil {
 		return nil, err
 	}
-	if err = userRepository.Create(ctx, req.User); err != nil {
+	user, err = userRepository.Create(ctx, req.User)
+	if err != nil {
 		return nil, err
 	}
 	return &go_hera.HeraResponse{

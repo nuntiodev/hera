@@ -2,15 +2,17 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"k8s.io/utils/strings/slices"
-	"net/http"
-	"time"
 
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/token"
@@ -40,6 +42,15 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 			return err
 		}
 		config, err = configRepository.Get(ctx)
+		// validate that the action is possible with project config
+		// we cannot send an email if the email provider is not enabled
+		if h.emailEnabled == false && config.VerifyEmail {
+			return errors.New("email provider is not enabled and verification email cannot be sent. If you want to enable email verification, override the EmailSender interface")
+		}
+		// we cannot send a text message if the text provider is enabled
+		if !h.textEnabled && config.VerifyPhone {
+			return errors.New("text provider is not enabled and verification text cannot be sent. If you want to enable text verification, override the TextSender interface")
+		}
 		return err
 	})
 	// async action 2 - validate a users credentials and fetch user info.

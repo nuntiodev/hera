@@ -2,13 +2,14 @@ package http_server
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/gorilla/mux"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/authenticator"
 	"github.com/nuntiodev/hera/interceptor"
-	"net/http"
-	"time"
 )
 
 type HeraHttpRoute struct {

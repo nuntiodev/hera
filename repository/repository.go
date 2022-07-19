@@ -3,9 +3,11 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
+
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
-	"time"
 )
 
 const (
@@ -25,6 +27,8 @@ type defaultRepository struct {
 	mongodbClient           *mongo.Client
 	internalEncryptionKeys  []string
 	maxEmailVerificationAge time.Duration
+	config                  *go_hera.Config
+	logger                  *zap.Logger
 }
 
 func (r *defaultRepository) Liveness(ctx context.Context) error {
@@ -47,6 +51,7 @@ func New(mongoClient *mongo.Client, encryptionKeys []string, logger *zap.Logger,
 		mongodbClient:           mongoClient,
 		internalEncryptionKeys:  encryptionKeys,
 		maxEmailVerificationAge: maxEmailVerificationAge,
+		logger:                  logger,
 	}
 	return repository, nil
 }

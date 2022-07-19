@@ -12,12 +12,13 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/nuntiodev/hera/email"
-	"github.com/nuntiodev/hera/models"
-	"github.com/nuntiodev/hera/text"
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/nuntiodev/hera/email"
+	"github.com/nuntiodev/hera/models"
+	"github.com/nuntiodev/hera/text"
 
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/repository"

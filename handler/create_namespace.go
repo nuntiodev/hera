@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/token_repository"
@@ -12,8 +13,8 @@ import (
 )
 
 /*
-	CreateNamespace - this method creates a sets up a namespace for a new client.
-	This includes creating a database, collections and indexes.
+	CreateNamespace creates and sets up a namespace for a new client.
+	This includes creating a database, collections, indexes and etc.
 */
 func (h *defaultHandler) CreateNamespace(ctx context.Context, req *go_hera.HeraRequest) (resp *go_hera.HeraResponse, err error) {
 	var (

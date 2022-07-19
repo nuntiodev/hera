@@ -2,6 +2,7 @@ package config_repository
 
 import (
 	"context"
+
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,11 +29,13 @@ type ConfigRepository interface {
 type defaultConfigRepository struct {
 	collection *mongo.Collection
 	crypto     cryptox.Crypto
+	config     *go_hera.Config
 }
 
-func New(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto) (ConfigRepository, error) {
+func New(ctx context.Context, collection *mongo.Collection, crypto cryptox.Crypto, config *go_hera.Config) (ConfigRepository, error) {
 	return &defaultConfigRepository{
 		collection: collection,
 		crypto:     crypto,
+		config:     config,
 	}, nil
 }

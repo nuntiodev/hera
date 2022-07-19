@@ -32,9 +32,11 @@ func initialize() error {
 func Run(ctx context.Context) error {
 	var logger *zap.Logger
 	var err error
+
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("could not get .env")
 	}
+
 	logMode = os.Getenv("LOG_MODE")
 	if logMode == "prod" {
 		logger, err = zap.NewProduction()

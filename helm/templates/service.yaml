@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace | default "default" }}
 spec:
   type: {{ .Values.service.type }}
+  clusterIP: "None"
   ports:
     {{- if eq .Values.service.http.enabled "true"  }}
     - port: {{ .Values.service.http.port }}

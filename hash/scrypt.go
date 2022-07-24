@@ -31,7 +31,7 @@ func (sh *scryptHash) generate(password string) (*go_hera.Hash, error) {
 		return nil, err
 	}
 	return &go_hera.Hash{
-		Variant: go_hera.HasingAlgorithm_BCRYPT,
+		Variant: go_hera.HasingAlgorithm_SCRYPT,
 		Body:    base64.StdEncoding.EncodeToString(hash),
 		Params: map[string]string{
 			"salt":           base64.StdEncoding.EncodeToString(salt),
@@ -65,14 +65,12 @@ func Key(password, salt []byte, signerKey, saltSeparator string, rounds, memCost
 		sk, ss []byte
 		err    error
 	)
-
 	if sk, err = base64.StdEncoding.DecodeString(signerKey); err != nil {
 		return nil, err
 	}
 	if ss, err = base64.StdEncoding.DecodeString(saltSeparator); err != nil {
 		return nil, err
 	}
-
 	return key(password, salt, sk, ss, rounds, memCost, p, keyLen)
 }
 
@@ -81,12 +79,10 @@ func key(password, salt, signerKey, saltSeparator []byte, rounds, memCost, p, ke
 	if err != nil {
 		return nil, err
 	}
-
 	var block cipher.Block
 	if block, err = aes.NewCipher(ck); err != nil {
 		return nil, err
 	}
-
 	cipherText := make([]byte, aes.BlockSize+len(signerKey))
 	stream := cipher.NewCTR(block, cipherText[:aes.BlockSize])
 	stream.XORKeyStream(cipherText[aes.BlockSize:], signerKey)

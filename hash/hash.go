@@ -29,7 +29,9 @@ func (h *hasher) Generate(password string) (*go_hera.Hash, error) {
 	case go_hera.HasingAlgorithm_BCRYPT:
 		bcryptCost := bcrypt.DefaultCost
 		if h.config.Bcrypt != nil {
-			bcryptCost = int(h.config.Bcrypt.Cost)
+			if h.config.Bcrypt.Cost != 0 {
+				bcryptCost = int(h.config.Bcrypt.Cost)
+			}
 		}
 		return (&bcryptHash{cost: bcryptCost}).Generate(password)
 	case go_hera.HasingAlgorithm_SCRYPT:
@@ -40,12 +42,24 @@ func (h *hasher) Generate(password string) (*go_hera.Hash, error) {
 		p := 1
 		keyLen := 32
 		if h.config.Scrypt != nil {
-			saltSeparator = []byte(h.config.Scrypt.SaltSeparator)
-			signerKey = []byte(h.config.Scrypt.SignerKey)
-			rounds = int(h.config.Scrypt.Rounds)
-			memCost = int(h.config.Scrypt.MemCost)
-			p = int(h.config.Scrypt.P)
-			keyLen = int(h.config.Scrypt.KeyLen)
+			if h.config.Scrypt.SaltSeparator != "" {
+				saltSeparator = []byte(h.config.Scrypt.SaltSeparator)
+			}
+			if h.config.Scrypt.SignerKey != "" {
+				signerKey = []byte(h.config.Scrypt.SignerKey)
+			}
+			if h.config.Scrypt.Rounds != 0 {
+				rounds = int(h.config.Scrypt.Rounds)
+			}
+			if h.config.Scrypt.MemCost != 0 {
+				memCost = int(h.config.Scrypt.MemCost)
+			}
+			if h.config.Scrypt.P != 0 {
+				p = int(h.config.Scrypt.P)
+			}
+			if h.config.Scrypt.KeyLen != 0 {
+				keyLen = int(h.config.Scrypt.KeyLen)
+			}
 		}
 		return (&scryptHash{
 			signerKey:     signerKey,

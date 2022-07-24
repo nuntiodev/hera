@@ -8,10 +8,10 @@ import (
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (c *defaultConfigRepository) Create(ctx context.Context, config *go_hera.Config) error {
+func (c *defaultConfigRepository) Create(ctx context.Context, config *go_hera.Config) (*go_hera.Config, error) {
 	prepare(actionCreate, config)
 	if config == nil {
-		return errors.New("missing required config")
+		return nil, errors.New("missing required config")
 	} else if config.Name == "" {
 		config.Name = "Hera App"
 	}
@@ -19,13 +19,16 @@ func (c *defaultConfigRepository) Create(ctx context.Context, config *go_hera.Co
 	config.ValidatePassword = true
 	config.CreatedAt = ts.Now()
 	config.UpdatedAt = ts.Now()
+	if config.HasingAlgorithm == go_hera.HasingAlgorithm_INVALID_HASHING_ALGORITHM {
+		config.HasingAlgorithm = go_hera.HasingAlgorithm_BCRYPT
+	}
 	create := models.ProtoConfigToConfig(config)
 	create.Id = namespaceConfigName
 	if err := c.crypto.Encrypt(create); err != nil {
-		return err
+		return nil, err
 	}
 	if _, err := c.collection.InsertOne(ctx, create); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return config, nil
 }

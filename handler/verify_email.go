@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	"github.com/nuntiodev/hera/hash"
 	"github.com/nuntiodev/hera/helpers"
 	"github.com/nuntiodev/hera/repository/user_repository"
-	"golang.org/x/crypto/bcrypt"
 	"k8s.io/utils/strings/slices"
 	"strings"
 	"time"
@@ -19,9 +19,9 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_hera.HeraReque
 	var (
 		userRepository user_repository.UserRepository
 		user           *go_hera.User
-		bcryptErr      error
+		hashErr        error
 	)
-	// get requested user and check if the email is already verified
+	//get requested user and check if the email is already verified
 	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 	if err != nil {
 		return nil, err
@@ -33,10 +33,10 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_hera.HeraReque
 	if slices.Contains(user.VerifiedEmails, user.EmailHash) {
 		return nil, errors.New("email is already verified")
 	}
-	if user.EmailVerificationCode == "" {
+	if user.EmailVerificationCode == nil || user.EmailVerificationCode.Body == "" {
 		return nil, errors.New("verification email has not been sent")
 	}
-	if req.User.EmailVerificationCode == "" {
+	if req.User.EmailVerificationCode == nil || req.User.EmailVerificationCode.Body == "" {
 		return nil, errors.New("missing provided email verification code")
 	}
 	if time.Now().Sub(user.VerificationEmailSentAt.AsTime()).Minutes() > h.maxVerificationAge.Minutes() {
@@ -44,12 +44,15 @@ func (h *defaultHandler) VerifyEmail(ctx context.Context, req *go_hera.HeraReque
 	}
 	// provide exponential backoff
 	time.Sleep(helpers.GetExponentialBackoff(float64(user.VerifyEmailAttempts), helpers.BackoffFactorTwo))
-	bcryptErr = bcrypt.CompareHashAndPassword([]byte(user.EmailVerificationCode), []byte(strings.TrimSpace(req.User.EmailVerificationCode)))
-	// verify email
-	if err = userRepository.VerifyEmail(ctx, user, bcryptErr == nil); err != nil {
+	if err != nil {
 		return nil, err
 	}
-	if bcryptErr != nil {
+	hashErr = hash.New(nil).Compare(strings.TrimSpace(req.User.EmailVerificationCode.Body), user.EmailVerificationCode)
+	// verify email
+	if err = userRepository.VerifyEmail(ctx, user, hashErr == nil); err != nil {
+		return nil, err
+	}
+	if hashErr != nil {
 		return nil, err
 	}
 	return &go_hera.HeraResponse{}, nil

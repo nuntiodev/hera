@@ -55,19 +55,26 @@ func prepare(action int, user *go_hera.User) {
 	if user.Phone != nil {
 		user.Phone = pointerx.StringPtr(strings.TrimSpace(*user.Phone))
 	}
+	if user.EmailVerificationCode != nil {
+		user.EmailVerificationCode.Body = strings.TrimSpace(user.EmailVerificationCode.Body)
+	}
+	if user.PhoneVerificationCode != nil {
+		user.PhoneVerificationCode.Body = strings.TrimSpace(user.PhoneVerificationCode.Body)
+	}
 	user.Metadata = strings.TrimSpace(user.Metadata)
-	user.EmailVerificationCode = strings.TrimSpace(user.EmailVerificationCode)
-	user.PhoneVerificationCode = strings.TrimSpace(user.PhoneVerificationCode)
 	user.EmailHash = strings.TrimSpace(user.EmailHash)
 	user.PhoneHash = strings.TrimSpace(user.PhoneHash)
 }
 
-func validatePassword(password string) error {
+func validatePassword(password *go_hera.Hash) error {
+	if password == nil {
+		return nil
+	}
 	var (
 		num, sym bool
 		tot      uint8
 	)
-	for _, char := range password {
+	for _, char := range password.Body {
 		switch {
 		case unicode.IsUpper(char):
 			tot++

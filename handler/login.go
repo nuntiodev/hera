@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/nuntiodev/hera/hash"
 	"net/http"
 	"time"
 
@@ -16,7 +17,6 @@ import (
 
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/token"
-	"golang.org/x/crypto/bcrypt"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -35,7 +35,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 		accessClaims     *go_hera.CustomClaims
 		errGroup         = &errgroup.Group{}
 	)
-	// async action 1 - get namespace config.
+	// async action 1 - get namespace config
 	errGroup.Go(func() (err error) {
 		configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 		if err != nil {
@@ -53,7 +53,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 		}
 		return err
 	})
-	// async action 2 - validate a users credentials and fetch user info.
+	// async action 2 - fetch requested user
 	errGroup.Go(func() (err error) {
 		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 		if err != nil {
@@ -63,7 +63,11 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 		if err != nil {
 			return err
 		}
-		return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.User.Password))
+		// check user password
+		if err = hash.New(nil).Compare(req.User.Password.Body, user.Password); err != nil {
+			return err
+		}
+		return nil
 	})
 	if err = errGroup.Wait(); err != nil {
 		return nil, err
@@ -74,7 +78,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 		// check if we should send a new email
 		if user.VerificationEmailExpiresAt.AsTime().Sub(time.Now()).Seconds() <= 0 {
 			// sent new email
-			verificationEmail, err := h.SendVerificationEmail(ctx, req) // do not call directly on interface, but make same requests...
+			verificationEmail, err := h.SendVerificationEmail(ctx, req) // todo: do not call directly on interface, but make same requests...
 			if err != nil {
 				return nil, fmt.Errorf("could not send email with err: %v", err)
 			}
@@ -105,7 +109,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 		loggedInFrom = req.Token.LoggedInFrom
 		deviceInfo = req.Token.DeviceInfo
 	}
-	// async action 3 - generate refresh token.
+	// async action 3 - generate refresh token
 	errGroup.Go(func() (err error) {
 		refreshToken, refreshClaims, err = h.token.GenerateToken(privateKey, refreshTokenId, user.Id, "", token.RefreshToken, refreshTokenExpiry)
 		if err != nil {
@@ -124,7 +128,7 @@ func (h *defaultHandler) Login(ctx context.Context, req *go_hera.HeraRequest) (r
 		}
 		return nil
 	})
-	// async action 4 - generate access token.
+	// async action 4 - generate access token
 	errGroup.Go(func() (err error) {
 		accessToken, accessClaims, err = h.token.GenerateToken(privateKey, uuid.NewString(), user.Id, refreshTokenId, token.AccessToken, accessTokenExpiry)
 		if err != nil {

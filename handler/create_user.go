@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"github.com/nuntiodev/hera/hash"
 
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/repository/config_repository"
@@ -28,7 +29,7 @@ func (h *defaultHandler) CreateUser(ctx context.Context, req *go_hera.HeraReques
 	}
 	// build repository used to create user in the database
 	h.repository.UserRepositoryBuilder()
-	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).WithPasswordValidation(config.ValidatePassword).Build(ctx)
+	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).WithPasswordValidation(config.ValidatePassword).SetHasher(hash.New(config)).Build(ctx)
 	if err != nil {
 		return nil, err
 	}

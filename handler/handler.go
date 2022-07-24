@@ -51,7 +51,6 @@ type defaultHandler struct {
 	textEnabled        bool
 	logger             *zap.Logger
 	maxVerificationAge time.Duration
-	defaultConfig      *go_hera.Config
 }
 
 func decodeKeyPair(rsaPrivateKey, rsaPublicKey string) (*rsa.PrivateKey, *rsa.PublicKey, error) {
@@ -133,7 +132,7 @@ func New(logger *zap.Logger, repository repository.Repository, token token.Token
 	if err != nil {
 		return nil, err
 	}
-	handler.defaultConfig = defaultConfig
+	handler.repository.SetDefaultConfig(defaultConfig)
 	return handler, nil
 }
 
@@ -149,6 +148,9 @@ func (h *defaultHandler) initializeDefaultConfigAndUsers(textEnabled, emailEnabl
 		resp, err := h.CreateNamespace(ctx, &go_hera.HeraRequest{
 			Config: &go_hera.Config{Name: "Nuntio Hera App"},
 		})
+		if err != nil {
+			return nil, err
+		}
 		configCreate = resp.Config
 		if err != nil {
 			return nil, err

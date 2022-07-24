@@ -19,6 +19,7 @@ type configRepositoryBuilder struct {
 	namespace              string
 	client                 *mongo.Client
 	config                 *go_hera.Config
+	inMemoryConfigs        map[string]*go_hera.Config
 }
 
 func (cb *configRepositoryBuilder) SetNamespace(namespace string) ConfigRepositoryBuilder {
@@ -31,6 +32,9 @@ func (cb *configRepositoryBuilder) Build(ctx context.Context) (config_repository
 	if cb.namespace == "" {
 		cb.namespace = defaultDb
 		config = cb.config
+	}
+	if inMemoryConfig, ok := cb.inMemoryConfigs[cb.namespace]; ok {
+		config = inMemoryConfig
 	}
 	crypto, err := cryptox.New(cb.internalEncryptionKeys, nil, nil)
 	if err != nil {
@@ -48,5 +52,7 @@ func (r *defaultRepository) ConfigRepositoryBuilder() ConfigRepositoryBuilder {
 	return &configRepositoryBuilder{
 		client:                 r.mongodbClient,
 		internalEncryptionKeys: r.internalEncryptionKeys,
+		config:                 r.config,
+		inMemoryConfigs:        r.inMemoryConfigs,
 	}
 }

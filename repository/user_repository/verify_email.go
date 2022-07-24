@@ -15,7 +15,7 @@ func (r *mongodbRepository) VerifyEmail(ctx context.Context, user *go_hera.User,
 	prepare(actionGet, user)
 	emailHash, _, _ := generateUserHashes(&go_hera.User{Email: user.Email})
 	if emailHash == "" {
-		return errors.New("no valid email hash")
+		return errors.New("no valid email hasher")
 	}
 	mongoUpdate := bson.M{}
 	setData := bson.M{

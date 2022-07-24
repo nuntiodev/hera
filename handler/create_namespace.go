@@ -3,12 +3,13 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/nuntiodev/hera/hash"
+	"github.com/nuntiodev/x/pointerx"
 
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/token_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
-	"github.com/nuntiodev/x/pointerx"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -21,12 +22,21 @@ func (h *defaultHandler) CreateNamespace(ctx context.Context, req *go_hera.HeraR
 		userRepository   user_repository.UserRepository
 		configRepository config_repository.ConfigRepository
 		tokenRepository  token_repository.TokenRepository
+		config           *go_hera.Config
 		errGroup         = &errgroup.Group{}
 	)
-	// async action 1 - setup user repository and create test user
-	errGroup.Go(func() error {
-		var err error
-		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
+	// async action 1 - setup user & config repository, create default config and create test user
+	errGroup.Go(func() (err error) {
+		// create initial config
+		configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
+		if err != nil {
+			return fmt.Errorf("could not build config with err: %v", err)
+		}
+		config, err = configRepository.Create(ctx, req.Config)
+		if err != nil {
+			return err
+		}
+		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetHasher(hash.New(config)).Build(ctx)
 		if err != nil {
 			return fmt.Errorf("could not build user repository with err: %v", err)
 		}
@@ -38,27 +48,14 @@ func (h *defaultHandler) CreateNamespace(ctx context.Context, req *go_hera.HeraR
 			FirstName: pointerx.StringPtr("Test"),
 			LastName:  pointerx.StringPtr("User"),
 			Email:     pointerx.StringPtr("test@user.io"),
+			Password:  &go_hera.Hash{Body: "MySecretPassword1234!*"},
 		}); err != nil {
 			return err
 		}
 		return nil
 	})
-	// async action 2 - setup config repository and create default config
-	errGroup.Go(func() error {
-		var err error
-		// create initial config
-		configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
-		if err != nil {
-			return fmt.Errorf("could not build config with err: %v", err)
-		}
-		if err = configRepository.Create(ctx, req.Config); err != nil {
-			return err
-		}
-		return nil
-	})
-	// async action 3 - setup tokens repository
-	errGroup.Go(func() error {
-		var err error
+	// async action 2 - setup tokens repository
+	errGroup.Go(func() (err error) {
 		tokenRepository, err = h.repository.TokenRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
 		if err != nil {
 			return err
@@ -71,5 +68,7 @@ func (h *defaultHandler) CreateNamespace(ctx context.Context, req *go_hera.HeraR
 	if err = errGroup.Wait(); err != nil {
 		return nil, err
 	}
-	return &go_hera.HeraResponse{}, nil
+	return &go_hera.HeraResponse{
+		Config: config,
+	}, nil
 }

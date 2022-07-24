@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	"github.com/nuntiodev/hera/hash"
 	"github.com/nuntiodev/hera/helpers"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
-	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/sync/errgroup"
 	"strings"
 	"time"
@@ -21,9 +21,10 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 	var (
 		configRepository config_repository.ConfigRepository
 		userRepository   user_repository.UserRepository
+		hasher           hash.Hash
 		config           *go_hera.Config
 		user             *go_hera.User
-		bcryptErr        error
+		hashErr          error
 		errGroup         errgroup.Group
 	)
 	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
@@ -34,9 +35,10 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 	if err != nil {
 		return nil, err
 	}
+	hasher = hash.New(config)
 	errGroup.Go(func() (err error) {
 		// get requested user and check if the email is already verified
-		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).WithPasswordValidation(config.ValidatePassword).Build(ctx)
+		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetHasher(hasher).WithPasswordValidation(config.ValidatePassword).Build(ctx)
 		if err != nil {
 			return err
 		}
@@ -44,10 +46,10 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 		if err != nil {
 			return err
 		}
-		if user.ResetPasswordCode == "" {
+		if user.ResetPasswordCode == nil || user.ResetPasswordCode.Body == "" {
 			return errors.New("reset password code has not been set")
 		}
-		if req.User.ResetPasswordCode == "" {
+		if req.User.ResetPasswordCode == nil || req.User.ResetPasswordCode.Body == "" {
 			return errors.New("missing reset password code")
 		}
 		if time.Now().Sub(user.ResetPasswordCodeSentAt.AsTime()).Minutes() > h.maxVerificationAge.Minutes() {
@@ -60,12 +62,11 @@ func (h *defaultHandler) ResetPassword(ctx context.Context, req *go_hera.HeraReq
 	}
 	// provide exponential backoff
 	time.Sleep(helpers.GetExponentialBackoff(float64(user.VerifyEmailAttempts), helpers.BackoffFactorTwo))
-	bcryptErr = bcrypt.CompareHashAndPassword([]byte(user.ResetPasswordCode), []byte(strings.TrimSpace(req.User.ResetPasswordCode)))
-	// reset password
+	hashErr = hasher.Compare(strings.TrimSpace(req.User.ResetPasswordCode.Body), user.ResetPasswordCode)
 	if err = userRepository.UpdatePassword(ctx, user, req.User); err != nil {
 		return nil, err
 	}
-	if bcryptErr != nil {
+	if hashErr != nil {
 		return nil, err
 	}
 	return &go_hera.HeraResponse{}, nil

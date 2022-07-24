@@ -15,7 +15,7 @@ func (r *mongodbRepository) VerifyPhone(ctx context.Context, user *go_hera.User,
 	prepare(actionGet, user)
 	_, _, phoneHash := generateUserHashes(&go_hera.User{Email: user.Email})
 	if phoneHash == "" {
-		return errors.New("no valid phone hash")
+		return errors.New("no valid phone hasher")
 	}
 	mongoUpdate := bson.M{}
 	setData := bson.M{

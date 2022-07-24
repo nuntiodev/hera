@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	"github.com/nuntiodev/hera/hash"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
@@ -22,28 +23,10 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_her
 		randomCode       string
 		verificationCode []byte
 		config           *go_hera.Config
-		errGroup         = &errgroup.Group{}
+		errGroup         = errgroup.Group{}
 	)
 	if h.emailEnabled == false {
 		return nil, errors.New("email provider is not enabled")
-	}
-	// async action 1 - get user and check if his email is verified
-	errGroup.Go(func() (err error) {
-		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
-		if err != nil {
-			return err
-		}
-		user, err = userRepository.Get(ctx, req.User)
-		if err != nil {
-			return err
-		}
-		if user.GetEmail() == "" {
-			return errors.New("user do not have an email - set the email for the user")
-		}
-		return err
-	})
-	if err = errGroup.Wait(); err != nil {
-		return nil, err
 	}
 	randomCode, err = cryptox.GenerateSymmetricKey(6, cryptox.Numeric)
 	if err != nil {
@@ -53,25 +36,36 @@ func (h *defaultHandler) SendResetPasswordEmail(ctx context.Context, req *go_her
 	if err != nil {
 		return nil, err
 	}
-	// async action 2 - send verification email
+	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
+	if err != nil {
+		return nil, err
+	}
+	config, err = configRepository.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	userRepository, err = h.repository.UserRepositoryBuilder().SetHasher(hash.New(config)).SetNamespace(req.Namespace).Build(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err = userRepository.Get(ctx, req.User)
+	if err != nil {
+		return nil, err
+	}
+	if user.GetEmail() == "" {
+		return nil, errors.New("user do not have an email - set the email for the user")
+	}
+	// async action 1 - send reset password email
 	errGroup.Go(func() (err error) {
-		configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
-		if err != nil {
-			return err
-		}
-		config, err = configRepository.Get(ctx)
-		if err != nil {
-			return err
-		}
 		if err = h.email.SendResetPasswordEmail(config.GetName(), user.GetEmail(), string(verificationCode)); err != nil {
 			return err
 		}
-		return err
+		return nil
 	})
-	// async action 3  update verification email sent at
+	// async action 2 - update reset password code
 	errGroup.Go(func() (err error) {
 		if err = userRepository.UpdateResetPasswordCode(ctx, &go_hera.User{
-			EmailVerificationCode: string(verificationCode),
+			EmailVerificationCode: &go_hera.Hash{Body: string(verificationCode)},
 			Id:                    user.Id,
 		}); err != nil {
 			return err

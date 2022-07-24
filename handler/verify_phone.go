@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	"github.com/nuntiodev/hera/hash"
 	"github.com/nuntiodev/hera/helpers"
 	"github.com/nuntiodev/hera/repository/user_repository"
-	"golang.org/x/crypto/bcrypt"
 	"k8s.io/utils/strings/slices"
-	"strings"
 	"time"
 )
 
@@ -19,7 +18,7 @@ func (h *defaultHandler) VerifyPhone(ctx context.Context, req *go_hera.HeraReque
 	var (
 		userRepository user_repository.UserRepository
 		user           *go_hera.User
-		bcryptErr      error
+		hashErr        error
 	)
 	// get requested user and check if the phone is already verified
 	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
@@ -33,10 +32,10 @@ func (h *defaultHandler) VerifyPhone(ctx context.Context, req *go_hera.HeraReque
 	if slices.Contains(user.VerifiedPhoneNumbers, user.PhoneHash) {
 		return nil, errors.New("phone is already verified")
 	}
-	if user.PhoneVerificationCode == "" {
+	if user.PhoneVerificationCode == nil || user.PhoneVerificationCode.Body == "" {
 		return nil, errors.New("verification text has not been sent")
 	}
-	if req.User.PhoneVerificationCode == "" {
+	if req.User.PhoneVerificationCode == nil || req.User.PhoneVerificationCode.Body == "" {
 		return nil, errors.New("missing provided text verification code")
 	}
 	if time.Now().Sub(user.VerificationTextSentAt.AsTime()).Minutes() > h.maxVerificationAge.Minutes() {
@@ -44,12 +43,12 @@ func (h *defaultHandler) VerifyPhone(ctx context.Context, req *go_hera.HeraReque
 	}
 	// provide exponential backoff
 	time.Sleep(helpers.GetExponentialBackoff(float64(user.VerifyPhoneAttempts), helpers.BackoffFactorTwo))
-	bcryptErr = bcrypt.CompareHashAndPassword([]byte(user.PhoneVerificationCode), []byte(strings.TrimSpace(req.User.PhoneVerificationCode)))
+	hashErr = hash.New(nil).Compare(req.User.PhoneVerificationCode.Body, user.PhoneVerificationCode)
 	// verify phone
-	if err = userRepository.VerifyPhone(ctx, user, bcryptErr == nil); err != nil {
+	if err = userRepository.VerifyPhone(ctx, user, hashErr == nil); err != nil {
 		return nil, err
 	}
-	if bcryptErr != nil {
+	if hashErr != nil {
 		return nil, err
 	}
 	return &go_hera.HeraResponse{}, nil

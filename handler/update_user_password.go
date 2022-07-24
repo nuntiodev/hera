@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	"github.com/nuntiodev/hera/hash"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 )
@@ -26,7 +27,7 @@ func (h *defaultHandler) UpdateUserPassword(ctx context.Context, req *go_hera.He
 	if err != nil {
 		return nil, err
 	}
-	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).WithPasswordValidation(config.ValidatePassword).Build(ctx)
+	userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).SetHasher(hash.New(config)).WithPasswordValidation(config.ValidatePassword).Build(ctx)
 	if err != nil {
 		return nil, err
 	}

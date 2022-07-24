@@ -2,9 +2,9 @@ package user_repository
 
 import (
 	"context"
+	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -17,11 +17,14 @@ func (r *mongodbRepository) UpdatePhoneVerificationCode(ctx context.Context, use
 	if err != nil {
 		return err
 	}
-	hashedCode, err := bcrypt.GenerateFromPassword([]byte(user.PhoneVerificationCode), bcrypt.DefaultCost)
+	if r.hasher == nil {
+		return errors.New("hasher is nil")
+	}
+	hashedCode, err := r.hasher.Generate(user.PhoneVerificationCode.Body)
 	if err != nil {
 		return err
 	}
-	user.PhoneVerificationCode = string(hashedCode)
+	user.PhoneVerificationCode = hashedCode
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"phone_verification_code":      user.PhoneVerificationCode,

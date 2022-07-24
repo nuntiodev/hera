@@ -12,7 +12,7 @@ type User struct {
 	Id                         string               `bson:"_id" json:"_id"`
 	Username                   cryptox.Stringx      `bson:"username" json:"username"`
 	Email                      cryptox.Stringx      `bson:"email" json:"email"`
-	Password                   string               `bson:"password" json:"password"`
+	Password                   *Hash                `bson:"password" json:"password"`
 	Image                      cryptox.Stringx      `bson:"image" json:"image"`
 	Metadata                   cryptox.Stringx      `bson:"metadata" json:"metadata"`
 	CreatedAt                  time.Time            `bson:"created_at" json:"created_at"`
@@ -21,10 +21,10 @@ type User struct {
 	LastName                   cryptox.Stringx      `bson:"last_name" json:"last_name"`
 	Birthdate                  cryptox.Stringx      `bson:"birthdate" json:"birthdate"`
 	VerificationEmailSentAt    time.Time            `bson:"verification_email_sent_at" json:"verification_email_sent_at"`
-	EmailVerificationCode      string               `bson:"email_verification_code" json:"email_verification_code"`
+	EmailVerificationCode      *Hash                `bson:"email_verification_code" json:"email_verification_code"`
 	VerificationEmailExpiresAt time.Time            `bson:"verification_email_expires_at" json:"verification_email_expires_at"`
 	VerifyEmailAttempts        int32                `bson:"verify_email_attempts" json:"verify_email_attempts"`
-	ResetPasswordCode          string               `bson:"reset_password_code" json:"reset_password_code"`
+	ResetPasswordCode          *Hash                `bson:"reset_password_code" json:"reset_password_code"`
 	ResetPasswordCodeSentAt    time.Time            `bson:"reset_password_code_sent_at" json:"reset_password_code_sent_at"`
 	ResetPasswordCodeExpiresAt time.Time            `bson:"reset_password_code_expires_at" json:"reset_password_code_expires_at"`
 	ResetPasswordAttempts      int32                `bson:"reset_password_attempts" json:"reset_password_attempts"`
@@ -37,7 +37,12 @@ type User struct {
 	PreferredLanguage          go_hera.LanguageCode `bson:"preferred_language" json:"preferred_language"`
 	UsernameHash               string               `bson:"username_hash" json:"username_hash"`
 	VerifyPhoneAttempts        int32                `bson:"verify_phone_attempts" json:"verify_phone_attempts"`
-	PhoneVerificationCode      string               `bson:"phone_verification_code" json:"phone_verification_code"`
+	PhoneVerificationCode      *Hash                `bson:"phone_verification_code" json:"phone_verification_code"`
+	Gender                     cryptox.Stringx      `bson:"gender" json:"gender"`
+	Country                    cryptox.Stringx      `bson:"country" json:"country"`
+	Address                    cryptox.Stringx      `bson:"address" json:"address"`
+	City                       cryptox.Stringx      `bson:"city" json:"city"`
+	PostalCode                 cryptox.Stringx      `bson:"postal_code" json:"postal_code"`
 }
 
 func UsersToProto(users []*User) []*go_hera.User {
@@ -63,7 +68,7 @@ func UserToProtoUser(user *User) *go_hera.User {
 		Id:                         user.Id,
 		Username:                   &user.Username.Body,
 		Email:                      &user.Email.Body,
-		Password:                   user.Password,
+		Password:                   HashToProto(user.Password),
 		Image:                      &user.Image.Body,
 		FirstName:                  &user.FirstName.Body,
 		LastName:                   &user.LastName.Body,
@@ -72,9 +77,9 @@ func UserToProtoUser(user *User) *go_hera.User {
 		CreatedAt:                  ts.New(user.CreatedAt),
 		UpdatedAt:                  ts.New(user.UpdatedAt),
 		VerificationEmailSentAt:    ts.New(user.VerificationEmailSentAt),
-		EmailVerificationCode:      user.EmailVerificationCode,
+		EmailVerificationCode:      HashToProto(user.EmailVerificationCode),
 		VerificationEmailExpiresAt: ts.New(user.VerificationEmailExpiresAt),
-		ResetPasswordCode:          user.ResetPasswordCode,
+		ResetPasswordCode:          HashToProto(user.ResetPasswordCode),
 		ResetPasswordCodeSentAt:    ts.New(user.ResetPasswordCodeSentAt),
 		ResetPasswordCodeExpiresAt: ts.New(user.ResetPasswordCodeExpiresAt),
 		ResetPasswordAttempts:      user.ResetPasswordAttempts,
@@ -88,7 +93,12 @@ func UserToProtoUser(user *User) *go_hera.User {
 		PreferredLanguage:          &user.PreferredLanguage,
 		UsernameHash:               user.UsernameHash,
 		VerifyPhoneAttempts:        user.VerifyPhoneAttempts,
-		PhoneVerificationCode:      user.PhoneVerificationCode,
+		PhoneVerificationCode:      HashToProto(user.PhoneVerificationCode),
+		Gender:                     &user.Gender.Body,
+		Country:                    &user.Country.Body,
+		Address:                    &user.Address.Body,
+		City:                       &user.City.Body,
+		PostalCode:                 &user.PostalCode.Body,
 	}
 }
 
@@ -104,7 +114,7 @@ func ProtoUserToUser(user *go_hera.User) *User {
 		Id:                         user.Id,
 		Username:                   cryptox.Stringx{Body: user.GetUsername()},
 		Email:                      cryptox.Stringx{Body: user.GetEmail()},
-		Password:                   user.Password,
+		Password:                   ProtoToHash(user.GetPassword()),
 		Image:                      cryptox.Stringx{Body: user.GetImage()},
 		FirstName:                  cryptox.Stringx{Body: user.GetFirstName()},
 		LastName:                   cryptox.Stringx{Body: user.GetLastName()},
@@ -113,9 +123,9 @@ func ProtoUserToUser(user *go_hera.User) *User {
 		CreatedAt:                  user.GetCreatedAt().AsTime(),
 		UpdatedAt:                  user.GetUpdatedAt().AsTime(),
 		VerificationEmailSentAt:    user.GetVerificationEmailSentAt().AsTime(),
-		EmailVerificationCode:      user.GetEmailVerificationCode(),
+		EmailVerificationCode:      ProtoToHash(user.GetEmailVerificationCode()),
 		VerificationEmailExpiresAt: user.GetVerificationEmailExpiresAt().AsTime(),
-		ResetPasswordCode:          user.GetResetPasswordCode(),
+		ResetPasswordCode:          ProtoToHash(user.GetResetPasswordCode()),
 		ResetPasswordCodeSentAt:    user.GetResetPasswordCodeSentAt().AsTime(),
 		ResetPasswordCodeExpiresAt: user.GetResetPasswordCodeExpiresAt().AsTime(),
 		ResetPasswordAttempts:      user.GetResetPasswordAttempts(),
@@ -128,7 +138,12 @@ func ProtoUserToUser(user *go_hera.User) *User {
 		VerifiedPhoneNumbers:       user.GetVerifiedPhoneNumbers(),
 		PreferredLanguage:          user.GetPreferredLanguage(),
 		UsernameHash:               user.GetUsernameHash(),
-		VerifyPhoneAttempts:        user.VerifyPhoneAttempts,
-		PhoneVerificationCode:      user.PhoneVerificationCode,
+		VerifyPhoneAttempts:        user.GetVerifyPhoneAttempts(),
+		PhoneVerificationCode:      ProtoToHash(user.GetPhoneVerificationCode()),
+		Gender:                     cryptox.Stringx{Body: user.GetGender()},
+		Country:                    cryptox.Stringx{Body: user.GetCountry()},
+		Address:                    cryptox.Stringx{Body: user.GetAddress()},
+		City:                       cryptox.Stringx{Body: user.GetCity()},
+		PostalCode:                 cryptox.Stringx{Body: user.GetPostalCode()},
 	}
 }

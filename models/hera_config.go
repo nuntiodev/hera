@@ -5,6 +5,7 @@ import (
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/x/pointerx"
 	ts "google.golang.org/protobuf/types/known/timestamppb"
+	"strings"
 	"time"
 )
 
@@ -17,15 +18,18 @@ const (
 )
 
 type HeraApp struct {
-	Name             string   `bson:"name" json:"name"`
-	Logo             string   `bson:"logo" json:"logo"`
-	DisableSignup    bool     `bson:"disable_signup" json:"disable_signup"`
-	DisableLogin     bool     `bson:"disable_login" json:"disable_login"`
-	ValidatePassword bool     `bson:"validate_password" json:"validate_password"`
-	VerifyEmail      bool     `bson:"verify_email" json:"verify_email"`
-	VerifyPhone      bool     `bson:"verify_phone" json:"verify_phone"`
-	LoginMechanisms  []string `bson:"login_mechanisms" json:"login_mechanisms"`
-	PublicKey        string   `bson:"public_key" json:"public_key"`
+	Name             string      `bson:"name" json:"name"`
+	Logo             string      `bson:"logo" json:"logo"`
+	DisableSignup    bool        `bson:"disable_signup" json:"disable_signup"`
+	DisableLogin     bool        `bson:"disable_login" json:"disable_login"`
+	ValidatePassword bool        `bson:"validate_password" json:"validate_password"`
+	VerifyEmail      bool        `bson:"verify_email" json:"verify_email"`
+	VerifyPhone      bool        `bson:"verify_phone" json:"verify_phone"`
+	LoginMechanisms  []string    `bson:"login_mechanisms" json:"login_mechanisms"`
+	PublicKey        string      `bson:"public_key" json:"public_key"`
+	HashingAlgorithm string      `bson:"hashing_algorithm" json:"hashing_algorithm"`
+	Scrypt           *ScryptHera `bson:"scrypt" json:"scrypt"`
+	Bcrypt           *Bcrypt     `bson:"bcrypt" json:"bcrypt"`
 }
 
 type HeraUser struct {
@@ -41,7 +45,7 @@ type HeraUser struct {
 }
 
 type HeraConfig struct {
-	App   HeraApp    `bson:"app" json:"app"`
+	App   HeraApp    `bson:"default_config" json:"default_config"`
 	Users []HeraUser `bson:"users" json:"users"`
 }
 
@@ -74,6 +78,25 @@ func HeraConfigToProtoConfig(h *HeraConfig) (*go_hera.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	hashingAlgorithm := go_hera.HasingAlgorithm_BCRYPT
+	if strings.ToLower(strings.TrimSpace(h.App.HashingAlgorithm)) == "scrypt" {
+		hashingAlgorithm = go_hera.HasingAlgorithm_SCRYPT
+	}
+	var bcrypt *go_hera.Bcrypt
+	if h.App.Bcrypt != nil {
+		bcrypt = &go_hera.Bcrypt{Cost: int32(h.App.Bcrypt.Cost)}
+	}
+	var scrypt *go_hera.Scrypt
+	if h.App.Scrypt != nil {
+		scrypt = &go_hera.Scrypt{
+			SignerKey:     h.App.Scrypt.SignerKey,
+			SaltSeparator: h.App.Scrypt.SaltSeparator,
+			Rounds:        int32(h.App.Scrypt.Rounds),
+			MemCost:       int32(h.App.Scrypt.MemCost),
+			P:             int32(h.App.Scrypt.P),
+			KeyLen:        int32(h.App.Scrypt.KeyLen),
+		}
+	}
 	return &go_hera.Config{
 		Name:                     h.App.Name,
 		Logo:                     h.App.Logo,
@@ -83,6 +106,9 @@ func HeraConfigToProtoConfig(h *HeraConfig) (*go_hera.Config, error) {
 		VerifyPhone:              h.App.VerifyPhone,
 		VerifyEmail:              h.App.VerifyEmail,
 		PublicKey:                h.App.PublicKey,
+		HasingAlgorithm:          hashingAlgorithm,
+		Bcrypt:                   bcrypt,
+		Scrypt:                   scrypt,
 		SupportedLoginMechanisms: supportedLoginMechanisms,
 	}, nil
 }
@@ -98,7 +124,7 @@ func HeraConfigToProtoUsers(h *HeraConfig) []*go_hera.User {
 			FirstName: pointerx.StringPtr(user.FirstName),
 			LastName:  pointerx.StringPtr(user.LastName),
 			Email:     pointerx.StringPtr(user.Email),
-			Password:  user.Password,
+			Password:  &go_hera.Hash{Body: user.Password},
 			Phone:     pointerx.StringPtr(user.Phone),
 			Username:  pointerx.StringPtr(user.Username),
 			Image:     pointerx.StringPtr(user.Image),

@@ -2,9 +2,9 @@ package user_repository
 
 import (
 	"context"
+	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -17,11 +17,14 @@ func (r *mongodbRepository) UpdateResetPasswordCode(ctx context.Context, user *g
 	if err != nil {
 		return err
 	}
-	hashedCode, err := bcrypt.GenerateFromPassword([]byte(user.ResetPasswordCode), bcrypt.DefaultCost)
+	if r.hasher == nil {
+		return errors.New("hasher is nil")
+	}
+	hashedCode, err := r.hasher.Generate(user.ResetPasswordCode.Body)
 	if err != nil {
 		return err
 	}
-	user.ResetPasswordCode = string(hashedCode)
+	user.ResetPasswordCode = hashedCode
 	mongoUpdate := bson.M{
 		"$set": bson.M{
 			"reset_password_code":            user.ResetPasswordCode,

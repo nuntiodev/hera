@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	"github.com/nuntiodev/hera/hash"
 	"github.com/nuntiodev/x/cryptox"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -64,6 +65,7 @@ type mongodbRepository struct {
 	collection             *mongo.Collection
 	crypto                 cryptox.Crypto
 	logger                 *zap.Logger
+	hasher                 hash.Hash
 	validatePassword       bool
 	maxCodeVerificationAge time.Duration
 }
@@ -129,11 +131,12 @@ func (r *mongodbRepository) BuildIndexes(ctx context.Context) error {
 	return nil
 }
 
-func New(collection *mongo.Collection, crypto cryptox.Crypto, validatePassword bool, maxEmailVerificationAge time.Duration) (UserRepository, error) {
+func New(collection *mongo.Collection, crypto cryptox.Crypto, hash hash.Hash, validatePassword bool, maxEmailVerificationAge time.Duration) (UserRepository, error) {
 	return &mongodbRepository{
 		collection:             collection,
 		crypto:                 crypto,
 		validatePassword:       validatePassword,
+		hasher:                 hash,
 		maxCodeVerificationAge: maxEmailVerificationAge,
 	}, nil
 }

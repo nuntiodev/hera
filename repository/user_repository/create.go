@@ -2,9 +2,9 @@ package user_repository
 
 import (
 	"context"
+	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/nuntiodev/hera/models"
-	"golang.org/x/crypto/bcrypt"
 )
 
 /*
@@ -24,12 +24,15 @@ func (r *mongodbRepository) Create(ctx context.Context, user *go_hera.User) (*go
 		return nil, err
 	}
 	prepare(actionCreate, user)
-	if user.Password != "" {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if user.Password != nil && user.Password.Body != "" {
+		if r.hasher == nil {
+			return nil, errors.New("hasher is nil")
+		}
+		hashedPassword, err := r.hasher.Generate(user.Password.Body)
 		if err != nil {
 			return nil, err
 		}
-		user.Password = string(hashedPassword)
+		user.Password = hashedPassword
 	}
 	create := models.ProtoUserToUser(user)
 	// create hashes

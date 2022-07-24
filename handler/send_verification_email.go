@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/nuntiodev/hera-sdks/go_hera"
+	"github.com/nuntiodev/hera/hash"
 	"github.com/nuntiodev/hera/repository/config_repository"
 	"github.com/nuntiodev/hera/repository/user_repository"
 	"github.com/nuntiodev/x/cryptox"
@@ -28,27 +29,6 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 	if h.emailEnabled == false {
 		return nil, errors.New("email provider is not enabled")
 	}
-	// async action 1 - get user and check if his email is verified
-	errGroup.Go(func() (err error) {
-		userRepository, err = h.repository.UserRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
-		if err != nil {
-			return err
-		}
-		user, err = userRepository.Get(ctx, req.User)
-		if err != nil {
-			return err
-		}
-		if user.GetEmail() == "" {
-			return errors.New("user do not have an email - set the email for the user")
-		}
-		if slices.Contains(user.VerifiedEmails, user.EmailHash) {
-			return errors.New("email is already verified")
-		}
-		return
-	})
-	if err = errGroup.Wait(); err != nil {
-		return nil, err
-	}
 	randomCode, err = cryptox.GenerateSymmetricKey(6, cryptox.Numeric)
 	if err != nil {
 		return nil, err
@@ -58,24 +38,39 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 		return nil, err
 	}
 	// async action 2 - send verification email
+	configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
+	if err != nil {
+		return nil, err
+	}
+	config, err = configRepository.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	userRepository, err = h.repository.UserRepositoryBuilder().SetHasher(hash.New(config)).SetNamespace(req.Namespace).Build(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err = userRepository.Get(ctx, req.User)
+	if err != nil {
+		return nil, err
+	}
+	if user.GetEmail() == "" {
+		return nil, errors.New("user do not have an email - set the email for the user")
+	}
+	if slices.Contains(user.VerifiedEmails, user.EmailHash) {
+		return nil, errors.New("email is already verified")
+	}
+	// async action 1 - update email verification code
 	errGroup.Go(func() (err error) {
-		configRepository, err = h.repository.ConfigRepositoryBuilder().SetNamespace(req.Namespace).Build(ctx)
-		if err != nil {
-			return err
-		}
-		config, err = configRepository.Get(ctx)
-		if err != nil {
-			return err
-		}
 		if err = h.email.SendVerificationEmail(config.GetName(), user.GetEmail(), string(verificationCode)); err != nil {
 			return err
 		}
-		return
+		return nil
 	})
-	// async action 3  update verification email sent at
+	// async action 2  update verification email sent at
 	errGroup.Go(func() (err error) {
 		if err = userRepository.UpdateEmailVerificationCode(ctx, &go_hera.User{
-			EmailVerificationCode: string(verificationCode),
+			EmailVerificationCode: &go_hera.Hash{Body: string(verificationCode)},
 			Id:                    user.Id,
 		}); err != nil {
 			return err
@@ -85,5 +80,5 @@ func (h *defaultHandler) SendVerificationEmail(ctx context.Context, req *go_hera
 	if err = errGroup.Wait(); err != nil {
 		return nil, err
 	}
-	return &go_hera.HeraResponse{}, nil
+	return
 }
